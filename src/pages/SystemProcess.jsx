@@ -3,11 +3,11 @@ import { useState } from 'react';
 export default function SystemProcess() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-12">
+    <div className="flex-grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
       {/* Hero Section */}
       <header className="mb-16 max-w-4xl">
         <div className="flex items-center gap-2 mb-4">
-          <span className="w-8 h-[1px] bg-primary"></span>
+          <span className="w-8 h-px bg-primary"></span>
           <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">System Architecture</span>
         </div>
         <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-on-surface mb-6 uppercase">

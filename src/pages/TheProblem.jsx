@@ -1,6 +1,6 @@
 export default function TheProblem() {
   return (
-    <div className="flex-grow px-margin-mobile md:px-margin-desktop py-12 max-w-7xl mx-auto w-full">
+    <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
       {/* Header Section */}
       <header className="mb-16">
         <div className="inline-flex items-center space-x-2 border border-border-industrial bg-surface-bright px-3 py-1 mb-6">

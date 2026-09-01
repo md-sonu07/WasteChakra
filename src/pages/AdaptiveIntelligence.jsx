@@ -1,6 +1,6 @@
 export default function AdaptiveIntelligence() {
   return (
-    <div className="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-16 flex flex-col gap-16">
+    <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop flex flex-col gap-16">
       <header className="w-full max-w-4xl pt-16">
         <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-border-industrial bg-surface-bright">
           <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
@@ -40,7 +40,7 @@ export default function AdaptiveIntelligence() {
             </div>
           </div>
 
-          <div className="bg-surface-bright border border-border-industrial p-6 flex flex-col items-start gap-4 ring-1 ring-primary-container ring-offset-2 ring-offset-surface">
+          <div className="border border-border-industrial p-6 flex flex-col justify-between min-h-50 relative group hover:border-primary-container transition-colors">
             <div className="w-10 h-10 bg-primary-container text-on-primary-container flex items-center justify-center">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
             </div>
@@ -89,7 +89,7 @@ export default function AdaptiveIntelligence() {
               </div>
               <div className="h-2 w-full bg-surface-dim relative gauge-notches border border-border-industrial">
                 <div className="absolute top-0 left-0 h-full bg-primary-container" style={{ width: '42.8%' }}></div>
-                <div className="absolute top-[-4px] bottom-[-4px] w-[2px] bg-primary z-10" style={{ left: '40%' }}></div>
+                <div className="absolute -top-1 -bottom-1 -left-1 w-0.5 bg-primary transform scale-y-0 group-hover:scale-y-100 transition-transform origin-top"></div>
               </div>
             </div>
           </article>

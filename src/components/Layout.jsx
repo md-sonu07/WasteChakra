@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 
 export default function Layout() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
+
+  const closeMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -32,10 +36,41 @@ export default function Layout() {
           <Link to="/system" className="hidden md:inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors technical-shadow uppercase">
             EXPLORE SYSTEM
           </Link>
-          <button className="md:hidden text-primary p-2">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>menu</span>
+          <button 
+            className="md:hidden text-primary p-2"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>
+              {isMobileMenuOpen ? 'close' : 'menu'}
+            </span>
           </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 w-full bg-surface-bright/95 backdrop-blur-md border-b border-surface-container-highest flex flex-col shadow-lg animate-[fadeIn_0.2s_ease-out]">
+            <Link to="/system" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/system') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              SYSTEM
+            </Link>
+            <Link to="/process" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/process') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              PROCESS
+            </Link>
+            <Link to="/innovation" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/innovation') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              INNOVATION
+            </Link>
+            <Link to="/impact" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/impact') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              IMPACT
+            </Link>
+            <Link to="/team" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/team') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              TEAM
+            </Link>
+            <div className="p-6">
+              <Link to="/system" onClick={closeMenu} className="flex items-center justify-center w-full bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors uppercase">
+                EXPLORE SYSTEM
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       <main className="flex-grow pt-[88px] flex flex-col items-center w-full">

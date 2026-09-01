@@ -60,10 +60,10 @@ export default function Home() {
           <div ref={threejsContainer} style={{ width: '100%', height: '100%' }}></div>
         </div>
         <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[1px] h-64 bg-slate-800"></div>
-          <div className="absolute top-1/4 left-1/4 h-[1px] w-64 bg-slate-800"></div>
+          <div className="absolute top-1/4 left-1/4 w-px h-64 bg-slate-800"></div>
+          <div className="absolute top-1/4 left-1/4 h-px w-64 bg-slate-800"></div>
         </div>
-        <div className="max-w-[1440px] w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter relative z-10">
+        <div className="max-w-360 w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter relative z-10">
           <div className="lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 pt-12 lg:pt-0">
             <div className="inline-flex items-center gap-2 mb-6 border border-border-industrial px-3 py-1 bg-surface-bright self-start">
               <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
@@ -93,7 +93,7 @@ export default function Home() {
               <div className="absolute -bottom-1 -left-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -bottom-1 -right-1 w-2 h-2 border border-slate-400 bg-surface"></div>
             </div>
-            <div className="relative w-full aspect-[4/3] bg-surface-bright industrial-border flex items-center justify-center p-8 overflow-hidden shadow-sm">
+            <div className="relative w-full aspect-4/3 bg-surface-bright industrial-border flex items-center justify-center p-8 overflow-hidden shadow-sm">
               <img alt="Adaptive Architecture 3D Render" className="w-full h-full object-cover opacity-90 transition-transform duration-1000 hover:scale-105" src="/images/hero.jpg" />
               <div className="absolute top-4 right-4 text-right bg-surface-bright/80 p-2 backdrop-blur">
                 <div className="font-mono-data text-label-caps text-text-muted">TARGET CALORIFIC VALUE</div>
@@ -110,7 +110,7 @@ export default function Home() {
 
       {/* Section 2: The Problem Summary */}
       <section className="w-full relative py-32 px-margin-mobile md:px-margin-desktop border-b border-border-industrial bg-surface-bright">
-        <div className="max-w-[1440px] w-full mx-auto flex flex-col items-center">
+        <div className="max-w-360 w-full mx-auto flex flex-col items-center">
           <div className="text-center mb-16">
             <h2 className="font-display-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-4">THE WASTE STREAM WON’T STAY THE SAME.</h2>
             <p className="font-mono-data text-mono-data text-text-muted">ANALYZING INPUT FLUCTUATIONS ACROSS 72H CYCLE</p>
@@ -161,7 +161,7 @@ export default function Home() {
       
       {/* Section 3: Bento Grid */}
       <section className="w-full relative py-32 px-margin-mobile md:px-margin-desktop bg-white">
-        <div className="max-w-[1440px] w-full mx-auto">
+        <div className="max-w-360 w-full mx-auto">
           <div className="mb-12 flex items-center justify-between border-b border-border-industrial pb-4">
             <h3 className="font-mono-data text-mono-data text-on-surface">MATTER CLASSIFICATION</h3>
             <span className="font-mono-data text-[10px] text-text-muted">GRID.SYS.3</span>
@@ -173,7 +173,7 @@ export default function Home() {
                 <span className="material-symbols-outlined">compost</span>
               </div>
               <h4 className="font-display-lg text-xl mb-2">ORGANIC MATTERS</h4>
-              <p className="font-body-md text-text-muted text-sm flex-grow">Highly variable moisture levels. Requires pre-drying stabilization before core processing.</p>
+              <p className="font-body-md text-text-muted text-sm grow">Highly variable moisture levels. Requires pre-drying stabilization before core processing.</p>
               <div className="mt-4 pt-4 border-t border-border-industrial flex justify-between items-center">
                 <span className="font-mono-data text-label-caps">VOLATILITY</span>
                 <div className="flex gap-1">
@@ -189,7 +189,7 @@ export default function Home() {
                 <span className="material-symbols-outlined">recycling</span>
               </div>
               <h4 className="font-display-lg text-xl mb-2">SYNTHETIC POLYMERS</h4>
-              <p className="font-body-md text-text-muted text-sm flex-grow">High calorific potential but introduces complex halogen compounds during thermal breakdown.</p>
+              <p className="font-body-md text-text-muted text-sm grow">High calorific potential but introduces complex halogen compounds during thermal breakdown.</p>
               <div className="mt-4 pt-4 border-t border-border-industrial flex justify-between items-center">
                 <span className="font-mono-data text-label-caps">STABILITY</span>
                 <div className="flex gap-1">
@@ -205,7 +205,7 @@ export default function Home() {
                 <span className="material-symbols-outlined">layers</span>
               </div>
               <h4 className="font-display-lg text-xl mb-2">INERT CONTAMINANTS</h4>
-              <p className="font-body-md text-text-muted text-sm flex-grow">Glass, metals, and ash residues that bypass conversion and require mechanical separation.</p>
+              <p className="font-body-md text-text-muted text-sm grow">Glass, metals, and ash residues that bypass conversion and require mechanical separation.</p>
               <div className="mt-4 pt-4 border-t border-border-industrial flex justify-between items-center">
                 <span className="font-mono-data text-label-caps">ABRASION RISK</span>
                 <div className="flex gap-1">
@@ -221,7 +221,7 @@ export default function Home() {
       
       {/* Section 4: Adaptive Narrative */}
       <section className="w-full relative py-32 px-margin-mobile md:px-margin-desktop bg-surface border-t border-border-industrial overflow-hidden">
-        <div className="max-w-[1440px] w-full mx-auto">
+        <div className="max-w-360 w-full mx-auto">
           <h2 className="font-display-lg text-headline-lg-mobile md:text-headline-lg text-center mb-24">PROCESS ARCHITECTURE</h2>
           
           <div className="relative w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-0 mt-12 px-4 md:px-12">
@@ -236,8 +236,8 @@ export default function Home() {
             `}</style>
             
             {/* Connecting lines */}
-            <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-[1px] bg-border-industrial -z-10 transform -translate-y-1/2 overflow-hidden">
-               <div className="absolute top-0 left-0 h-full w-1/4 bg-gradient-to-r from-transparent via-primary to-transparent animate-data-flow"></div>
+            <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-px bg-border-industrial -z-10 transform -translate-y-1/2 overflow-hidden">
+               <div className="absolute top-0 left-0 h-full w-1/4 bg-linear-to-r from-transparent via-primary to-transparent animate-data-flow"></div>
             </div>
 
             {/* Step 1 */}
@@ -253,7 +253,7 @@ export default function Home() {
             
             {/* Step 2 */}
             <div className="group bg-surface-bright border-2 border-primary-container p-8 w-full md:w-80 flex flex-col items-center text-center relative z-10 shadow-[0_0_30px_rgba(34,197,94,0.1)] transform md:scale-110 hover:scale-[1.12] transition-all duration-300">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-container to-primary"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary-container to-primary"></div>
               <div className="w-20 h-20 rounded-full bg-primary-container/20 border border-primary-container text-primary-container flex items-center justify-center mb-6 relative">
                 <div className="absolute inset-0 rounded-full border border-primary-container animate-ping opacity-20"></div>
                 <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>science</span>

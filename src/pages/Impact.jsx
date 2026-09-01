@@ -1,6 +1,6 @@
 export default function Impact() {
   return (
-    <div className="flex-grow w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
+    <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
       {/* Hero Section */}
       <section className="mb-24">
         <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-border-industrial bg-surface-bright">
@@ -21,7 +21,7 @@ export default function Impact() {
       <section className="mb-32">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter relative">
           {/* Map Visual */}
-          <div className="lg:col-span-8 bg-surface-bright border border-border-industrial rounded relative overflow-hidden h-[500px] lg:h-[600px] group">
+          <div className="lg:col-span-8 bg-surface-bright border border-border-industrial rounded relative overflow-hidden h-125 lg:h-150 group">
             <div className="absolute top-4 right-4 z-10 font-mono-data text-mono-data text-text-muted bg-surface/90 backdrop-blur px-2 py-1 border border-border-industrial rounded">
               NODE-MAP-01
             </div>
