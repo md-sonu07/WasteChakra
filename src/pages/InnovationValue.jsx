@@ -1,6 +1,6 @@
 export default function InnovationValue() {
   return (
-    <div className="flex-grow max-w-[1440px] mx-auto w-full">
+    <div className="grow max-w-360 mx-auto w-full">
       {/* Hero Section */}
       <section className="px-margin-mobile md:px-margin-desktop py-24 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none">
@@ -14,9 +14,9 @@ export default function InnovationValue() {
             <div className="w-12 h-1 bg-primary"></div>
             <span className="font-label-caps text-label-caps text-primary uppercase">Core Principle 01</span>
           </div>
-          <h1 className="font-display-lg text-display-lg md:text-display-lg text-on-surface mb-8">
+          <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-on-surface mb-8">
             OUR INNOVATION IS<br/>
-            <span className="text-text-muted">THE ARCHITECTURE.</span>
+            <span className="text-text-muted wrap-break-word">THE ARCHITECTURE.</span>
           </h1>
           <p className="font-body-md text-body-md text-text-muted max-w-2xl border-l-2 border-primary pl-6">
             We do not invent novel waste streams; we architect precise, controlled environments where standard physics and chemistry are executed with uncompromising certainty.
