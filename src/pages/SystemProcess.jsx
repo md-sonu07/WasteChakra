@@ -30,60 +30,7 @@ export default function SystemProcess() {
           className="absolute inset-4 technical-border overflow-hidden bg-surface flex items-center justify-center cursor-pointer"
           onClick={() => setIsImageModalOpen(true)}
         >
-          {/* Custom SVG Architecture Diagram */}
-          <svg viewBox="0 0 1000 400" className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 ease-in-out">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" strokeWidth="0.5" />
-              </pattern>
-              <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#1e293b" />
-                <stop offset="50%" stopColor="#22c55e" />
-                <stop offset="100%" stopColor="#1e293b" />
-              </linearGradient>
-            </defs>
-
-            <rect width="100%" height="100%" fill="#0f172a" />
-            <rect width="100%" height="100%" fill="url(#grid)" />
-
-            {/* Connection Lines */}
-            <path d="M 250 200 L 450 200" fill="none" stroke="#334155" strokeWidth="4" />
-            <path d="M 550 200 L 750 200" fill="none" stroke="#334155" strokeWidth="4" />
-
-            {/* Animated Flow Lines */}
-            <path d="M 250 200 L 450 200" fill="none" stroke="url(#flowGradient)" strokeWidth="4" strokeDasharray="100 200" className="animate-[dash_2s_linear_infinite]" />
-            <path d="M 550 200 L 750 200" fill="none" stroke="url(#flowGradient)" strokeWidth="4" strokeDasharray="100 200" className="animate-[dash_2s_linear_infinite]" style={{ animationDelay: '1s' }} />
-
-            {/* Stage 1: Input */}
-            <g transform="translate(100, 150)">
-              <rect width="150" height="100" fill="#1e293b" stroke="#475569" strokeWidth="2" rx="4" />
-              <text x="75" y="45" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">STAGE 01</text>
-              <text x="75" y="65" fill="#f8fafc" fontSize="16" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">RAW INTAKE</text>
-              <circle cx="75" cy="100" r="4" fill="#ef4444" className="animate-pulse" />
-            </g>
-
-            {/* Stage 2: Processing (Bio-Cycle) */}
-            <g transform="translate(400, 120)">
-              <rect width="200" height="160" fill="#1e293b" stroke="#22c55e" strokeWidth="3" rx="8" />
-              <text x="100" y="60" fill="#22c55e" fontSize="14" textAnchor="middle" fontFamily="monospace">CORE PROCESSOR</text>
-              <text x="100" y="85" fill="#f8fafc" fontSize="20" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">BIO-CYCLE UNIT</text>
-              <text x="100" y="110" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">ADAPTIVE STABILIZATION</text>
-
-              {/* Spinning gear/rotor graphic */}
-              <g transform="translate(100, 140)">
-                <circle r="15" fill="none" stroke="#22c55e" strokeWidth="2" strokeDasharray="10 5" className="animate-[spin_4s_linear_infinite]" />
-                <circle r="5" fill="#22c55e" />
-              </g>
-            </g>
-
-            {/* Stage 3: Output */}
-            <g transform="translate(750, 150)">
-              <rect width="150" height="100" fill="#1e293b" stroke="#475569" strokeWidth="2" rx="4" />
-              <text x="75" y="45" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">STAGE 03</text>
-              <text x="75" y="65" fill="#f8fafc" fontSize="16" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">REFINED RDF</text>
-              <circle cx="75" cy="100" r="4" fill="#22c55e" />
-            </g>
-          </svg>
+          <img className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700 ease-in-out" src="/images/system.png" alt="System Architecture" />
 
           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors flex items-center justify-center pointer-events-none">
             <span className="material-symbols-outlined text-transparent group-hover:text-primary transition-colors text-6xl drop-shadow-md">zoom_in</span>
@@ -220,54 +167,11 @@ export default function SystemProcess() {
             >
               <span className="material-symbols-outlined">close</span>
             </button>
-            {/* Reusing the custom SVG in the modal */}
-            <svg viewBox="0 0 1000 400" className="w-full h-full object-contain">
-              <defs>
-                <pattern id="grid-modal" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#334155" strokeWidth="0.5" />
-                </pattern>
-                <linearGradient id="flowGradient-modal" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#1e293b" />
-                  <stop offset="50%" stopColor="#22c55e" />
-                  <stop offset="100%" stopColor="#1e293b" />
-                </linearGradient>
-              </defs>
-
-              <rect width="100%" height="100%" fill="#0f172a" />
-              <rect width="100%" height="100%" fill="url(#grid-modal)" />
-
-              <path d="M 250 200 L 450 200" fill="none" stroke="#334155" strokeWidth="4" />
-              <path d="M 550 200 L 750 200" fill="none" stroke="#334155" strokeWidth="4" />
-
-              <path d="M 250 200 L 450 200" fill="none" stroke="url(#flowGradient-modal)" strokeWidth="4" strokeDasharray="100 200" className="animate-[dash_2s_linear_infinite]" />
-              <path d="M 550 200 L 750 200" fill="none" stroke="url(#flowGradient-modal)" strokeWidth="4" strokeDasharray="100 200" className="animate-[dash_2s_linear_infinite]" style={{ animationDelay: '1s' }} />
-
-              <g transform="translate(100, 150)">
-                <rect width="150" height="100" fill="#1e293b" stroke="#475569" strokeWidth="2" rx="4" />
-                <text x="75" y="45" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">STAGE 01</text>
-                <text x="75" y="65" fill="#f8fafc" fontSize="16" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">RAW INTAKE</text>
-                <circle cx="75" cy="100" r="4" fill="#ef4444" className="animate-pulse" />
-              </g>
-
-              <g transform="translate(400, 120)">
-                <rect width="200" height="160" fill="#1e293b" stroke="#22c55e" strokeWidth="3" rx="8" />
-                <text x="100" y="60" fill="#22c55e" fontSize="14" textAnchor="middle" fontFamily="monospace">CORE PROCESSOR</text>
-                <text x="100" y="85" fill="#f8fafc" fontSize="20" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">BIO-CYCLE UNIT</text>
-                <text x="100" y="110" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">ADAPTIVE STABILIZATION</text>
-
-                <g transform="translate(100, 140)">
-                  <circle r="15" fill="none" stroke="#22c55e" strokeWidth="2" strokeDasharray="10 5" className="animate-[spin_4s_linear_infinite]" />
-                  <circle r="5" fill="#22c55e" />
-                </g>
-              </g>
-
-              <g transform="translate(750, 150)">
-                <rect width="150" height="100" fill="#1e293b" stroke="#475569" strokeWidth="2" rx="4" />
-                <text x="75" y="45" fill="#94a3b8" fontSize="12" textAnchor="middle" fontFamily="monospace">STAGE 03</text>
-                <text x="75" y="65" fill="#f8fafc" fontSize="16" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">REFINED RDF</text>
-                <circle cx="75" cy="100" r="4" fill="#22c55e" />
-              </g>
-            </svg>
+            <img 
+              src="/images/system.png" 
+              alt="System Architecture Full View" 
+              className="w-full h-full object-contain" 
+            />
           </div>
         </div>
       )}
