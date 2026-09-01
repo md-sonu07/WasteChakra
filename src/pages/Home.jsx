@@ -87,7 +87,7 @@ export default function Home() {
             </div>
           </div>
           <div className="lg:col-span-7 relative order-1 lg:order-2 flex items-center justify-center">
-            <div className="absolute inset-0 border border-border-industrial m-4 hidden lg:block pointer-events-none">
+            <div className="absolute inset-0 border border-border-industrial hidden lg:block pointer-events-none">
               <div className="absolute -top-1 -left-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -top-1 -right-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -bottom-1 -left-1 w-2 h-2 border border-slate-400 bg-surface"></div>
@@ -95,14 +95,14 @@ export default function Home() {
             </div>
             <div className="relative w-full aspect-4/3 bg-surface-bright industrial-border flex items-center justify-center p-8 overflow-hidden shadow-sm">
               <img alt="Adaptive Architecture 3D Render" className="w-full h-full object-cover opacity-90 transition-transform duration-1000 hover:scale-105" src="/images/hero.jpg" />
-              <div className="absolute top-4 right-4 text-right bg-surface-bright/80 p-2 backdrop-blur">
+              {/* <div className="absolute top-4 right-4 text-right bg-surface-bright/80 p-2 backdrop-blur">
                 <div className="font-mono-data text-label-caps text-text-muted">TARGET CALORIFIC VALUE</div>
                 <div className="font-mono-data text-body-md text-on-surface">~18 MJ/kg</div>
               </div>
               <div className="absolute bottom-4 left-4 bg-surface-bright/80 p-2 backdrop-blur">
                 <div className="font-mono-data text-label-caps text-text-muted">TARGET MOISTURE</div>
                 <div className="font-mono-data text-body-md text-on-surface">&lt;15%</div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -219,64 +219,73 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Section 4: Adaptive Narrative */}
-      <section className="w-full relative py-32 px-margin-mobile md:px-margin-desktop bg-surface border-t border-border-industrial overflow-hidden">
-        <div className="max-w-360 w-full mx-auto">
-          <h2 className="font-display-lg text-headline-lg-mobile md:text-headline-lg text-center mb-24">PROCESS ARCHITECTURE</h2>
+      {/* Section 4: Adaptive Pipeline (Redesigned) */}
+      <section className="w-full relative py-32 bg-surface-bright border-t border-border-industrial overflow-hidden">
+        {/* Technical Grid Background */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "linear-gradient(to right, theme('colors.slate.300') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.slate.300') 1px, transparent 1px)", backgroundSize: '40px 40px' }}></div>
+        
+        <div className="max-w-360 w-full mx-auto px-margin-mobile md:px-margin-desktop relative z-10">
+          <div className="text-center mb-24">
+            <h2 className="font-display-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-4">PROCESS ARCHITECTURE</h2>
+            <p className="font-mono-data text-primary uppercase tracking-widest text-sm">Modular Municipal Waste Processing Plant</p>
+          </div>
           
-          <div className="relative w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-0 mt-12 px-4 md:px-12">
+          <div className="relative w-full max-w-5xl mx-auto">
+            {/* Central glowing vertical axis */}
+            <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px bg-border-industrial transform md:-translate-x-1/2">
+               <div className="absolute top-0 left-0 w-full h-1/4 bg-linear-to-b from-transparent via-primary to-transparent animate-[flowDown_4s_linear_infinite]"></div>
+            </div>
+
             <style>{`
-              @keyframes dataFlow {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(400%); }
-              }
-              .animate-data-flow {
-                animation: dataFlow 3s linear infinite;
+              @keyframes flowDown {
+                0% { top: -20%; }
+                100% { top: 120%; }
               }
             `}</style>
             
-            {/* Connecting lines */}
-            <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-px bg-border-industrial -z-10 transform -translate-y-1/2 overflow-hidden">
-               <div className="absolute top-0 left-0 h-full w-1/4 bg-linear-to-r from-transparent via-primary to-transparent animate-data-flow"></div>
-            </div>
-
-            {/* Step 1 */}
-            <div className="group bg-surface-bright border border-border-industrial p-8 w-full md:w-72 flex flex-col items-center text-center relative z-10 hover:border-primary transition-all duration-300 hover:-translate-y-2">
-              <div className="w-16 h-16 rounded-full border border-border-industrial bg-surface flex items-center justify-center mb-6 group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary transition-all duration-300">
-                <span className="material-symbols-outlined text-2xl">input</span>
-              </div>
-              <h3 className="font-label-caps text-lg mb-2 text-on-surface">RAW MSW INPUT</h3>
-              <p className="font-mono-data text-xs text-text-muted uppercase">HETEROGENEOUS MIX</p>
-              
-              <div className="hidden md:block absolute top-1/2 -right-3 transform -translate-y-1/2 w-6 h-6 bg-surface border border-border-industrial rotate-45 group-hover:border-primary group-hover:bg-primary/10 transition-colors"></div>
-            </div>
-            
-            {/* Step 2 */}
-            <div className="group bg-surface-bright border-2 border-primary-container p-8 w-full md:w-80 flex flex-col items-center text-center relative z-10 shadow-[0_0_30px_rgba(34,197,94,0.1)] transform md:scale-110 hover:scale-[1.12] transition-all duration-300">
-              <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary-container to-primary"></div>
-              <div className="w-20 h-20 rounded-full bg-primary-container/20 border border-primary-container text-primary-container flex items-center justify-center mb-6 relative">
-                <div className="absolute inset-0 rounded-full border border-primary-container animate-ping opacity-20"></div>
-                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>science</span>
-              </div>
-              <h3 className="font-label-caps text-xl mb-2 text-on-surface">BIO-CYCLE UNIT</h3>
-              <p className="font-mono-data text-xs text-primary-container uppercase">ADAPTIVE STABILIZATION</p>
-            </div>
-            
-            {/* Step 3 */}
-            <div className="group bg-surface-bright border border-border-industrial p-8 w-full md:w-72 flex flex-col items-center text-center relative z-10 hover:border-secondary-container transition-all duration-300 hover:-translate-y-2">
-              <div className="w-16 h-16 rounded-full border border-border-industrial bg-surface flex items-center justify-center mb-6 group-hover:bg-secondary-container/10 group-hover:text-secondary-container group-hover:border-secondary-container transition-all duration-300">
-                <span className="material-symbols-outlined text-2xl">output</span>
-              </div>
-              <h3 className="font-label-caps text-lg mb-2 text-on-surface">RECOVERED RESOURCES</h3>
-              <p className="font-mono-data text-xs text-text-muted uppercase">HOMOGENIZED YIELD</p>
-              
-              <div className="hidden md:block absolute top-1/2 -left-3 transform -translate-y-1/2 w-6 h-6 bg-surface border border-border-industrial rotate-45 group-hover:border-secondary-container group-hover:bg-secondary-container/10 transition-colors"></div>
+            <div className="flex flex-col gap-12 md:gap-0">
+              {[
+                { id: "01", title: "INPUT & RECEPTION", icon: "move_to_inbox", desc: "Waste In via Conveyor" },
+                { id: "02", title: "PRE-SHREDDING & SCREENING", icon: "filter_alt", desc: "Shredder Module & Trommel Screen" },
+                { id: "03", title: "MECHANICAL SEPARATION", icon: "call_split", desc: "Magnetic Separator, Ballistic Separator, Star Screen" },
+                { id: "04", title: "ADVANCED SENSING & SORTING", icon: "document_scanner", desc: "NIR/Optical & X-Ray Sorters" },
+                { id: "05", title: "CONDENSING & BAILING", icon: "compress", desc: "Baler Modules & Compactor Press" },
+                { id: "06", title: "COMPOSTING / ORGANIC TREATMENT", icon: "compost", desc: "Bio-reactor, Bio-filter, Maturation bay" },
+                { id: "07", title: "REFUSE-DERIVED FUEL (RDF)", icon: "local_fire_department", desc: "Pelletizer & Secondary Shredder" },
+                { id: "08", title: "STORAGE & DISPATCH", icon: "local_shipping", desc: "RDF Out, PET Finished Products, Metals" },
+              ].map((step, index) => (
+                <div key={step.id} className={`relative flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-16 w-full ${index % 2 === 0 ? 'md:flex-row-reverse text-left md:text-right' : 'text-left'}`}>
+                  {/* Timeline Node */}
+                  <div className="absolute left-6 md:left-1/2 transform -translate-x-1/2 w-4 h-4 bg-surface-bright border-2 border-primary rounded-full z-20 flex items-center justify-center top-6 md:top-8">
+                    <div className="w-1 h-1 bg-primary rounded-full animate-ping"></div>
+                  </div>
+                  
+                  {/* Content Card */}
+                  <div className="ml-16 md:ml-0 w-full md:w-1/2 group">
+                    <div className="p-6 md:p-8 bg-surface border border-border-industrial rounded hover:border-primary transition-colors duration-300 relative overflow-hidden flex flex-col">
+                      {/* Glow effect on hover */}
+                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                      
+                      <div className={`flex items-center gap-4 mb-4 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+                        <span className="material-symbols-outlined text-primary text-3xl opacity-80">{step.icon}</span>
+                        <span className="font-mono-data text-text-muted text-sm">STEP.{step.id}</span>
+                      </div>
+                      
+                      <h3 className="font-label-caps text-on-surface text-xl mb-2">{step.title}</h3>
+                      <p className="font-mono-data text-xs text-text-muted uppercase tracking-wide">{step.desc}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Empty space for alternating layout on desktop */}
+                  <div className="hidden md:block w-1/2"></div>
+                </div>
+              ))}
             </div>
           </div>
           
-          <div className="mt-24 text-center">
-            <Link to="/final" className="group inline-flex items-center gap-2 text-primary hover:text-primary-container font-label-caps uppercase transition-colors">
-              See Final Impact CTA
+          <div className="mt-24 text-center relative z-10">
+            <Link to="/final" className="group inline-flex items-center gap-2 text-primary hover:text-on-primary-container font-label-caps uppercase transition-colors px-6 py-3 border border-border-industrial hover:border-primary bg-surface rounded">
+              See Final Impact
               <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>
