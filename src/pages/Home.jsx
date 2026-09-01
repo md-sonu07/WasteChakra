@@ -55,7 +55,7 @@ export default function Home() {
   return (
     <>
       {/* Section 1: Hero */}
-      <section className="w-full relative min-h-[90vh] flex items-center justify-center pt-24 pb-32 px-margin-mobile md:px-margin-desktop overflow-hidden border-b border-border-industrial">
+      <section className="w-full relative min-h-[90vh] flex items-center justify-center pt-8 md:pt-24 pb-16 md:pb-32 px-margin-mobile md:px-margin-desktop overflow-hidden border-b border-border-industrial">
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none opacity-40">
           <div ref={threejsContainer} style={{ width: '100%', height: '100%' }}></div>
         </div>
@@ -64,7 +64,7 @@ export default function Home() {
           <div className="absolute top-1/4 left-1/4 h-px w-64 bg-slate-800"></div>
         </div>
         <div className="max-w-360 w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter relative z-10">
-          <div className="lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 pt-12 lg:pt-0">
+          <div className="lg:col-span-5 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2 mb-6 border border-border-industrial px-3 py-1 bg-surface-bright self-start">
               <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
               <span className="font-mono-data text-label-caps text-text-muted tracking-widest">SYS.STATUS: OPTIMAL</span>
@@ -86,23 +86,15 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="lg:col-span-7 relative order-1 lg:order-2 flex items-center justify-center">
+          <div className="lg:col-span-7 relative flex items-center justify-center pt-12 lg:pt-0">
             <div className="absolute inset-0 border border-border-industrial hidden lg:block pointer-events-none">
               <div className="absolute -top-1 -left-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -top-1 -right-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -bottom-1 -left-1 w-2 h-2 border border-slate-400 bg-surface"></div>
               <div className="absolute -bottom-1 -right-1 w-2 h-2 border border-slate-400 bg-surface"></div>
             </div>
-            <div className="relative w-full aspect-4/3 bg-surface-bright industrial-border flex items-center justify-center p-8 overflow-hidden shadow-sm">
+            <div className="relative w-full aspect-4/3 bg-surface-bright industrial-border flex items-center justify-center p-2 overflow-hidden shadow-sm">
               <img alt="Adaptive Architecture 3D Render" className="w-full h-full object-cover opacity-90 transition-transform duration-1000 hover:scale-105" src="/images/hero.jpg" />
-              {/* <div className="absolute top-4 right-4 text-right bg-surface-bright/80 p-2 backdrop-blur">
-                <div className="font-mono-data text-label-caps text-text-muted">TARGET CALORIFIC VALUE</div>
-                <div className="font-mono-data text-body-md text-on-surface">~18 MJ/kg</div>
-              </div>
-              <div className="absolute bottom-4 left-4 bg-surface-bright/80 p-2 backdrop-blur">
-                <div className="font-mono-data text-label-caps text-text-muted">TARGET MOISTURE</div>
-                <div className="font-mono-data text-body-md text-on-surface">&lt;15%</div>
-              </div> */}
             </div>
           </div>
         </div>
