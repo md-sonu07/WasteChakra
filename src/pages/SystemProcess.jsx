@@ -3,7 +3,7 @@ import { useState } from 'react';
 export default function SystemProcess() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   return (
-    <div className="flex-grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
+    <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
       {/* Hero Section */}
       <header className="mb-16 max-w-4xl">
         <div className="flex items-center gap-2 mb-4">
@@ -37,27 +37,27 @@ export default function SystemProcess() {
           </div>
         </div>
 
-        <div className="absolute top-8 right-8 bg-surface-bright/90 backdrop-blur technical-border p-4 z-10 w-48">
-          <div className="font-mono-data text-label-caps text-text-muted mb-1">SYSTEM STATUS</div>
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 bg-surface-bright/90 backdrop-blur technical-border p-3 md:p-4 z-10 w-36 md:w-48 shadow-sm">
+          <div className="font-mono-data text-[10px] md:text-label-caps text-text-muted mb-1">SYSTEM STATUS</div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-            <span className="font-body-md text-body-md text-primary font-medium">OPTIMAL</span>
+            <span className="font-body-md text-sm md:text-body-md text-primary font-medium">OPTIMAL</span>
           </div>
-          <div className="mt-4 pt-4 border-t border-border-industrial">
-            <div className="font-mono-data text-label-caps text-text-muted mb-1">FLOW RATE</div>
-            <div className="font-headline-lg text-headline-lg-mobile text-on-surface">NOMINAL</div>
+          <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border-industrial">
+            <div className="font-mono-data text-[10px] md:text-label-caps text-text-muted mb-1">FLOW RATE</div>
+            <div className="font-headline-lg text-lg md:text-headline-lg-mobile text-on-surface leading-tight">NOMINAL</div>
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-8 bg-surface-bright/90 backdrop-blur technical-border p-3 z-10 flex gap-4">
+        <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 bg-surface-bright/90 backdrop-blur technical-border p-2 md:p-3 z-10 flex gap-3 md:gap-4 shadow-sm scale-90 origin-bottom-left md:scale-100 md:origin-center">
           <div>
-            <div className="font-mono-data text-label-caps text-text-muted">EFFICIENCY</div>
-            <div className="font-body-md text-body-md text-on-surface font-medium">OPTIMIZED</div>
+            <div className="font-mono-data text-[10px] md:text-label-caps text-text-muted">EFFICIENCY</div>
+            <div className="font-body-md text-sm md:text-body-md text-on-surface font-medium">OPTIMIZED</div>
           </div>
           <div className="w-px bg-border-industrial"></div>
           <div>
-            <div className="font-mono-data text-label-caps text-text-muted">ENERGY</div>
-            <div className="font-body-md text-body-md text-on-surface font-medium">BALANCED</div>
+            <div className="font-mono-data text-[10px] md:text-label-caps text-text-muted">ENERGY</div>
+            <div className="font-body-md text-sm md:text-body-md text-on-surface font-medium">BALANCED</div>
           </div>
         </div>
       </section>

@@ -7,14 +7,14 @@ export default function TheProblem() {
           <span className="w-2 h-2 rounded-full bg-secondary-container animate-pulse"></span>
           <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">PROBLEM STATEMENT // ID-8492</span>
         </div>
-        <h1 className="font-display-lg text-display-lg text-on-surface mb-6 uppercase md:w-3/4">THE WASTE STREAM WON'T STAY THE SAME.</h1>
+        <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-on-surface mb-6 uppercase md:w-3/4">THE WASTE STREAM WON'T STAY THE SAME.</h1>
         <p className="font-body-md text-body-md text-text-muted md:w-1/2 md:text-lg">Variable and heterogeneous urban MSW makes reliable resource recovery and consistent RDF production difficult.</p>
       </header>
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-24">
         {/* Main Visual Card (Spans 8 cols) */}
-        <div className="md:col-span-8 bg-surface-bright industrial-border relative overflow-hidden technical-shadow h-[500px]">
+        <div className="md:col-span-8 bg-surface-bright industrial-border relative overflow-hidden technical-shadow h-64 md:h-125">
           <div className="absolute top-4 right-4 font-label-caps text-label-caps text-text-muted z-10 bg-surface-bright/80 px-2 py-1 border border-border-industrial backdrop-blur-sm">VISUALIZATION-A1</div>
           <div className="absolute inset-0 w-full h-full">
             <img className="object-cover w-full h-full opacity-90 mix-blend-multiply" src="/images/problem.jpg" alt="Waste Visualization" />
