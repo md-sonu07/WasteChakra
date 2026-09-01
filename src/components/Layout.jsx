@@ -77,28 +77,69 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="bg-surface-container-lowest text-primary font-mono-data text-mono-data uppercase w-full mt-auto border-t border-surface-container-highest">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter px-margin-mobile md:px-margin-desktop py-16 w-full max-w-container-max mx-auto">
-          <div className="md:col-span-4 flex flex-col justify-between mb-8 md:mb-0">
-            <div>
-              <div className="font-label-caps text-label-caps text-on-surface-variant mb-4 tracking-widest">WASTECHAKRA</div>
-              <p className="font-mono-data text-mono-data uppercase text-text-muted max-w-sm">
-                Engineered for Absolute Certainty. Jamia Millia Islamia Affiliated. Comestro Powered.
-              </p>
+      <footer className="bg-slate-950 text-slate-300 relative border-t border-primary/20 overflow-hidden">
+        {/* Animated glowing background orb */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: "linear-gradient(to right, theme('colors.primary') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.primary') 1px, transparent 1px)", backgroundSize: '30px 30px' }}></div>
+        
+        <div className="relative z-10 w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop pt-24 pb-12">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-16">
+            
+            {/* Brand Section */}
+            <div className="md:col-span-5 flex flex-col justify-between">
+              <div>
+                <Link to="/" className="flex items-center gap-3 mb-6 group w-max">
+                  <img src="/logo.svg" alt="WasteChakra Logo" className="w-10 h-10 group-hover:scale-110 transition-transform duration-500 opacity-90 group-hover:opacity-100" />
+                  <span className="font-display-lg text-2xl text-white tracking-wider group-hover:text-primary transition-colors duration-300">WASTECHAKRA</span>
+                </Link>
+                <p className="font-mono-data text-xs leading-relaxed text-slate-400 max-w-sm uppercase tracking-widest border-l-2 border-primary/50 pl-4">
+                  Engineered for Absolute Certainty.<br/>
+                  Jamia Millia Islamia Affiliated.<br/>
+                  Comestro Powered.
+                </p>
+              </div>
             </div>
-            <div className="mt-8 font-mono-data text-mono-data uppercase text-text-muted">
-              © 2024 WasteChakra
+
+            {/* Links Section */}
+            <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-8 font-mono-data text-xs uppercase tracking-widest">
+              <div className="flex flex-col gap-6">
+                <h4 className="text-white font-label-caps mb-2 opacity-50">Architecture</h4>
+                <Link to="/system" className="hover:text-primary hover:translate-x-2 transition-all duration-300">System Overview</Link>
+                <Link to="/process" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Process Parameters</Link>
+                <Link to="/innovation" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Core Innovations</Link>
+              </div>
+              <div className="flex flex-col gap-6">
+                <h4 className="text-white font-label-caps mb-2 opacity-50">Company</h4>
+                <Link to="/impact" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Global Impact</Link>
+                <Link to="/team" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Our Team</Link>
+                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Careers</Link>
+              </div>
+              <div className="flex flex-col gap-6">
+                <h4 className="text-white font-label-caps mb-2 opacity-50">Legal & Social</h4>
+                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Privacy Policy</Link>
+                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Terms of Service</Link>
+                <div className="flex gap-4 mt-2">
+                  <a href="#" className="flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-sm">share</span>
+                  </a>
+                  <a href="#" className="flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
+                    <span className="material-symbols-outlined text-sm">mail</span>
+                  </a>
+                </div>
+              </div>
             </div>
+            
           </div>
-          <div className="md:col-span-8 flex flex-col md:flex-row justify-end gap-12">
-            <div className="flex flex-col gap-4">
-              <Link to="/system" className="text-on-tertiary-fixed-variant hover:text-primary underline underline-offset-4 transition-all">SYSTEM ARCHITECTURE</Link>
-              <Link to="/process" className="text-on-tertiary-fixed-variant hover:text-primary underline underline-offset-4 transition-all">PROCESS PARAMETERS</Link>
+          
+          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 font-mono-data text-[10px] text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              SYS.STATUS: ONLINE
             </div>
-            <div className="flex flex-col gap-4">
-              <Link to="#" className="text-on-tertiary-fixed-variant hover:text-primary underline underline-offset-4 transition-all">TECHNICAL SPECS</Link>
-              <Link to="#" className="text-on-tertiary-fixed-variant hover:text-primary underline underline-offset-4 transition-all">COMPLIANCE</Link>
-              <Link to="#" className="text-on-tertiary-fixed-variant hover:text-primary underline underline-offset-4 transition-all">LEGAL</Link>
+            <div>
+              © 2024 WasteChakra. All rights reserved.
             </div>
           </div>
         </div>
