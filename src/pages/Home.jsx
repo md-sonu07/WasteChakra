@@ -76,10 +76,10 @@ export default function Home() {
               Convert an unpredictable waste stream into predictable, quality-controlled resource streams through modular and adaptive processing.
             </p>
             <div className="flex flex-wrap items-center gap-6">
-              <Link to="/system" className="bg-primary-container text-slate-900 font-label-caps text-label-caps px-8 py-4 hover:opacity-90 transition-opacity border border-primary-container inline-flex items-center gap-3">
+              <a href="https://wastechakra-process-ccer.bolt.host/" target="_blank" rel="noopener noreferrer" className="bg-primary-container text-slate-900 font-label-caps text-label-caps px-8 py-4 hover:opacity-90 transition-opacity border border-primary-container inline-flex items-center gap-3">
                 <span className="">INITIATE DIAGNOSTIC</span>
                 <span className="material-symbols-outlined">analytics</span>
-              </Link>
+              </a>
               <div className="flex flex-col">
                 <span className="font-mono-data text-[10px] text-text-muted uppercase">System ID</span>
                 <span className="font-mono-data text-mono-data text-on-surface">BCU-01-ALPHA</span>
