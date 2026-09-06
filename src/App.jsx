@@ -8,6 +8,7 @@ import InnovationValue from './pages/InnovationValue';
 import Impact from './pages/Impact';
 import Team from './pages/Team';
 import FinalCTA from './pages/FinalCTA';
+import WasteChakraSimulation from './simulation/WasteChakraSimulation';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="innovation" element={<InnovationValue />} />
           <Route path="impact" element={<Impact />} />
           <Route path="team" element={<Team />} />
+          <Route path="simulation" element={<WasteChakraSimulation />} />
           <Route path="problem" element={<TheProblem />} />
           <Route path="final" element={<FinalCTA />} />
         </Route>

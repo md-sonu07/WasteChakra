@@ -32,9 +32,12 @@ export default function Layout() {
             <Link to="/team" className={`font-body-md uppercase tracking-wider transition-colors duration-300 ${isActive('/team') ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'}`}>
               TEAM
             </Link>
+            <Link to="/system" className={`font-body-md uppercase tracking-wider transition-colors duration-300 ${isActive('/system') ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'}`}>
+              Explore System
+            </Link>
           </div>
-          <Link to="/system" className="hidden md:inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors technical-shadow uppercase">
-            EXPLORE SYSTEM
+          <Link to="/simulation" className="hidden md:inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors technical-shadow uppercase">
+            Explore 3D System
           </Link>
           <button 
             className="md:hidden text-primary p-2"
@@ -63,6 +66,9 @@ export default function Layout() {
             </Link>
             <Link to="/team" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/team') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
               TEAM
+            </Link>
+            <Link to="/simulation" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/simulation') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
+              3D SIMULATION
             </Link>
             <div className="p-6">
               <Link to="/system" onClick={closeMenu} className="flex items-center justify-center w-full bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors uppercase">
