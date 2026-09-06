@@ -292,13 +292,24 @@ export default function WasteChakraSimulation() {
         {/* Main simulation */}
         <div>
           <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4 blueprint-shadow">
-            <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl bg-surface">
+            <div
+              ref={containerRef}
+              className={`relative w-full overflow-hidden rounded-xl bg-surface ${
+                isFullscreen ? "flex items-center justify-center min-h-screen" : ""
+              }`}
+            >
               <canvas
                 ref={canvasRef}
                 onClick={(e) => handleCanvasClick(e, canvasRef.current, setSelectedNode)}
                 onMouseMove={(e) => handleCanvasHover(e, canvasRef.current, setHoverInfo)}
                 onMouseLeave={() => setHoverInfo(null)}
-                className="cursor-pointer block w-full h-auto"
+                className="cursor-pointer block mx-auto"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: isFullscreen ? `calc(100vh * (${CANVAS_W} / ${CANVAS_H}))` : "100%",
+                  maxHeight: isFullscreen ? "100vh" : "none",
+                }}
               />
 
               {/* Top Controls */}
