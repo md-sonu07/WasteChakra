@@ -498,6 +498,32 @@ export default function WasteChakraSimulation() {
                   </div>
                 </div>
               )}
+
+              {/* Fullscreen Action Buttons */}
+              {isFullscreen && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 p-2 rounded-sm bg-surface-bright/90 backdrop-blur-md border border-border-industrial shadow-2xl">
+                  <button
+                    onClick={run}
+                    disabled={running}
+                    className="btn-industrial btn-industrial--primary btn-industrial--small"
+                  >
+                    <Play className="w-4 h-4" /> {t.run}
+                  </button>
+                  <button
+                    onClick={pause}
+                    disabled={!running}
+                    className="btn-industrial btn-industrial--secondary btn-industrial--small"
+                  >
+                    <Pause className="w-4 h-4" /> {t.pause}
+                  </button>
+                  <button
+                    onClick={reset}
+                    className="btn-industrial btn-industrial--neutral btn-industrial--small"
+                  >
+                    <RotateCcw className="w-4 h-4" /> {t.reset}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
