@@ -102,6 +102,13 @@ const STAGE_ACTION_DESC = {
   routing: "The WC engine picks the most profitable end-pathway for every material in this load.",
 };
 
+// Mutable positions shared by module-level drawing helpers
+const LIVE_POS = {
+  view: { x: 0, y: 0, zoom: 1 },
+  stagePos: {},
+  destPos: {},
+};
+
 let particleId = 0;
 
 function makeParticle(material) {
@@ -194,6 +201,14 @@ export default function WasteChakraSimulation() {
   const speedRef = useRef(speed);
   const runningRef = useRef(running);
   const hoverIdRef = useRef(null);
+  const viewRef = useRef({ x: 0, y: 0, zoom: 1 });
+  const stagePosRef = useRef(
+    Object.fromEntries(STAGE_IDS.map((id) => [id, { x: STAGE_X[id], y: CONVEYOR_Y }]))
+  );
+  const destPosRef = useRef(
+    Object.fromEntries(DESTINATIONS.map((d) => [d, { x: 1050, y: DEST_Y[d] }]))
+  );
+  const dragRef = useRef({ active: false, kind: null, id: null, startX: 0, startY: 0, startObjX: 0, startObjY: 0, moved: false });
   paramsRef.current = params;
   speedRef.current = speed;
   runningRef.current = running;
@@ -271,6 +286,24 @@ export default function WasteChakraSimulation() {
     canvas.style.aspectRatio = `${CANVAS_W} / ${CANVAS_H}`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    const onWheel = (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = CANVAS_W / rect.width;
+      const scaleY = CANVAS_H / rect.height;
+      const cssX = e.clientX - rect.left;
+      const cssY = e.clientY - rect.top;
+      const canvasX = cssX * scaleX;
+      const canvasY = cssY * scaleY;
+      const view = viewRef.current;
+      const oldZoom = view.zoom;
+      const newZoom = Math.max(0.25, Math.min(4, oldZoom * (e.deltaY > 0 ? 0.92 : 1.08)));
+      view.x = canvasX - ((canvasX - view.x) * newZoom / oldZoom);
+      view.y = canvasY - ((canvasY - view.y) * newZoom / oldZoom);
+      view.zoom = newZoom;
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+
     let ps = particles;
     let lastTime = performance.now();
 
@@ -284,6 +317,18 @@ export default function WasteChakraSimulation() {
 
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
       drawBackground(ctx);
+
+      const v = viewRef.current;
+      LIVE_POS.view.x = v.x;
+      LIVE_POS.view.y = v.y;
+      LIVE_POS.view.zoom = v.zoom;
+      LIVE_POS.stagePos = stagePosRef.current;
+      LIVE_POS.destPos = destPosRef.current;
+
+      ctx.save();
+      ctx.translate(v.x, v.y);
+      ctx.scale(v.zoom, v.zoom);
+
       drawConveyor(ctx, selectedNode, hoverId);
       drawStages(ctx, selectedNode, hoverId);
       drawDestinations(ctx);
@@ -295,11 +340,12 @@ export default function WasteChakraSimulation() {
       }
 
       drawParticles(ctx, ps);
+      ctx.restore();
 
       animRef.current = requestAnimationFrame(draw);
     };
     animRef.current = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(animRef.current);
+    return () => { cancelAnimationFrame(animRef.current); canvas.removeEventListener("wheel", onWheel); };
   }, [particles.length === 0, selectedNode]); // eslint-disable-line
 
   const updateParam = (key, val) => {
@@ -367,6 +413,23 @@ export default function WasteChakraSimulation() {
     }
   };
 
+  const resetView = () => {
+    viewRef.current = { x: 0, y: 0, zoom: 1 };
+    stagePosRef.current = Object.fromEntries(
+      STAGE_IDS.map((id) => [id, { x: STAGE_X[id], y: CONVEYOR_Y }])
+    );
+    destPosRef.current = Object.fromEntries(
+      DESTINATIONS.map((d) => [d, { x: 1050, y: DEST_Y[d] }])
+    );
+    dragRef.current.active = false;
+  };
+
+  const zoomCanvas = (factor) => {
+    const view = viewRef.current;
+    const newZoom = Math.max(0.25, Math.min(4, view.zoom * factor));
+    view.zoom = newZoom;
+  };
+
   return (
     <div
       className="min-h-screen w-full bg-surface text-on-surface"
@@ -387,14 +450,117 @@ export default function WasteChakraSimulation() {
             >
               <canvas
                 ref={canvasRef}
-                onClick={(e) => {
-                  const id = resolveCanvasHit(e, canvasRef.current);
-                  setSelectedNode(id);
-                  if (id === "reception") setWasteInputOpen(true);
+                onMouseDown={(e) => {
+                  if (e.button !== 0) return;
+                  const canvas = canvasRef.current;
+                  if (!canvas) return;
+                  const rect = canvas.getBoundingClientRect();
+                  const scaleX = CANVAS_W / rect.width;
+                  const scaleY = CANVAS_H / rect.height;
+                  const cssX = e.clientX - rect.left;
+                  const cssY = e.clientY - rect.top;
+                  const view = viewRef.current;
+                  const cx = (cssX * scaleX - view.x) / view.zoom;
+                  const cy = (cssY * scaleY - view.y) / view.zoom;
+
+                  // Hit-test stages then destinations
+                  let hit = null;
+                  for (const id of STAGE_IDS) {
+                    const pos = stagePosRef.current[id];
+                    if (Math.abs(cx - pos.x) <= 40 && Math.abs(cy - pos.y) <= 48) { hit = { kind: "stage", id }; break; }
+                  }
+                  if (!hit) {
+                    for (const d of DESTINATIONS) {
+                      const pos = destPosRef.current[d];
+                      if (Math.abs(cx - pos.x) <= 50 && Math.abs(cy - pos.y) <= 22) { hit = { kind: "dest", id: d }; break; }
+                    }
+                  }
+
+                  if (hit) {
+                    const obj = hit.kind === "stage" ? stagePosRef.current[hit.id] : destPosRef.current[hit.id];
+                    dragRef.current = { active: true, kind: hit.kind, id: hit.id, startX: cssX, startY: cssY, startObjX: obj.x, startObjY: obj.y, moved: false };
+                  } else {
+                    dragRef.current = { active: true, kind: "pan", id: null, startX: cssX, startY: cssY, startObjX: view.x, startObjY: view.y, moved: false };
+                  }
                 }}
-                onMouseMove={(e) => handleCanvasHover(e, canvasRef.current, setHoverInfo)}
-                onMouseLeave={() => setHoverInfo(null)}
-                className="cursor-pointer block mx-auto"
+                onMouseMove={(e) => {
+                  const canvas = canvasRef.current;
+                  if (!canvas) return;
+                  const rect = canvas.getBoundingClientRect();
+                  const scaleX = CANVAS_W / rect.width;
+                  const scaleY = CANVAS_H / rect.height;
+                  const cssX = e.clientX - rect.left;
+                  const cssY = e.clientY - rect.top;
+
+                  if (dragRef.current.active) {
+                    const dx = (cssX - dragRef.current.startX) * scaleX;
+                    const dy = (cssY - dragRef.current.startY) * scaleY;
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
+                    const d = dragRef.current;
+                    if (d.kind === "pan") {
+                      viewRef.current.x = d.startObjX + dx;
+                      viewRef.current.y = d.startObjY + dy;
+                    } else if (d.kind === "stage") {
+                      stagePosRef.current[d.id].x = d.startObjX + dx / viewRef.current.zoom;
+                      stagePosRef.current[d.id].y = d.startObjY + dy / viewRef.current.zoom;
+                    } else if (d.kind === "dest") {
+                      destPosRef.current[d.id].x = d.startObjX + dx / viewRef.current.zoom;
+                      destPosRef.current[d.id].y = d.startObjY + dy / viewRef.current.zoom;
+                    }
+                    return;
+                  }
+
+                  // Hover detection (only when not dragging)
+                  const view = viewRef.current;
+                  const cx = (cssX * scaleX - view.x) / view.zoom;
+                  const cy = (cssY * scaleY - view.y) / view.zoom;
+                  let found = null;
+                  for (const id of STAGE_IDS) {
+                    const pos = stagePosRef.current[id];
+                    if (Math.abs(cx - pos.x) <= 40 && Math.abs(cy - pos.y) <= 48) {
+                      found = { id, type: "stage", percentX: ((pos.x * view.zoom + view.x) / CANVAS_W) * 100, percentY: ((pos.y * view.zoom + view.y) / CANVAS_H) * 100 };
+                      break;
+                    }
+                  }
+                  if (!found) {
+                    for (const d of DESTINATIONS) {
+                      const pos = destPosRef.current[d];
+                      if (Math.abs(cx - pos.x) <= 50 && Math.abs(cy - pos.y) <= 22) {
+                        found = { id: d, type: "destination", percentX: ((pos.x * view.zoom + view.x) / CANVAS_W) * 100, percentY: ((pos.y * view.zoom + view.y) / CANVAS_H) * 100 };
+                        break;
+                      }
+                    }
+                  }
+                  setHoverInfo(found);
+                }}
+                onMouseUp={(e) => {
+                  if (dragRef.current.active && !dragRef.current.moved) {
+                    const canvas = canvasRef.current;
+                    if (canvas) {
+                      const rect = canvas.getBoundingClientRect();
+                      const scaleX = CANVAS_W / rect.width;
+                      const scaleY = CANVAS_H / rect.height;
+                      const cx = ((e.clientX - rect.left) * scaleX - viewRef.current.x) / viewRef.current.zoom;
+                      const cy = ((e.clientY - rect.top) * scaleY - viewRef.current.y) / viewRef.current.zoom;
+                      let hitId = null;
+                      for (const id of STAGE_IDS) {
+                        const pos = stagePosRef.current[id];
+                        if (Math.abs(cx - pos.x) <= 40 && Math.abs(cy - pos.y) <= 48) { hitId = id; break; }
+                      }
+                      if (!hitId) {
+                        for (const d of DESTINATIONS) {
+                          const pos = destPosRef.current[d];
+                          if (Math.abs(cx - pos.x) <= 50 && Math.abs(cy - pos.y) <= 22) { hitId = d; break; }
+                        }
+                      }
+                      setSelectedNode(hitId);
+                      if (hitId === "reception") setWasteInputOpen(true);
+                    }
+                  }
+                  dragRef.current.active = false;
+                }}
+                onMouseLeave={() => { dragRef.current.active = false; setHoverInfo(null); }}
+                className="block mx-auto cursor-grab active:cursor-grabbing"
                 style={{
                   width: "100%",
                   height: "auto",
@@ -405,6 +571,33 @@ export default function WasteChakraSimulation() {
 
               {/* Top Controls */}
               <div className="absolute top-3 right-3 z-40 flex items-center gap-2">
+                {/* Zoom Out */}
+                <button
+                  onClick={() => zoomCanvas(0.85)}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  title="Zoom Out"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+
+                {/* Zoom In */}
+                <button
+                  onClick={() => zoomCanvas(1.18)}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  title="Zoom In"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+
+                {/* Reset View/Positions */}
+                <button
+                  onClick={resetView}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  title="Reset View & Positions"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+
                 {/* Fullscreen Toggle */}
                 <button
                   onClick={toggleFullscreen}
@@ -469,7 +662,7 @@ export default function WasteChakraSimulation() {
                   <div className="w-72 md:w-84 p-3.5 rounded-xl border border-primary/40 bg-surface-bright shadow-2xl backdrop-blur-md text-on-surface ring-1 ring-primary/20">
                     <div className="flex items-center justify-between mb-1.5">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] mt-6 font-bold tracking-wider border ${infoMap[hoverInfo.id].tagColor
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border ${infoMap[hoverInfo.id].tagColor
                           }`}
                       >
                         {infoMap[hoverInfo.id].tag}
@@ -878,35 +1071,43 @@ function drawBackground(ctx) {
 }
 
 function drawConveyor(ctx, selectedId, hoverId) {
+  const sp = LIVE_POS.stagePos;
+  const dp = LIVE_POS.destPos;
+  const firstStage = sp[STAGE_IDS[0]];
+  const lastStage = sp[STAGE_IDS[STAGE_IDS.length - 1]];
+  const beltLeft = firstStage ? firstStage.x - 40 : 40;
+  const beltRight = lastStage ? lastStage.x + 40 : 1000;
+  const beltW = beltRight - beltLeft;
+
   // Main conveyor belt
   ctx.fillStyle = "#e2e8f0";
-  ctx.fillRect(40, CONVEYOR_Y - 20, 960, 40);
+  ctx.fillRect(beltLeft, CONVEYOR_Y - 20, beltW, 40);
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 2;
-  ctx.strokeRect(40, CONVEYOR_Y - 20, 960, 40);
+  ctx.strokeRect(beltLeft, CONVEYOR_Y - 20, beltW, 40);
 
   // Belt texture lines
   ctx.strokeStyle = "rgba(148,163,184,0.6)";
   ctx.lineWidth = 1;
-  for (let x = 50; x < 1000; x += 20) {
+  for (let x = beltLeft + 10; x < beltRight; x += 20) {
     ctx.beginPath();
     ctx.moveTo(x, CONVEYOR_Y - 18);
     ctx.lineTo(x, CONVEYOR_Y + 18);
     ctx.stroke();
   }
 
-  // Destination bins
+  // Destination bins + pipes
   DESTINATIONS.forEach((d) => {
-    const y = DEST_Y[d];
+    const pos = dp[d] || { x: 1050, y: DEST_Y[d] };
     const isHovered = hoverId === d;
     const isSelected = selectedId === d;
-    drawBin(ctx, 1010, y, DESTINATION_COLORS[d], DESTINATION_LABELS[d], isHovered, isSelected);
+    drawBin(ctx, pos.x, pos.y, DESTINATION_COLORS[d], DESTINATION_LABELS[d], isHovered, isSelected);
     // Pipe from routing to bin
     ctx.strokeStyle = isHovered || isSelected ? DESTINATION_COLORS[d] : DESTINATION_COLORS[d] + "80";
     ctx.lineWidth = isHovered || isSelected ? 4 : 3;
     ctx.beginPath();
-    ctx.moveTo(970, CONVEYOR_Y);
-    ctx.lineTo(1010, y);
+    ctx.moveTo(lastStage ? lastStage.x + 38 : 970, CONVEYOR_Y);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
   });
 }
@@ -945,9 +1146,11 @@ function drawBin(
 }
 
 function drawStages(ctx, selected, hover) {
+  const sp = LIVE_POS.stagePos;
   for (const id of STAGE_IDS) {
-    const x = STAGE_X[id];
-    const y = CONVEYOR_Y;
+    const pos = sp[id] || { x: STAGE_X[id], y: CONVEYOR_Y };
+    const x = pos.x;
+    const y = pos.y;
     const isSelected = selected === id;
     if (hover === id && !isSelected) {
       ctx.save();
@@ -965,13 +1168,16 @@ function drawStages(ctx, selected, hover) {
   // Flow arrows between stages
   ctx.fillStyle = "#94a3b8";
   for (let i = 0; i < STAGE_IDS.length - 1; i++) {
-    const x1 = STAGE_X[STAGE_IDS[i]] + 38;
-    const x2 = STAGE_X[STAGE_IDS[i + 1]] - 38;
+    const pos1 = sp[STAGE_IDS[i]] || { x: STAGE_X[STAGE_IDS[i]] };
+    const pos2 = sp[STAGE_IDS[i + 1]] || { x: STAGE_X[STAGE_IDS[i + 1]] };
+    const x1 = pos1.x + 38;
+    const x2 = pos2.x - 38;
     const mid = (x1 + x2) / 2;
+    const y1 = pos1.y || CONVEYOR_Y;
     ctx.beginPath();
-    ctx.moveTo(mid - 4, CONVEYOR_Y - 25);
-    ctx.lineTo(mid + 4, CONVEYOR_Y - 25);
-    ctx.lineTo(mid, CONVEYOR_Y - 31);
+    ctx.moveTo(mid - 4, y1 - 25);
+    ctx.lineTo(mid + 4, y1 - 25);
+    ctx.lineTo(mid, y1 - 31);
     ctx.fill();
   }
 }
@@ -1051,8 +1257,9 @@ function drawStageStatus(ctx, ps) {
     const label = STAGE_ACTION_TEXT[id];
     if (!label) continue;
 
-    const x = STAGE_X[id];
-    const y = CONVEYOR_Y;
+    const pos = LIVE_POS.stagePos[id] || { x: STAGE_X[id], y: CONVEYOR_Y };
+    const x = pos.x;
+    const y = pos.y;
 
     ctx.save();
     ctx.font = "bold 8.5px 'Space Grotesk', sans-serif";
@@ -1447,7 +1654,8 @@ function drawDestinations(ctx) {
   ctx.fillStyle = "#64748b";
   ctx.font = "bold 10px sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("END PATHWAYS", 1010, 50);
+  const anyDest = LIVE_POS.destPos[DESTINATIONS[0]] || { x: 1010 };
+  ctx.fillText("END PATHWAYS", anyDest.x, 50);
 }
 
 function drawParticles(ctx, ps) {
@@ -1592,8 +1800,9 @@ function updateParticles(ps, p, dt) {
     let np = { ...part };
 
     if (np.routed && !np.finalRouting && np.destination) {
-      const stageX = STAGE_X[STAGE_IDS[np.stageIndex]] ?? 970;
-      const chuteY = CONVEYOR_Y + 75;
+      const stagePos = LIVE_POS.stagePos[STAGE_IDS[np.stageIndex]] || { x: 970 };
+      const stageX = stagePos.x;
+      const chuteY = (stagePos.y || CONVEYOR_Y) + 75;
       const dx = stageX - np.x;
       const dy = chuteY - np.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -1608,8 +1817,9 @@ function updateParticles(ps, p, dt) {
     }
 
     if (np.routed && np.finalRouting && np.destination) {
-      const targetX = 1010;
-      const targetY = DEST_Y[np.destination];
+      const destPos = LIVE_POS.destPos[np.destination] || { x: 1010, y: DEST_Y[np.destination] };
+      const targetX = destPos.x;
+      const targetY = destPos.y;
       const dx = targetX - np.x;
       const dy = targetY - np.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -1624,7 +1834,7 @@ function updateParticles(ps, p, dt) {
     }
 
     const stageId = STAGE_IDS[np.stageIndex];
-    const stageX = STAGE_X[stageId];
+    const stageX = (LIVE_POS.stagePos[stageId] || { x: STAGE_X[stageId] }).x;
     np.x += np.speed * dt;
 
     if (np.x >= stageX) {
@@ -1711,22 +1921,22 @@ function resolveCanvasHit(e, canvas) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = CANVAS_W / rect.width;
   const scaleY = CANVAS_H / rect.height;
-  const cx = (e.clientX - rect.left) * scaleX;
-  const cy = (e.clientY - rect.top) * scaleY;
+  const v = LIVE_POS.view;
+  const cx = ((e.clientX - rect.left) * scaleX - v.x) / v.zoom;
+  const cy = ((e.clientY - rect.top) * scaleY - v.y) / v.zoom;
 
   // Check Stages
   for (const id of STAGE_IDS) {
-    const x = STAGE_X[id];
-    const y = CONVEYOR_Y;
-    if (Math.abs(cx - x) <= 40 && Math.abs(cy - y) <= 48) {
+    const pos = LIVE_POS.stagePos[id] || { x: STAGE_X[id], y: CONVEYOR_Y };
+    if (Math.abs(cx - pos.x) <= 40 && Math.abs(cy - pos.y) <= 48) {
       return id;
     }
   }
 
   // Check Destinations
   for (const d of DESTINATIONS) {
-    const binY = DEST_Y[d];
-    if (cx >= 1000 && cx <= 1095 && Math.abs(cy - binY) <= 18) {
+    const pos = LIVE_POS.destPos[d] || { x: 1010, y: DEST_Y[d] };
+    if (Math.abs(cx - pos.x) <= 50 && Math.abs(cy - pos.y) <= 22) {
       return d;
     }
   }
@@ -1741,21 +1951,21 @@ function handleCanvasHover(e, canvas, setHover) {
   const relY = e.clientY - rect.top;
   const scaleX = CANVAS_W / rect.width;
   const scaleY = CANVAS_H / rect.height;
-  const cx = relX * scaleX;
-  const cy = relY * scaleY;
+  const v = LIVE_POS.view;
+  const cx = (relX * scaleX - v.x) / v.zoom;
+  const cy = (relY * scaleY - v.y) / v.zoom;
 
   // Check Stages
   for (const id of STAGE_IDS) {
-    const x = STAGE_X[id];
-    const y = CONVEYOR_Y;
-    if (Math.abs(cx - x) <= 40 && Math.abs(cy - y) <= 48) {
+    const pos = LIVE_POS.stagePos[id] || { x: STAGE_X[id], y: CONVEYOR_Y };
+    if (Math.abs(cx - pos.x) <= 40 && Math.abs(cy - pos.y) <= 48) {
       setHover({
         id,
         type: "stage",
-        canvasX: x,
-        canvasY: y,
-        percentX: (x / CANVAS_W) * 100,
-        percentY: (y / CANVAS_H) * 100,
+        canvasX: pos.x,
+        canvasY: pos.y,
+        percentX: ((pos.x * v.zoom + v.x) / CANVAS_W) * 100,
+        percentY: ((pos.y * v.zoom + v.y) / CANVAS_H) * 100,
       });
       return;
     }
@@ -1763,15 +1973,15 @@ function handleCanvasHover(e, canvas, setHover) {
 
   // Check Destinations
   for (const d of DESTINATIONS) {
-    const binY = DEST_Y[d];
-    if (cx >= 1000 && cx <= 1095 && Math.abs(cy - binY) <= 18) {
+    const pos = LIVE_POS.destPos[d] || { x: 1010, y: DEST_Y[d] };
+    if (Math.abs(cx - pos.x) <= 50 && Math.abs(cy - pos.y) <= 22) {
       setHover({
         id: d,
         type: "destination",
-        canvasX: 1050,
-        canvasY: binY,
-        percentX: (1050 / CANVAS_W) * 100,
-        percentY: (binY / CANVAS_H) * 100,
+        canvasX: pos.x,
+        canvasY: pos.y,
+        percentX: ((pos.x * v.zoom + v.x) / CANVAS_W) * 100,
+        percentY: ((pos.y * v.zoom + v.y) / CANVAS_H) * 100,
       });
       return;
     }
