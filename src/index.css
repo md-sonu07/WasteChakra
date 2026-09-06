@@ -190,3 +190,8 @@
   50% { opacity: 1; }
   100% { opacity: 0.8; }
 }
+
+@keyframes flowDown {
+  0% { top: -20%; }
+  100% { top: 120%; }
+}

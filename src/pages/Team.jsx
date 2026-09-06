@@ -40,7 +40,7 @@ export default function Team() {
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-border-industrial bg-surface-bright">
             <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">ABOUT COMESTRO</span>
           </div>
-          <h1 className="font-display-lg text-headline-lg-mobile md:text-display-lg text-on-surface mb-8 uppercase">
+          <h1 className="font-display-lg text-headline-lg-mobile md:text-6xl text-on-surface mb-8 uppercase">
             ENGINEERING PRECISION. <br/>
             <span className="text-text-muted">LABORATORY DISCIPLINE.</span>
           </h1>

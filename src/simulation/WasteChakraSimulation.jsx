@@ -8,7 +8,6 @@ import {
   X,
   Cpu,
   Zap,
-  Recycle,
   Languages,
   ChevronDown,
   Maximize,
@@ -366,15 +365,15 @@ export default function WasteChakraSimulation() {
                     left: `${hoverInfo.percentX}%`,
                     top: `${hoverInfo.percentY}%`,
                     transform:
-                      hoverInfo.percentX > 75
+                      hoverInfo.type === "destination"
                         ? hoverInfo.percentY > 70
                           ? "translate(-105%, -100%)"
                           : "translate(-105%, -45%)"
                         : hoverInfo.percentX < 20
-                        ? "translate(5%, -110%)"
-                        : hoverInfo.percentY > 70
-                        ? "translate(-50%, -70%)"
-                        : "translate(-50%, -115%)",
+                        ? "translate(0%, calc(-100% - 3.5rem))"
+                        : hoverInfo.percentX > 85
+                        ? "translate(-100%, calc(-100% - 3.5rem))"
+                        : "translate(-50%, calc(-100% - 3.5rem))",
                   }}
                 >
                   <div className="w-72 md:w-84 p-3.5 rounded-xl border border-primary/40 bg-surface-bright shadow-2xl backdrop-blur-md text-on-surface ring-1 ring-primary/20">
@@ -1089,15 +1088,15 @@ function drawCollectionChute(ctx, cx, cy) {
   ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.fillStyle = "#334155";
-  roundRect(ctx, cx - 16, cy + 14, 32, 16, 2);
+  roundRect(ctx, cx - 18, cy + 14, 36, 15, 2);
   ctx.fill();
   ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 1.5;
   ctx.stroke();
   ctx.fillStyle = "#e2e8f0";
-  ctx.font = "6px sans-serif";
+  ctx.font = "5px sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("RECOVERED", cx, cy + 25);
+  ctx.fillText("RECOVERED", cx, cy + 24, 32);
 }
 
 function drawDestinations(ctx) {

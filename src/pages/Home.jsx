@@ -228,13 +228,6 @@ export default function Home() {
                <div className="absolute top-0 left-0 w-full h-1/4 bg-linear-to-b from-transparent via-primary to-transparent animate-[flowDown_4s_linear_infinite]"></div>
             </div>
 
-            <style>{`
-              @keyframes flowDown {
-                0% { top: -20%; }
-                100% { top: 120%; }
-              }
-            `}</style>
-            
             <div className="flex flex-col gap-12 md:gap-0">
               {[
                 { id: "01", title: "INPUT & RECEPTION", icon: "move_to_inbox", desc: "Waste In via Conveyor" },

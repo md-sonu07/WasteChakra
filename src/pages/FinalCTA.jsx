@@ -29,14 +29,14 @@ export default function FinalCTA() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link to="/contact" className="group relative inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps px-8 py-5 text-sm transition-all hover:bg-primary hover:text-white border border-primary overflow-hidden">
+              <Link to="/impact" className="group relative inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps px-8 py-5 text-sm transition-all hover:bg-primary hover:text-white border border-primary overflow-hidden">
                 <span className="relative z-10 flex items-center gap-2">
                   REQUEST TECHNICAL SPECIFICATIONS
                   <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </span>
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] bg-[position:-100%_0,0_0] bg-no-repeat group-hover:animate-[shimmer_1.5s_infinite]"></div>
               </Link>
-              <Link to="/demo" className="inline-flex items-center justify-center font-label-caps text-on-surface bg-surface-container hover:bg-surface-container-high border border-border-industrial px-8 py-5 text-sm transition-colors">
+              <Link to="/simulation" className="inline-flex items-center justify-center font-label-caps text-on-surface bg-surface-container hover:bg-surface-container-high border border-border-industrial px-8 py-5 text-sm transition-colors">
                 VIEW VIRTUAL DEMO
               </Link>
             </div>

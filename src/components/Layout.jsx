@@ -32,12 +32,9 @@ export default function Layout() {
             <Link to="/team" className={`font-body-md uppercase tracking-wider transition-colors duration-300 ${isActive('/team') ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'}`}>
               TEAM
             </Link>
-            <Link to="/system" className={`font-body-md uppercase tracking-wider transition-colors duration-300 ${isActive('/system') ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'}`}>
-              Explore System
-            </Link>
           </div>
           <Link to="/simulation" className="hidden md:inline-flex items-center justify-center bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors technical-shadow uppercase">
-            Explore 3D System
+            Explore Simulation
           </Link>
           <button 
             className="md:hidden text-primary p-2"
@@ -68,7 +65,7 @@ export default function Layout() {
               TEAM
             </Link>
             <Link to="/simulation" onClick={closeMenu} className={`px-6 py-4 border-b border-surface-container font-body-md uppercase tracking-wider ${isActive('/simulation') ? 'text-primary bg-primary/5' : 'text-on-surface hover:bg-surface-variant'}`}>
-              3D SIMULATION
+              SIMULATION
             </Link>
             <div className="p-6">
               <Link to="/system" onClick={closeMenu} className="flex items-center justify-center w-full bg-primary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded hover:bg-primary hover:text-on-primary transition-colors uppercase">
@@ -120,20 +117,12 @@ export default function Layout() {
                 <h4 className="text-white font-label-caps mb-2 opacity-50">Company</h4>
                 <Link to="/impact" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Global Impact</Link>
                 <Link to="/team" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Our Team</Link>
-                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Careers</Link>
               </div>
               <div className="flex flex-col gap-6">
-                <h4 className="text-white font-label-caps mb-2 opacity-50">Legal & Social</h4>
-                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Privacy Policy</Link>
-                <Link to="#" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Terms of Service</Link>
-                <div className="flex gap-4 mt-2">
-                  <a href="#" className="flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-sm">share</span>
-                  </a>
-                  <a href="#" className="flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
-                    <span className="material-symbols-outlined text-sm">mail</span>
-                  </a>
-                </div>
+                <h4 className="text-white font-label-caps mb-2 opacity-50">Simulation</h4>
+                <Link to="/simulation" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Launch Simulator</Link>
+                <Link to="/problem" className="hover:text-primary hover:translate-x-2 transition-all duration-300">The Problem</Link>
+                <Link to="/final" className="hover:text-primary hover:translate-x-2 transition-all duration-300">Deployment CTA</Link>
               </div>
             </div>
             
@@ -145,7 +134,7 @@ export default function Layout() {
               SYS.STATUS: ONLINE
             </div>
             <div>
-              © 2024 WasteChakra. All rights reserved.
+              © {new Date().getFullYear()} WasteChakra. All rights reserved.
             </div>
           </div>
         </div>
