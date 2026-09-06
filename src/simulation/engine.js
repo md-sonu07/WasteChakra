@@ -1,6 +1,18 @@
 import { STAGE_IDS, STAGE_LABELS } from "./types";
 
 export function computeComposition(p) {
+  if (p.materialMass) {
+    const mm = p.materialMass;
+    return {
+      organic: mm.organic || 0,
+      plastic: mm.plastic || 0,
+      paper: mm.paper || 0,
+      ferrous: mm.ferrous || 0,
+      aluminium: mm.aluminium || 0,
+      glass: mm.glass || 0,
+      residual: mm.residual || 0,
+    };
+  }
   const total = p.totalWaste;
   const organic = (p.organicFraction / 100) * total;
   const plastic = (p.plasticFraction / 100) * total;
@@ -114,7 +126,7 @@ export function generateAILines(p) {
     residual: "Residual Waste",
   };
   return mats
-    .filter((m) => comp[m] > 5)
+    .filter((m) => comp[m] > p.totalWaste * 0.01)
     .map((m) => {
       const purity = computePurity(m, p);
       const cont = Math.round(100 - purity);

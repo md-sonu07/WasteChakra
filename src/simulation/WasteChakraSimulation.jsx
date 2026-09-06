@@ -12,6 +12,8 @@ import {
   ChevronDown,
   Maximize,
   Minimize,
+  Minus,
+  Plus,
 } from "lucide-react";
 import {
   MATERIAL_COLORS,
@@ -33,6 +35,7 @@ import {
 } from "./engine";
 import { NODE_INFO_MAP, NODE_INFO_MAP_EN } from "./nodeInfo";
 import { UI } from "./i18n";
+import { WASTE_ITEMS } from "./wasteCatalog";
 
 const CANVAS_W = 1100;
 const CANVAS_H = 620;
@@ -71,6 +74,32 @@ const DEST_Y = {
   "rdf-fuel": 510,
   construction: 550,
   "residual-disposal": 590,
+};
+
+// Live caption shown on a stage while garbage is being processed there
+const STAGE_ACTION_TEXT = {
+  reception: "UNLOADING WASTE",
+  "ai-scanner": "SCANNING WASTE NOW",
+  shredder: "SHREDDING PIECES",
+  trommel: "FILTERING BY SIZE",
+  magnetic: "PULLING FERROUS METAL",
+  "non-ferrous": "SEPARATING ALUMINIUM",
+  "optical-sorter": "SORTING PLASTIC & PAPER",
+  quality: "CHECKING PURITY",
+  routing: "ROUTING TO PATHWAY",
+};
+
+// Detailed 1-2 line description shown in the top banner
+const STAGE_ACTION_DESC = {
+  reception: "Dumper trucks empty the unsorted city waste into the reception hopper — the entry point of the whole line.",
+  "ai-scanner": "AI cameras scan every item in real time to identify the material type, purity and contamination level.",
+  shredder: "Heavy waste and sealed bags are cut into uniform small pieces so the separators work more easily.",
+  trommel: "A rotating sieve filters out fine organic particles by size, sending larger dry waste ahead.",
+  magnetic: "A powerful magnet pulls iron and steel (ferrous) metals straight out of the waste stream for recovery.",
+  "non-ferrous": "An eddy-current field repels aluminium cans and other non-ferrous metals into a separate bin.",
+  "optical-sorter": "NIR sensors fire air jets to sort PET and HDPE plastic and paper to their correct baskets.",
+  quality: "Sensors verify moisture, purity and contamination in real time to maximize the market value.",
+  routing: "The WC engine picks the most profitable end-pathway for every material in this load.",
 };
 
 let particleId = 0;
@@ -112,6 +141,33 @@ function buildParticles(p, maxCount = 120) {
   return particles;
 }
 
+function deriveWasteParams(counts) {
+  const sel = WASTE_ITEMS.filter((it) => (counts[it.id] || 0) > 0);
+  const massByMat = {};
+  let tot = 0;
+  let moist = 0;
+  let cont = 0;
+  for (const it of sel) {
+    const w = it.mass * counts[it.id];
+    massByMat[it.material] = (massByMat[it.material] || 0) + w;
+    tot += w;
+    moist += w * it.moisture;
+    cont += w * it.contam;
+  }
+  if (tot <= 0) return null;
+  const ferrous = massByMat.ferrous || 0;
+  const aluminium = massByMat.aluminium || 0;
+  return {
+    totalWaste: Math.max(1, Math.round(tot)),
+    moisture: Math.round(moist / tot),
+    contamination: Math.round(cont / tot),
+    organicFraction: Math.round(((massByMat.organic || 0) / tot) * 100),
+    plasticFraction: Math.round(((massByMat.plastic || 0) / tot) * 100),
+    metalFraction: Math.round(((ferrous + aluminium) / tot) * 100),
+    materialMass: massByMat,
+  };
+}
+
 export default function WasteChakraSimulation() {
   const canvasRef = useRef(null);
   const [params, setParams] = useState(SCENARIOS["Normal Waste"]);
@@ -128,6 +184,8 @@ export default function WasteChakraSimulation() {
   const [language, setLanguage] = useState("en");
   const [langOpen, setLangOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [wasteInputOpen, setWasteInputOpen] = useState(false);
+  const [wasteCounts, setWasteCounts] = useState({});
   const containerRef = useRef(null);
   const langRef = useRef(null);
   const animRef = useRef(0);
@@ -229,6 +287,7 @@ export default function WasteChakraSimulation() {
       drawConveyor(ctx, selectedNode, hoverId);
       drawStages(ctx, selectedNode, hoverId);
       drawDestinations(ctx);
+      drawStageStatus(ctx, ps);
 
       if (isRunning && ps.length > 0) {
         ps = updateParticles(ps, p, sp * dt);
@@ -251,6 +310,36 @@ export default function WasteChakraSimulation() {
     setParams(SCENARIOS[name]);
     reset();
   };
+
+  const bumpWaste = (id, delta) => {
+    setWasteCounts((prev) => {
+      const next = Math.max(0, Math.min(99, (prev[id] || 0) + delta));
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const toggleWaste = (id) => {
+    setWasteCounts((prev) => {
+      const next = (prev[id] || 0) > 0 ? 0 : 1;
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const injectWaste = () => {
+    const snap = deriveWasteParams(wasteCounts);
+    if (!snap) return;
+    setParams(snap);
+    setParticles(buildParticles(snap));
+    setAILines(generateAILines(snap));
+    setStageStats(computeStageStats(snap));
+    setFinalResult(computeFinalResult(snap));
+    setRunning(true);
+    setShowAI(true);
+    setWasteInputOpen(false);
+  };
+
+  const warpTotal = WASTE_ITEMS.reduce((s, it) => s + it.mass * (wasteCounts[it.id] || 0), 0);
+  const warpCount = WASTE_ITEMS.reduce((s, it) => s + (wasteCounts[it.id] || 0), 0);
 
   const activeNodeId = hoverInfo?.id || selectedNode;
   const infoMap = language === "en" ? NODE_INFO_MAP_EN : NODE_INFO_MAP;
@@ -293,13 +382,16 @@ export default function WasteChakraSimulation() {
           <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4 blueprint-shadow">
             <div
               ref={containerRef}
-              className={`relative w-full overflow-hidden rounded-xl bg-surface ${
-                isFullscreen ? "flex items-center justify-center min-h-screen" : ""
-              }`}
+              className={`relative w-full overflow-hidden rounded-xl bg-surface ${isFullscreen ? "flex items-center justify-center min-h-screen" : ""
+                }`}
             >
               <canvas
                 ref={canvasRef}
-                onClick={(e) => handleCanvasClick(e, canvasRef.current, setSelectedNode)}
+                onClick={(e) => {
+                  const id = resolveCanvasHit(e, canvasRef.current);
+                  setSelectedNode(id);
+                  if (id === "reception") setWasteInputOpen(true);
+                }}
                 onMouseMove={(e) => handleCanvasHover(e, canvasRef.current, setHoverInfo)}
                 onMouseLeave={() => setHoverInfo(null)}
                 className="cursor-pointer block mx-auto"
@@ -338,17 +430,15 @@ export default function WasteChakraSimulation() {
                     <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-border-industrial bg-surface-bright shadow-xl overflow-hidden">
                       <button
                         onClick={() => selectLang("en")}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${
-                          language === "en" ? "text-primary bg-primary/5" : "text-on-surface"
-                        }`}
+                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${language === "en" ? "text-primary bg-primary/5" : "text-on-surface"
+                          }`}
                       >
                         English
                       </button>
                       <button
                         onClick={() => selectLang("hi")}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${
-                          language === "hi" ? "text-primary bg-primary/5" : "text-on-surface"
-                        }`}
+                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${language === "hi" ? "text-primary bg-primary/5" : "text-on-surface"
+                          }`}
                       >
                         हिन्दी
                       </button>
@@ -370,18 +460,17 @@ export default function WasteChakraSimulation() {
                           ? "translate(-105%, -100%)"
                           : "translate(-105%, -45%)"
                         : hoverInfo.percentX < 20
-                        ? "translate(0%, calc(-100% - 3.5rem))"
-                        : hoverInfo.percentX > 85
-                        ? "translate(-100%, calc(-100% - 3.5rem))"
-                        : "translate(-50%, calc(-100% - 3.5rem))",
+                          ? "translate(0%, calc(-100% - 3.5rem))"
+                          : hoverInfo.percentX > 85
+                            ? "translate(-100%, calc(-100% - 3.5rem))"
+                            : "translate(-50%, calc(-100% - 3.5rem))",
                   }}
                 >
                   <div className="w-72 md:w-84 p-3.5 rounded-xl border border-primary/40 bg-surface-bright shadow-2xl backdrop-blur-md text-on-surface ring-1 ring-primary/20">
                     <div className="flex items-center justify-between mb-1.5">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border ${
-                          infoMap[hoverInfo.id].tagColor
-                        }`}
+                        className={`px-2 py-0.5 rounded text-[10px] mt-6 font-bold tracking-wider border ${infoMap[hoverInfo.id].tagColor
+                          }`}
                       >
                         {infoMap[hoverInfo.id].tag}
                       </span>
@@ -550,8 +639,11 @@ export default function WasteChakraSimulation() {
                 {STAGE_IDS.map((id) => (
                   <button
                     key={id}
-                    onClick={() => setSelectedNode(id)}
-                    className="btn-industrial btn-industrial--neutral btn-industrial--small justify-start text-left truncate"
+                    onClick={() => {
+                      setSelectedNode(id);
+                      if (id === "reception") setWasteInputOpen(true);
+                    }}
+                    className="btn-industrial rounded-none btn-industrial--neutral btn-industrial--small justify-start text-left truncate"
                   >
                     • {STAGE_LABELS[id]}
                   </button>
@@ -617,6 +709,118 @@ export default function WasteChakraSimulation() {
           </div>
         </div>
       </div>
+
+      {/* Waste Input Selector Modal */}
+      {wasteInputOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+          onClick={() => setWasteInputOpen(false)}
+        >
+          <div
+            className="w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-surface-bright shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between px-5 py-4 border-b border-border-industrial">
+              <div>
+                <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+                  {t.wasteInputTitle}
+                </h3>
+                <p className="text-xs text-text-muted mt-1">{t.wasteInputSub}</p>
+              </div>
+              <button
+                onClick={() => setWasteInputOpen(false)}
+                className="p-2 rounded-lg border border-border-industrial text-on-surface hover:border-primary/50 hover:text-primary transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {WASTE_ITEMS.map((it) => {
+                const n = wasteCounts[it.id] || 0;
+                const size =
+                  it.mass < 1 ? `${Math.round(it.mass * 1000)} g` : `${it.mass} kg`;
+                return (
+                  <div
+                    key={it.id}
+                    onClick={() => toggleWaste(it.id)}
+                    className={`flex items-center gap-3 rounded-xl border p-3 transition-all cursor-pointer select-none ${n > 0
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                        : "border-border-industrial bg-surface hover:border-primary/40"
+                      }`}
+                  >
+                    <span
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ background: MATERIAL_COLORS[it.material] }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-on-surface truncate">
+                        {it.name[language]}
+                      </p>
+                      <p className="text-[10px] text-text-muted font-mono">
+                        {t.material[it.material]} · {size} · {t.moisture} {it.moisture}%
+                      </p>
+                    </div>
+                    <div
+                      className="flex items-center gap-1.5 shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => bumpWaste(it.id, -1)}
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span
+                        className={`w-7 text-center text-sm font-mono font-bold ${n > 0 ? "text-primary" : "text-text-muted"
+                          }`}
+                      >
+                        {n}
+                      </span>
+                      <button
+                        onClick={() => bumpWaste(it.id, 1)}
+                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-t border-border-industrial">
+              <div className="text-xs">
+                <span className="text-text-muted">{t.totalLoad}: </span>
+                <span className="font-mono font-bold text-primary">
+                  {warpTotal.toFixed(2)} kg
+                </span>
+                <span className="text-text-muted">
+                  {" "}· {warpCount} {t.itemsLabel}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setWasteCounts({})}
+                  className="btn-industrial btn-industrial--neutral btn-industrial--small"
+                >
+                  {t.clearWaste}
+                </button>
+                <button
+                  onClick={injectWaste}
+                  disabled={warpTotal <= 0}
+                  className="btn-industrial btn-industrial--primary btn-industrial--small"
+                >
+                  <Zap className="w-3.5 h-3.5" /> {t.inject}
+                </button>
+              </div>
+            </div>
+            {warpTotal <= 0 && (
+              <p className="px-5 pb-3 -mt-1 text-[11px] text-amber-600">{t.emptyWaste}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -743,6 +947,120 @@ function drawStages(ctx, selected, hover) {
     ctx.lineTo(mid + 4, CONVEYOR_Y - 25);
     ctx.lineTo(mid, CONVEYOR_Y - 31);
     ctx.fill();
+  }
+}
+
+// Live action caption drawn on a stage while garbage is in it
+function drawStageStatus(ctx, ps) {
+  const counts = {};
+  for (const part of ps) {
+    if (part.removed) continue;
+    const id = STAGE_IDS[part.stageIndex];
+    if (id) counts[id] = (counts[id] || 0) + 1;
+  }
+
+  const now = performance.now() / 1000;
+
+  // Find the "current" active stage — the one with the most particles
+  let activeId = null;
+  let activeCount = 0;
+  for (const id of STAGE_IDS) {
+    const n = counts[id] || 0;
+    if (n > activeCount) {
+      activeCount = n;
+      activeId = id;
+    }
+  }
+
+  // Top-center banner with live detail
+  if (activeId && STAGE_ACTION_DESC[activeId]) {
+    const action = STAGE_ACTION_TEXT[activeId];
+    const desc = STAGE_ACTION_DESC[activeId];
+
+    ctx.save();
+    ctx.font = "bold 12px 'Space Grotesk', sans-serif";
+    const actionW = ctx.measureText(action).width;
+    ctx.font = "10px 'Space Grotesk', sans-serif";
+    const descW = ctx.measureText(desc).width;
+    const padX = 16;
+    const w = Math.min(CANVAS_W - 24, Math.max(actionW, descW) + padX * 2 + 26);
+    const h = 54;
+    const bx = (CANVAS_W - w) / 2;
+    const by = 64;
+
+    // Banner background
+    ctx.globalAlpha = 0.95;
+    const grad = ctx.createLinearGradient(bx, by, bx + w, by + h);
+    grad.addColorStop(0, "#ffffff");
+    grad.addColorStop(1, "#f0fdf4");
+    ctx.fillStyle = grad;
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 1.4;
+    roundRect(ctx, bx, by, w, h, 12);
+    ctx.fill();
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Live dot
+    ctx.fillStyle = "#16a34a";
+    ctx.beginPath();
+    ctx.arc(bx + 14, by + 22, 4 + Math.sin(now * 6) * 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.font = "bold 12px 'Space Grotesk', sans-serif";
+    ctx.fillStyle = "#085c2f";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText("LIVE · " + action, bx + 26, by + 22);
+
+    ctx.font = "10px 'Space Grotesk', sans-serif";
+    ctx.fillStyle = "#475569";
+    ctx.fillText(desc, bx + padX, by + 39);
+
+    ctx.restore();
+  }
+
+  for (const id of STAGE_IDS) {
+    const n = counts[id] || 0;
+    if (n <= 0) continue;
+    const label = STAGE_ACTION_TEXT[id];
+    if (!label) continue;
+
+    const x = STAGE_X[id];
+    const y = CONVEYOR_Y;
+
+    ctx.save();
+    ctx.font = "bold 8.5px 'Space Grotesk', sans-serif";
+    const textW = ctx.measureText(label).width;
+    const padX = 10;
+    const w = textW + padX * 2;
+    const h = 16;
+    const bx = Math.max(6, Math.min(CANVAS_W - w - 6, x - w / 2));
+    const by = y - 64;
+
+    // Capsule background
+    ctx.globalAlpha = 0.92;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 1.2;
+    roundRect(ctx, bx, by, w, h, h / 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Animated pulse dot
+    const dotR = 2.5 + Math.sin(now * 6 + id.length) * 0.8;
+    ctx.fillStyle = "#16a34a";
+    ctx.beginPath();
+    ctx.arc(bx + 9, by + h / 2, dotR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Text
+    ctx.fillStyle = "#085c2f";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, bx + padX + 3, by + h / 2 + 0.5);
+
+    ctx.restore();
   }
 }
 
@@ -1362,8 +1680,8 @@ function processAtStage(part, stageId, p) {
   return { particle: np, splitOff: split };
 }
 
-function handleCanvasClick(e, canvas, setSelected) {
-  if (!canvas) return;
+function resolveCanvasHit(e, canvas) {
+  if (!canvas) return null;
   const rect = canvas.getBoundingClientRect();
   const scaleX = CANVAS_W / rect.width;
   const scaleY = CANVAS_H / rect.height;
@@ -1375,8 +1693,7 @@ function handleCanvasClick(e, canvas, setSelected) {
     const x = STAGE_X[id];
     const y = CONVEYOR_Y;
     if (Math.abs(cx - x) <= 40 && Math.abs(cy - y) <= 48) {
-      setSelected(id);
-      return;
+      return id;
     }
   }
 
@@ -1384,12 +1701,11 @@ function handleCanvasClick(e, canvas, setSelected) {
   for (const d of DESTINATIONS) {
     const binY = DEST_Y[d];
     if (cx >= 1000 && cx <= 1095 && Math.abs(cy - binY) <= 18) {
-      setSelected(d);
-      return;
+      return d;
     }
   }
 
-  setSelected(null);
+  return null;
 }
 
 function handleCanvasHover(e, canvas, setHover) {
