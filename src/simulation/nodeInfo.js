@@ -98,7 +98,7 @@ export const NODE_INFO_MAP = {
   },
   routing: {
     id: "routing",
-    name: "WasteChakra Intelligent Routing",
+    name: "WC Intelligent Routing",
     category: "Stage",
     tag: "STAGE 9",
     tagColor: "bg-purple-100 text-purple-700 border-purple-300",
@@ -215,3 +215,117 @@ export const NODE_INFO_MAP = {
     targetMaterials: ["Inert Fine Dust", "Non-combustible Residues"],
   },
 };
+
+// English description overrides (shortDesc / detailedDesc only — all other
+// fields like techSpecs, inputOutput, targetMaterials are shared).
+const EN_DESC = {
+  reception: {
+    shortDesc:
+      "The city's unsorted wet and dry waste is emptied here into the reception hopper — the entry point of the entire process.",
+    detailedDesc:
+      "Primary solid waste management step where dumper trucks feed the hopper with unsorted waste. From here, waste moves at a steady rate onto the processing line.",
+  },
+  "ai-scanner": {
+    shortDesc:
+      "High-speed optics cameras and AI computer-vision models scan the waste in real time to identify material type and contamination.",
+    detailedDesc:
+      "Multi-spectral vision sensors and an AI neural network scan the 3D shape, colour and density of every object passing the belt to verify material purity.",
+  },
+  shredder: {
+    shortDesc:
+      "Heavy waste, plastic bags and large objects are cut into uniform small pieces (pre-sizing) so downstream sorting becomes easier.",
+    detailedDesc:
+      "Counter-rotating blades break large items and rip sealed plastic bags open, letting the magnetic and optical separators that follow work at maximum efficiency.",
+  },
+  trommel: {
+    shortDesc:
+      "A rotating cylindrical sieve that filters out fine organic particles based on size.",
+    detailedDesc:
+      "As the drum rotates, organic waste and soil fall through the mesh into the compost pit below, while larger dry waste continues down the belt.",
+  },
+  magnetic: {
+    shortDesc:
+      "Powerful overband magnets pull iron, steel and other ferrous metals out of the waste stream for recycling.",
+    detailedDesc:
+      "A high-intensity electro-magnet above the belt instantly pulls cans, nails and scrap towards it and drops them into a dedicated recycling bin.",
+  },
+  "non-ferrous": {
+    shortDesc:
+      "Uses an eddy-current field to repel and separate aluminium cans, copper and brass.",
+    detailedDesc:
+      "A fast-spinning magnet induces eddy currents in non-ferrous metals, so the repelling force flips aluminium cans into the air and into a separate bin.",
+  },
+  "optical-sorter": {
+    shortDesc:
+      "NIR laser sensors and high-pressure air jets precisely sort PET, HDPE plastics and paper.",
+    detailedDesc:
+      "The optical sensor recognises the resin type (PET/HDPE/PP) and fires targeted air jets that blow the plastic into a separate basket.",
+  },
+  quality: {
+    shortDesc:
+      "A sensor network monitors moisture, purity and contamination levels in real time for the best market value.",
+    detailedDesc:
+      "Before final sorting, the quality-control system digitally certifies the moisture, toxicity and purity percentage of every material.",
+  },
+  routing: {
+    shortDesc:
+      "This AI decision engine routes waste to the most profitable end-pathway automatically based on purity and moisture.",
+    detailedDesc:
+      "WasteChakra's central AI engine decides the best recycling route for every material based on the current capacity and market rates of all 8 destinations.",
+  },
+  "plastic-recycling": {
+    shortDesc:
+      "Sorted clean plastic (PET, HDPE) is recycled into new plastic products and polymer pellets.",
+    detailedDesc:
+      "High-quality plastic is washed, shredded and melted into recycled plastic pellets used in new bottles and containers.",
+  },
+  "paper-recovery": {
+    shortDesc:
+      "Recovered paper and cardboard reach pulp mills to make new recycled paper and packaging boxes.",
+    detailedDesc:
+      "Paper and cardboard fibre is pressed into bales and turned into pulp at paper mills to make new packaging boxes.",
+  },
+  "metal-recovery": {
+    shortDesc:
+      "Recovered iron and aluminium are melted at foundries and refineries to produce pure metal.",
+    detailedDesc:
+      "Iron and aluminium scrap is melted at recycling foundries. Recycling uses 95% less energy than producing primary metal.",
+  },
+  composting: {
+    shortDesc:
+      "Wet organic waste (food & green waste) is converted into natural organic fertilizer through composting.",
+    detailedDesc:
+      "Organic waste is decomposed by bacteria under controlled oxygen and moisture to produce nutrient-rich organic fertilizer for farms.",
+  },
+  "anaerobic-digestion": {
+    shortDesc:
+      "Organic slurry is processed in a sealed digester to generate green biogas (CBG) and electricity.",
+    detailedDesc:
+      "Without oxygen, anaerobic bacteria digest the waste to create methane, which is purified into compressed biogas (CBG) and electricity.",
+  },
+  "rdf-fuel": {
+    shortDesc:
+      "Non-recyclable plastic and dry waste become Refuse Derived Fuel (RDF), an alternative to coal in cement plants.",
+    detailedDesc:
+      "Plastics and textiles that cannot be recycled are baled into high-calorific fuel used in cement kilns.",
+  },
+  construction: {
+    shortDesc:
+      "Glass, rubble and inert waste are used in road construction, interlocking paver blocks and construction aggregates.",
+    detailedDesc:
+      "Broken glass and concrete rubble are crushed for cement mix, road sub-base and strong paver tiles.",
+  },
+  "residual-disposal": {
+    shortDesc:
+      "The remaining non-usable <0.5% residue is disposed of only in an eco-friendly scientific landfill.",
+    detailedDesc:
+      "After full automated sorting, less than 0.5% unusable ash or inert waste is safely placed in an environment-friendly landfill cell.",
+  },
+};
+
+export const NODE_INFO_MAP_EN = Object.fromEntries(
+  Object.keys(NODE_INFO_MAP).map((id) => [
+    id,
+    { id, ...NODE_INFO_MAP[id], ...(EN_DESC[id] ?? {}) },
+  ])
+);

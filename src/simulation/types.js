@@ -51,7 +51,7 @@ export const STAGE_LABELS = {
   "non-ferrous": "Non-Ferrous Separator",
   "optical-sorter": "Optical AI Sorter",
   quality: "Quality / Contamination Analysis",
-  routing: "WasteChakra Intelligent Routing",
+  routing: "WC Intelligent Routing",
 };
 
 export const SCENARIOS = {

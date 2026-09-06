@@ -9,6 +9,10 @@ import {
   Cpu,
   Zap,
   Recycle,
+  Languages,
+  ChevronDown,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 import {
   MATERIAL_COLORS,
@@ -28,7 +32,8 @@ import {
   computeFinalResult,
   efficiencyFor,
 } from "./engine";
-import { NODE_INFO_MAP } from "./nodeInfo";
+import { NODE_INFO_MAP, NODE_INFO_MAP_EN } from "./nodeInfo";
+import { UI } from "./i18n";
 
 const CANVAS_W = 1100;
 const CANVAS_H = 620;
@@ -121,14 +126,32 @@ export default function WasteChakraSimulation() {
   const [finalResult, setFinalResult] = useState(null);
   const [demoMode, setDemoMode] = useState(false);
   const [showAI, setShowAI] = useState(false);
+  const [language, setLanguage] = useState("en");
+  const [langOpen, setLangOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef(null);
+  const langRef = useRef(null);
   const animRef = useRef(0);
   const demoTimer = useRef(null);
   const paramsRef = useRef(params);
   const speedRef = useRef(speed);
   const runningRef = useRef(running);
+  const hoverIdRef = useRef(null);
   paramsRef.current = params;
   speedRef.current = speed;
   runningRef.current = running;
+
+  useEffect(() => {
+    hoverIdRef.current = hoverInfo?.id ?? null;
+  }, [hoverInfo?.id]);
+
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
 
   const reset = useCallback(() => {
     setRunning(false);
@@ -189,7 +212,7 @@ export default function WasteChakraSimulation() {
     canvas.style.width = "100%";
     canvas.style.height = "auto";
     canvas.style.aspectRatio = `${CANVAS_W} / ${CANVAS_H}`;
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     let ps = particles;
     let lastTime = performance.now();
@@ -200,11 +223,12 @@ export default function WasteChakraSimulation() {
       const p = paramsRef.current;
       const sp = speedRef.current;
       const isRunning = runningRef.current;
+      const hoverId = hoverIdRef.current;
 
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
       drawBackground(ctx);
-      drawConveyor(ctx, selectedNode, hoverInfo?.id ?? null);
-      drawStages(ctx, selectedNode, hoverInfo?.id ?? null);
+      drawConveyor(ctx, selectedNode, hoverId);
+      drawStages(ctx, selectedNode, hoverId);
       drawDestinations(ctx);
 
       if (isRunning && ps.length > 0) {
@@ -218,7 +242,7 @@ export default function WasteChakraSimulation() {
     };
     animRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animRef.current);
-  }, [particles.length === 0, selectedNode, hoverInfo?.id]); // eslint-disable-line
+  }, [particles.length === 0, selectedNode]); // eslint-disable-line
 
   const updateParam = (key, val) => {
     setParams((prev) => ({ ...prev, [key]: val }));
@@ -230,8 +254,30 @@ export default function WasteChakraSimulation() {
   };
 
   const activeNodeId = hoverInfo?.id || selectedNode;
-  const activeNodeInfo = activeNodeId ? NODE_INFO_MAP[activeNodeId] : null;
+  const infoMap = language === "en" ? NODE_INFO_MAP_EN : NODE_INFO_MAP;
+  const activeNodeInfo = activeNodeId ? infoMap[activeNodeId] : null;
   const selectedStageInfo = stageStats.find((s) => s.id === activeNodeId);
+  const t = UI[language];
+  const selectLang = (lang) => {
+    setLanguage(lang);
+    setLangOpen(false);
+  };
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      if (containerRef.current) containerRef.current.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   return (
     <div
@@ -246,7 +292,7 @@ export default function WasteChakraSimulation() {
         {/* Main simulation */}
         <div>
           <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4 blueprint-shadow">
-            <div className="relative w-full overflow-hidden rounded-xl bg-surface">
+            <div ref={containerRef} className="relative w-full overflow-hidden rounded-xl bg-surface">
               <canvas
                 ref={canvasRef}
                 onClick={(e) => handleCanvasClick(e, canvasRef.current, setSelectedNode)}
@@ -255,8 +301,54 @@ export default function WasteChakraSimulation() {
                 className="cursor-pointer block w-full h-auto"
               />
 
+              {/* Top Controls */}
+              <div className="absolute top-3 right-3 z-40 flex items-center gap-2">
+                {/* Fullscreen Toggle */}
+                <button
+                  onClick={toggleFullscreen}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                >
+                  {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                </button>
+
+                {/* Language selector */}
+                <div ref={langRef} className="relative">
+                  <button
+                    onClick={() => setLangOpen((o) => !o)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-on-surface shadow-sm hover:border-primary/40 transition-colors"
+                  >
+                    <Languages className="w-3.5 h-3.5 text-primary" />
+                    {t.langLabel}
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 text-text-muted transition-transform ${langOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {langOpen && (
+                    <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-border-industrial bg-surface-bright shadow-xl overflow-hidden">
+                      <button
+                        onClick={() => selectLang("en")}
+                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${
+                          language === "en" ? "text-primary bg-primary/5" : "text-on-surface"
+                        }`}
+                      >
+                        English
+                      </button>
+                      <button
+                        onClick={() => selectLang("hi")}
+                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${
+                          language === "hi" ? "text-primary bg-primary/5" : "text-on-surface"
+                        }`}
+                      >
+                        हिन्दी
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Floating Hover Tooltip Card */}
-              {hoverInfo && NODE_INFO_MAP[hoverInfo.id] && (
+              {hoverInfo && infoMap[hoverInfo.id] && (
                 <div
                   className="absolute z-30 pointer-events-none transition-all duration-150 ease-out transform"
                   style={{
@@ -264,9 +356,13 @@ export default function WasteChakraSimulation() {
                     top: `${hoverInfo.percentY}%`,
                     transform:
                       hoverInfo.percentX > 75
-                        ? "translate(-105%, -45%)"
+                        ? hoverInfo.percentY > 70
+                          ? "translate(-105%, -100%)"
+                          : "translate(-105%, -45%)"
                         : hoverInfo.percentX < 20
                         ? "translate(5%, -110%)"
+                        : hoverInfo.percentY > 70
+                        ? "translate(-50%, -70%)"
                         : "translate(-50%, -115%)",
                   }}
                 >
@@ -274,30 +370,30 @@ export default function WasteChakraSimulation() {
                     <div className="flex items-center justify-between mb-1.5">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider border ${
-                          NODE_INFO_MAP[hoverInfo.id].tagColor
+                          infoMap[hoverInfo.id].tagColor
                         }`}
                       >
-                        {NODE_INFO_MAP[hoverInfo.id].tag}
+                        {infoMap[hoverInfo.id].tag}
                       </span>
                       <span className="text-[10px] text-text-muted font-mono">
-                        {NODE_INFO_MAP[hoverInfo.id].category}
+                        {t.category(infoMap[hoverInfo.id].category)}
                       </span>
                     </div>
 
                     <h4 className="text-sm font-bold text-on-surface mb-1 flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                      {NODE_INFO_MAP[hoverInfo.id].name}
+                      {infoMap[hoverInfo.id].name}
                     </h4>
 
                     {/* User requested short message box */}
                     <div className="mt-1.5 p-2 rounded-lg bg-primary/5 border border-primary/20 text-xs text-on-surface leading-relaxed font-medium">
-                      💡 {NODE_INFO_MAP[hoverInfo.id].shortDesc}
+                      💡 {infoMap[hoverInfo.id].shortDesc}
                     </div>
 
                     <div className="mt-2 pt-2 border-t border-border-industrial flex items-center justify-between text-[11px] text-text-muted font-mono">
-                      <span>Flow:</span>
+                      <span>{t.flow}</span>
                       <span className="text-on-surface truncate max-w-[200px]">
-                        {NODE_INFO_MAP[hoverInfo.id].inputOutput}
+                        {infoMap[hoverInfo.id].inputOutput}
                       </span>
                     </div>
                   </div>
@@ -314,26 +410,26 @@ export default function WasteChakraSimulation() {
                 disabled={running}
                 className="btn-industrial btn-industrial--primary"
               >
-                <Play className="w-4 h-4" /> Run
+                <Play className="w-4 h-4" /> {t.run}
               </button>
               <button
                 onClick={pause}
                 disabled={!running}
                 className="btn-industrial btn-industrial--secondary"
               >
-                <Pause className="w-4 h-4" /> Pause
+                <Pause className="w-4 h-4" /> {t.pause}
               </button>
               <button
                 onClick={reset}
                 className="btn-industrial btn-industrial--neutral"
               >
-                <RotateCcw className="w-4 h-4" /> Reset
+                <RotateCcw className="w-4 h-4" /> {t.reset}
               </button>
               <button
                 onClick={runDemo}
                 className={`btn-industrial ${demoMode ? "btn-industrial--primary" : "btn-industrial--neutral"}`}
               >
-                <Zap className="w-4 h-4" /> Demo Mode
+                <Zap className="w-4 h-4" /> {t.demo}
               </button>
               <div className="flex items-center gap-2 ml-auto">
                 <Gauge className="w-4 h-4 text-text-muted" />
@@ -355,18 +451,18 @@ export default function WasteChakraSimulation() {
           {/* Final results */}
           {finalResult && (
             <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
-              <ResultCard label="Input" value={`${finalResult.input} kg`} color="text-slate-700" />
-              <ResultCard label="Recovered" value={`${finalResult.recovered} kg`} color="text-emerald-600" />
-              <ResultCard label="Residual" value={`${finalResult.residual} kg`} color="text-amber-600" />
-              <ResultCard label="Diversion" value={`${finalResult.diversion}%`} color="text-primary" />
-              <ResultCard label="Recovered Value" value={`₹${finalResult.recoveredValue.toLocaleString("en-IN")}`} color="text-teal-700" />
+              <ResultCard label={t.input} value={`${finalResult.input} kg`} color="text-slate-700" />
+              <ResultCard label={t.recovered} value={`${finalResult.recovered} kg`} color="text-emerald-600" />
+              <ResultCard label={t.residual} value={`${finalResult.residual} kg`} color="text-amber-600" />
+              <ResultCard label={t.diversion} value={`${finalResult.diversion}%`} color="text-primary" />
+              <ResultCard label={t.recoveredValue} value={`₹${finalResult.recoveredValue.toLocaleString("en-IN")}`} color="text-teal-700" />
             </div>
           )}
 
           {demoMode && finalResult && (
             <div className="mt-4 text-center py-6 rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/10 to-teal-200/30">
-              <p className="text-2xl font-bold tracking-wider text-primary">WASTE → RESOURCE</p>
-              <p className="text-sm text-text-muted mt-1">{finalResult.diversion}% landfill diversion achieved</p>
+              <p className="text-2xl font-bold tracking-wider text-primary">{t.bannerTitle}</p>
+              <p className="text-sm text-text-muted mt-1">{t.bannerSub(finalResult.diversion)}</p>
             </div>
           )}
         </div>
@@ -399,18 +495,18 @@ export default function WasteChakraSimulation() {
 
               <div className="space-y-2 text-xs text-on-surface">
                 <div>
-                  <p className="text-text-muted font-semibold mb-0.5">विवरण (Details):</p>
+                  <p className="text-text-muted font-semibold mb-0.5">{t.details}</p>
                   <p className="text-on-surface leading-normal">{activeNodeInfo.detailedDesc}</p>
                 </div>
 
                 <div className="pt-2 border-t border-border-industrial">
-                  <p className="text-text-muted font-semibold mb-0.5">तकनीक (Technology):</p>
+                  <p className="text-text-muted font-semibold mb-0.5">{t.technology}</p>
                   <p className="font-mono text-primary text-[11px]">{activeNodeInfo.techSpecs}</p>
                 </div>
 
                 {activeNodeInfo.targetMaterials && (
                   <div className="pt-2 border-t border-border-industrial">
-                    <p className="text-text-muted font-semibold mb-1">लक्ष्य सामग्री (Target Materials):</p>
+                    <p className="text-text-muted font-semibold mb-1">{t.targetMaterials}</p>
                     <div className="flex flex-wrap gap-1">
                       {activeNodeInfo.targetMaterials.map((mat, idx) => (
                         <span key={idx} className="px-2 py-0.5 rounded bg-primary/5 border border-border-industrial text-[10px] text-on-surface-variant">
@@ -423,10 +519,10 @@ export default function WasteChakraSimulation() {
 
                 {selectedStageInfo && (
                   <div className="pt-2 border-t border-border-industrial space-y-1.5 text-sm">
-                    <InfoRow label="Live Input" value={`${selectedStageInfo.input} kg`} />
-                    <InfoRow label="Live Recovered" value={`${selectedStageInfo.recovered} kg`} />
-                    <InfoRow label="Efficiency" value={`${selectedStageInfo.efficiency}%`} />
-                    <InfoRow label="Status" value={running ? "RUNNING" : "IDLE"} valueColor={running ? "text-primary" : "text-text-muted"} />
+                    <InfoRow label={t.liveInput} value={`${selectedStageInfo.input} kg`} />
+                    <InfoRow label={t.liveRecovered} value={`${selectedStageInfo.recovered} kg`} />
+                    <InfoRow label={t.efficiency} value={`${selectedStageInfo.efficiency}%`} />
+                    <InfoRow label={t.status} value={running ? t.running : t.idle} valueColor={running ? "text-primary" : "text-text-muted"} />
                   </div>
                 )}
               </div>
@@ -435,10 +531,10 @@ export default function WasteChakraSimulation() {
             <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Settings2 className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-sm">Hover or Click any Node</h3>
+                <h3 className="font-semibold text-sm">{t.hoverTitle}</h3>
               </div>
               <p className="text-xs text-text-muted mb-3">
-                कन्वेयर लाइन के किसी भी स्टेज या एंड-पाथवे (गंतव्य) पर माउस ले जाएं या क्लिक करें ताकि उसकी कार्यप्रणाली समझ सकें।
+                {t.hoverDesc}
               </p>
               <div className="grid grid-cols-2 gap-1.5 text-[10px]">
                 {STAGE_IDS.map((id) => (
@@ -459,7 +555,7 @@ export default function WasteChakraSimulation() {
             <div className="rounded-2xl border border-primary/20 bg-surface-bright p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Cpu className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-sm">AI Material Analysis</h3>
+                <h3 className="font-semibold text-sm">{t.aiPanel}</h3>
               </div>
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                 {aiLines.map((line, i) => (
@@ -469,10 +565,10 @@ export default function WasteChakraSimulation() {
                       <span className="text-primary font-mono">{line.confidence}%</span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-text-muted">
-                      <span>Purity: <span className="text-on-surface">{line.purity}%</span></span>
-                      <span>Contam: <span className="text-on-surface">{line.contamination}%</span></span>
-                      <span>Recovery: <span className="text-on-surface">{line.recoverability}</span></span>
-                      <span>Value: <span className="text-on-surface">₹{line.valuePerKg}/kg</span></span>
+                      <span>{t.purity} <span className="text-on-surface">{line.purity}%</span></span>
+                      <span>{t.contam} <span className="text-on-surface">{line.contamination}%</span></span>
+                      <span>{t.recovery} <span className="text-on-surface">{line.recoverability}</span></span>
+                      <span>{t.value} <span className="text-on-surface">₹{line.valuePerKg}/kg</span></span>
                     </div>
                     <div className="mt-1.5 text-primary">→ {DESTINATION_LABELS[line.destination]}</div>
                   </div>
@@ -483,20 +579,20 @@ export default function WasteChakraSimulation() {
 
           {/* Parameters */}
           <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4">
-            <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-3">Simulation Parameters</h3>
+            <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-3">{t.params}</h3>
             <div className="space-y-3">
-              <ParamSlider label="Total Waste" value={params.totalWaste} min={200} max={2000} step={100} unit="kg" onChange={(v) => updateParam("totalWaste", v)} />
-              <ParamSlider label="Moisture" value={params.moisture} min={0} max={100} step={5} unit="%" onChange={(v) => updateParam("moisture", v)} />
-              <ParamSlider label="Contamination" value={params.contamination} min={0} max={100} step={5} unit="%" onChange={(v) => updateParam("contamination", v)} />
-              <ParamSlider label="Organic Fraction" value={params.organicFraction} min={0} max={80} step={5} unit="%" onChange={(v) => updateParam("organicFraction", v)} />
-              <ParamSlider label="Plastic Fraction" value={params.plasticFraction} min={0} max={50} step={2} unit="%" onChange={(v) => updateParam("plasticFraction", v)} />
-              <ParamSlider label="Metal Fraction" value={params.metalFraction} min={0} max={30} step={2} unit="%" onChange={(v) => updateParam("metalFraction", v)} />
+              <ParamSlider label={t.totalWaste} value={params.totalWaste} min={200} max={2000} step={100} unit="kg" onChange={(v) => updateParam("totalWaste", v)} />
+              <ParamSlider label={t.moisture} value={params.moisture} min={0} max={100} step={5} unit="%" onChange={(v) => updateParam("moisture", v)} />
+              <ParamSlider label={t.contamination} value={params.contamination} min={0} max={100} step={5} unit="%" onChange={(v) => updateParam("contamination", v)} />
+              <ParamSlider label={t.organicFraction} value={params.organicFraction} min={0} max={80} step={5} unit="%" onChange={(v) => updateParam("organicFraction", v)} />
+              <ParamSlider label={t.plasticFraction} value={params.plasticFraction} min={0} max={50} step={2} unit="%" onChange={(v) => updateParam("plasticFraction", v)} />
+              <ParamSlider label={t.metalFraction} value={params.metalFraction} min={0} max={30} step={2} unit="%" onChange={(v) => updateParam("metalFraction", v)} />
             </div>
           </div>
 
           {/* Scenarios */}
           <div className="rounded-2xl border border-border-industrial bg-surface-bright p-4">
-            <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-3">Scenarios</h3>
+            <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest mb-3">{t.scenarios}</h3>
             <div className="space-y-2">
               {Object.keys(SCENARIOS).map((name) => (
                 <button
