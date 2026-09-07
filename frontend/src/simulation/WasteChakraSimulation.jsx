@@ -27,13 +27,17 @@ import {
   computeComposition,
   computePurity,
   routeMaterial,
+  mapBackendToDestination,
   valuePerKg,
   generateAILines,
   computeStageStats,
   computeFinalResult,
   efficiencyFor,
 } from "./engine";
+
+import * as api from "../services/api";
 import { NODE_INFO_MAP, NODE_INFO_MAP_EN } from "./nodeInfo";
+
 import { UI } from "./i18n";
 import { WASTE_ITEMS } from "./wasteCatalog";
 
@@ -193,6 +197,14 @@ export default function WasteChakraSimulation() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [wasteInputOpen, setWasteInputOpen] = useState(false);
   const [wasteCounts, setWasteCounts] = useState({});
+
+  // Django REST Backend Integration State
+  const [backendConnected, setBackendConnected] = useState(false);
+  const [apiStats, setApiStats] = useState(null);
+  const [lastApiRecord, setLastApiRecord] = useState(null);
+  const [isApiProcessing, setIsApiProcessing] = useState(false);
+  const [apiError, setApiError] = useState(null);
+
   const containerRef = useRef(null);
   const langRef = useRef(null);
   const animRef = useRef(0);
@@ -212,6 +224,124 @@ export default function WasteChakraSimulation() {
   paramsRef.current = params;
   speedRef.current = speed;
   runningRef.current = running;
+
+  // Poll Django REST Backend health and initial stats summary
+  const fetchBackendStats = useCallback(async () => {
+    try {
+      const stats = await api.getStatsSummary();
+      setApiStats(stats);
+      setBackendConnected(true);
+      setApiError(null);
+    } catch (err) {
+      setBackendConnected(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBackendStats();
+  }, [fetchBackendStats]);
+
+  // Inject API detected waste record into plant simulation
+  const injectRecordIntoPlant = useCallback((record, autoStart = true) => {
+    if (!record) return;
+
+    const mat = (record.material || "MIXED").toUpperCase();
+    const counts = {};
+
+    if (mat === "ORGANIC") {
+      counts.vegpeel = 8;
+      counts.foodwaste = 2;
+    } else if (mat === "PLASTIC") {
+      counts.pet = 10;
+      counts.carrybag = 4;
+    } else if (mat === "PAPER") {
+      counts.cardboard = 6;
+      counts.newsprint = 4;
+    } else if (mat === "METAL") {
+      counts.steel = 6;
+      counts.canal = 4;
+    } else if (mat === "GLASS") {
+      counts.glassbottle = 6;
+      counts.glassjar = 4;
+    } else if (mat === "TEXTILE") {
+      counts.textile = 8;
+    } else {
+      counts.mixedres = 8;
+    }
+
+    const snap = deriveWasteParams(counts);
+    if (!snap) return;
+
+    if (record.moisture_pct) snap.moisture = Math.round(record.moisture_pct);
+    if (record.contamination_pct) snap.contamination = Math.round(record.contamination_pct);
+
+    const targetDest = mapBackendToDestination(record.final_category, record.material, snap.moisture);
+
+    snap.primaryMaterial = mat;
+    snap.targetDestination = targetDest;
+    snap.backendCategory = record.final_category;
+    snap.backendRecord = record;
+
+    setWasteCounts(counts);
+    setParams(snap);
+    paramsRef.current = snap;
+
+    setRunning(false);
+    if (demoTimer.current) clearTimeout(demoTimer.current);
+
+    const ps = buildParticles(snap);
+    setParticles(ps);
+    setAILines(generateAILines(snap));
+    setStageStats(computeStageStats(snap));
+    setFinalResult(computeFinalResult(snap));
+
+    if (autoStart) {
+      setRunning(true);
+      setShowAI(true);
+    }
+  }, []);
+
+
+  const handleDjangoSimulate = async () => {
+    setIsApiProcessing(true);
+    setApiError(null);
+    try {
+      const record = await api.simulateWaste({
+        moisture_pct: params.moisture,
+        contamination_pct: params.contamination,
+        combustibility_index: Math.min(1.0, (params.plastic + params.paper) / 100),
+        recyclability_score: Math.max(0.1, (100 - params.contamination) / 100),
+        rdf_suitability_score: Math.min(1.0, (params.plastic + params.contamination) / 100),
+        detected_material: params.plastic > 40 ? "PLASTIC" : params.organic > 40 ? "ORGANIC" : "MIXED",
+      });
+      setLastApiRecord(record);
+      await fetchBackendStats();
+      injectRecordIntoPlant(record, true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setIsApiProcessing(false);
+    }
+  };
+
+  const handleDjangoImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsApiProcessing(true);
+    setApiError(null);
+    try {
+      const record = await api.processWasteImage(file);
+      setLastApiRecord(record);
+      await fetchBackendStats();
+      injectRecordIntoPlant(record, true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setIsApiProcessing(false);
+    }
+  };
+
 
   useEffect(() => {
     hoverIdRef.current = hoverInfo?.id ?? null;
@@ -569,11 +699,47 @@ export default function WasteChakraSimulation() {
                 }}
               />
 
-              {/* Top Controls */}
+              {/* Top Controls & Django DRF Status */}
               <div className="absolute top-3 right-3 z-40 flex items-center gap-2">
+                {/* Django DRF API Status Indicator */}
+                <div
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border backdrop-blur shadow-sm ${
+                    backendConnected
+                      ? "bg-emerald-950/80 border-emerald-500/40 text-emerald-400"
+                      : "bg-amber-950/80 border-amber-500/40 text-amber-400"
+                  }`}
+                  title={backendConnected ? "Django REST API active on http://localhost:8000" : "Django API offline"}
+                >
+                  <span className={`w-2 h-2 rounded-full ${backendConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                  <span>{backendConnected ? "Django API Online" : "Django Offline"}</span>
+                </div>
+
+                {/* Upload Waste Image to Django API */}
+                <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-primary hover:border-primary/60 cursor-pointer shadow-sm transition-colors">
+                  <span>📷 Upload Image API</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleDjangoImageUpload}
+                    className="hidden"
+                    disabled={isApiProcessing}
+                  />
+                </label>
+
+                {/* Send Simulation to Django API */}
+                <button
+                  onClick={handleDjangoSimulate}
+                  disabled={isApiProcessing}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 backdrop-blur border border-primary/40 text-xs font-medium text-primary hover:bg-primary/20 shadow-sm transition-colors"
+                  title="Run decision pipeline on Django backend"
+                >
+                  {isApiProcessing ? "Processing..." : "⚡ Sync Django API"}
+                </button>
+
                 {/* Zoom Out */}
                 <button
                   onClick={() => zoomCanvas(0.85)}
+
                   className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
                   title="Zoom Out"
                 >
@@ -643,8 +809,9 @@ export default function WasteChakraSimulation() {
               {/* Floating Hover Tooltip Card */}
               {hoverInfo && infoMap[hoverInfo.id] && (
                 <div
-                  className="absolute z-30 pointer-events-none transition-all duration-150 ease-out transform"
+                  className="absolute z-50 pointer-events-none transition-all duration-150 ease-out transform"
                   style={{
+
                     left: `${hoverInfo.percentX}%`,
                     top: `${hoverInfo.percentY}%`,
                     transform:
@@ -717,11 +884,47 @@ export default function WasteChakraSimulation() {
                   </button>
                 </div>
               )}
+
+              {/* Django API Live Result Card */}
+              {lastApiRecord && (
+                <div className="absolute bottom-14 left-4 z-40 max-w-sm rounded-xl border border-primary/40 bg-surface-bright/95 p-3.5 shadow-2xl backdrop-blur text-xs">
+                  <div className="flex items-center justify-between font-bold text-primary mb-1.5 border-b border-border-industrial pb-1">
+                    <span>⚡ Django DRF Result ({lastApiRecord.final_category})</span>
+                    <button
+                      onClick={() => setLastApiRecord(null)}
+                      className="text-text-muted hover:text-white text-sm font-normal"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-on-surface">
+                    <div><span className="text-text-muted">Category:</span> <span className="font-semibold text-emerald-400">{lastApiRecord.final_category}</span></div>
+                    <div><span className="text-text-muted">Material:</span> <span className="font-semibold">{lastApiRecord.material}</span></div>
+                    <div><span className="text-text-muted">Moisture:</span> <span>{lastApiRecord.moisture_pct}%</span></div>
+                    <div><span className="text-text-muted">Recyclability:</span> <span>{(lastApiRecord.recyclability_score * 100).toFixed(0)}%</span></div>
+                    <div><span className="text-text-muted">Combustibility:</span> <span>{(lastApiRecord.combustibility_index * 100).toFixed(0)}%</span></div>
+                    <div><span className="text-text-muted">Confidence:</span> <span>{(lastApiRecord.decision_confidence * 100).toFixed(0)}%</span></div>
+                  </div>
+                  {lastApiRecord.decision_breakdown?.rules_fired && (
+                    <div className="mt-2 text-[10px] text-text-muted bg-surface-dark/50 p-1.5 rounded font-mono">
+                      Rules: {lastApiRecord.decision_breakdown.rules_fired.join(", ")}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => injectRecordIntoPlant(lastApiRecord, true)}
+                    className="mt-2.5 w-full flex items-center justify-center gap-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold border border-emerald-500/40 text-xs transition-colors shadow-sm"
+                  >
+                    ▶ Run Plant Simulation with Injected Waste
+                  </button>
+                </div>
+              )}
+
             </div>
           </div>
 
           {/* Controls */}
           <div className="mt-4 rounded-2xl border border-border-industrial bg-surface-bright p-4">
+
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={run}
@@ -1876,14 +2079,18 @@ function processAtStage(part, stageId, p) {
       break;
     case "magnetic":
       if (np.material === "ferrous" && Math.random() < eff) {
-        np.destination = "metal-recovery";
+        np.destination = (p.primaryMaterial === "METAL" && p.targetDestination)
+          ? p.targetDestination
+          : "metal-recovery";
         np.routed = true;
         split = true;
       }
       break;
     case "non-ferrous":
       if (np.material === "aluminium" && Math.random() < eff) {
-        np.destination = "metal-recovery";
+        np.destination = (p.primaryMaterial === "METAL" && p.targetDestination)
+          ? p.targetDestination
+          : "metal-recovery";
         np.routed = true;
         split = true;
       }
@@ -1892,26 +2099,37 @@ function processAtStage(part, stageId, p) {
       if ((np.material === "plastic" || np.material === "paper") && Math.random() < eff) {
         const purity = computePurity(np.material, p);
         const cont = 100 - purity;
-        np.destination = routeMaterial(np.material, purity, cont, p.moisture);
+        const isPrimary = p.primaryMaterial && (
+          (np.material === "plastic" && p.primaryMaterial === "PLASTIC") ||
+          (np.material === "paper" && p.primaryMaterial === "PAPER")
+        );
+        np.destination = (isPrimary && p.targetDestination)
+          ? p.targetDestination
+          : routeMaterial(np.material, purity, cont, p.moisture);
         np.routed = true;
         split = true;
       }
       break;
     case "quality":
       if (np.material === "glass" && Math.random() < eff) {
-        np.destination = "construction";
+        np.destination = (p.primaryMaterial === "GLASS" && p.targetDestination)
+          ? p.targetDestination
+          : "construction";
         np.routed = true;
         split = true;
       }
       break;
     case "trommel":
-      if (np.material === "organic" && Math.random() < 0.15) {
-        np.destination = "composting";
+      if (np.material === "organic" && Math.random() < 0.25) {
+        np.destination = (p.primaryMaterial === "ORGANIC" && p.targetDestination)
+          ? p.targetDestination
+          : (p.moisture > 55 ? "anaerobic-digestion" : "composting");
         np.routed = true;
         split = true;
       }
       break;
   }
+
 
   return { particle: np, splitOff: split };
 }

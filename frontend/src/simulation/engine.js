@@ -54,7 +54,40 @@ export function efficiencyFor(stage, p) {
   return Math.max(0.6, Math.min(0.98, base));
 }
 
-export function routeMaterial(mat, purity, contamination, moisture) {
+export function mapBackendToDestination(finalCategory, material, moisture = 30) {
+  const cat = (finalCategory || "").toUpperCase();
+  const mat = (material || "").toUpperCase();
+
+  if (cat === "RECYCLE") {
+    if (mat === "PLASTIC") return "plastic-recycling";
+    if (mat === "PAPER") return "paper-recovery";
+    if (mat === "METAL") return "metal-recovery";
+    if (mat === "GLASS") return "construction";
+    return "plastic-recycling";
+  }
+  if (cat === "BIO") {
+    return moisture > 55 ? "anaerobic-digestion" : "composting";
+  }
+  if (cat === "RDF") {
+    return "rdf-fuel";
+  }
+  if (cat === "REJECT") {
+    return "residual-disposal";
+  }
+
+  // Fallback by material
+  if (mat === "PLASTIC") return "plastic-recycling";
+  if (mat === "PAPER") return "paper-recovery";
+  if (mat === "METAL") return "metal-recovery";
+  if (mat === "GLASS") return "construction";
+  if (mat === "ORGANIC") return moisture > 55 ? "anaerobic-digestion" : "composting";
+  return "residual-disposal";
+}
+
+export function routeMaterial(mat, purity, contamination, moisture, overrideDestination = null) {
+  if (overrideDestination) {
+    return overrideDestination;
+  }
   switch (mat) {
     case "ferrous":
     case "aluminium":
@@ -102,7 +135,7 @@ export function valuePerKg(mat, dest) {
   if (mat === "ferrous") return 35;
   if (mat === "aluminium") return 120;
   if (mat === "glass") return 4;
-  return table[dest];
+  return table[dest] || 10;
 }
 
 export function generateAILines(p) {
@@ -130,8 +163,17 @@ export function generateAILines(p) {
     .map((m) => {
       const purity = computePurity(m, p);
       const cont = Math.round(100 - purity);
-      const dest = routeMaterial(m, purity, cont, p.moisture);
-      const conf = Math.round(85 + Math.random() * 12);
+      const isPrimaryInjected = p.primaryMaterial && (
+        (m === "plastic" && p.primaryMaterial === "PLASTIC") ||
+        (m === "organic" && p.primaryMaterial === "ORGANIC") ||
+        (m === "paper" && p.primaryMaterial === "PAPER") ||
+        ((m === "ferrous" || m === "aluminium") && p.primaryMaterial === "METAL") ||
+        (m === "glass" && p.primaryMaterial === "GLASS")
+      );
+      const dest = isPrimaryInjected && p.targetDestination
+        ? p.targetDestination
+        : routeMaterial(m, purity, cont, p.moisture);
+      const conf = Math.round(88 + Math.random() * 10);
       const recov = purity > 70 ? "HIGH" : purity > 45 ? "MEDIUM" : "LOW";
       return {
         material: labels[m],
@@ -144,6 +186,7 @@ export function generateAILines(p) {
       };
     });
 }
+
 
 export function computeStageStats(p) {
   const comp = computeComposition(p);
