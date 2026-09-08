@@ -32,7 +32,8 @@ class ProcessWasteImageView(APIView):
         waste_image = WasteImage.objects.create(image=image_file, source=source)
 
         # 2. Classify material
-        material, confidence, all_probs = virtual_classify(waste_image.image.path)
+        image_file.seek(0)
+        material, confidence, all_probs = virtual_classify(image_file)
         waste_image.detected_material = material
         waste_image.detection_confidence = confidence
         waste_image.raw_model_output = all_probs

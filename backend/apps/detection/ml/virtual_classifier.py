@@ -106,42 +106,39 @@ def smart_image_features_fallback(image_path: str) -> tuple[str, float, dict]:
     """
     materials = ["PLASTIC", "PAPER", "METAL", "GLASS", "ORGANIC", "TEXTILE", "E_WASTE"]
 
-    if os.path.exists(image_path):
-        try:
-            img = Image.open(image_path).convert("RGB").resize((100, 100))
-            pixels = list(img.getdata())
-            
-            total_px = len(pixels)
-            r_sum = sum(p[0] for p in pixels)
-            g_sum = sum(p[1] for p in pixels)
-            b_sum = sum(p[2] for p in pixels)
+    try:
+        img = Image.open(image_path).convert("RGB").resize((100, 100))
+        pixels = list(img.getdata())
+        
+        total_px = len(pixels)
+        r_sum = sum(p[0] for p in pixels)
+        g_sum = sum(p[1] for p in pixels)
+        b_sum = sum(p[2] for p in pixels)
 
-            avg_r = r_sum / total_px
-            avg_g = g_sum / total_px
-            avg_b = b_sum / total_px
+        avg_r = r_sum / total_px
+        avg_g = g_sum / total_px
+        avg_b = b_sum / total_px
 
-            # Check HSV / Color spectrum metrics
-            # Organic/food waste typically has warm tones (R > B, G > B) or greenish/yellowish/brownish hues
-            is_warm_food_tone = (avg_r > avg_b + 15) and (avg_g > avg_b + 10)
-            is_greenish = (avg_g > avg_r) and (avg_g > avg_b)
-            is_brownish = (avg_r > 80 and avg_g > 50 and avg_b < avg_g)
+        # Check HSV / Color spectrum metrics
+        # Organic/food waste typically has warm tones (R > B, G > B) or greenish/yellowish/brownish hues
+        is_warm_food_tone = (avg_r > avg_b + 15) and (avg_g > avg_b + 10)
+        is_greenish = (avg_g > avg_r) and (avg_g > avg_b)
+        is_brownish = (avg_r > 80 and avg_g > 50 and avg_b < avg_g)
 
-            if is_warm_food_tone or is_greenish or is_brownish:
-                material = "ORGANIC"
-            elif avg_r > 210 and avg_g > 210 and avg_b > 210:
-                material = "PAPER"
-            elif avg_r < 70 and avg_g < 70 and avg_b < 70:
-                material = "METAL"
-            elif avg_b > avg_r + 15 and avg_b > avg_g:
-                material = "PLASTIC"
-            elif max(avg_r, avg_g, avg_b) - min(avg_r, avg_g, avg_b) < 15:
-                # Low saturation grey / metallic shine
-                material = "METAL"
-            else:
-                material = "ORGANIC" if avg_r > avg_b else "MIXED"
-        except Exception:
+        if is_warm_food_tone or is_greenish or is_brownish:
             material = "ORGANIC"
-    else:
+        elif avg_r > 210 and avg_g > 210 and avg_b > 210:
+            material = "PAPER"
+        elif avg_r < 70 and avg_g < 70 and avg_b < 70:
+            material = "METAL"
+        elif avg_b > avg_r + 15 and avg_b > avg_g:
+            material = "PLASTIC"
+        elif max(avg_r, avg_g, avg_b) - min(avg_r, avg_g, avg_b) < 15:
+            # Low saturation grey / metallic shine
+            material = "METAL"
+        else:
+            material = "ORGANIC" if avg_r > avg_b else "MIXED"
+    except Exception:
         material = "ORGANIC"
 
     confidence = round(random.uniform(0.82, 0.94), 2)
