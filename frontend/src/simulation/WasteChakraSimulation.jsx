@@ -703,7 +703,7 @@ export default function WasteChakraSimulation() {
               <div className="absolute top-3 right-3 z-40 flex items-center gap-2">
                 {/* Django DRF API Status Indicator */}
                 <div
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono border backdrop-blur shadow-sm ${
+                  className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-mono border backdrop-blur shadow-sm ${
                     backendConnected
                       ? "bg-emerald-950/80 border-emerald-500/40 text-emerald-400"
                       : "bg-amber-950/80 border-amber-500/40 text-amber-400"
@@ -715,7 +715,7 @@ export default function WasteChakraSimulation() {
                 </div>
 
                 {/* Upload Waste Image to Django API */}
-                <label className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-primary hover:border-primary/60 cursor-pointer shadow-sm transition-colors">
+                <label className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-primary hover:border-primary/60 cursor-pointer shadow-sm transition-colors">
                   <span>📷 Upload Image API</span>
                   <input
                     type="file"
@@ -730,7 +730,7 @@ export default function WasteChakraSimulation() {
                 <button
                   onClick={handleDjangoSimulate}
                   disabled={isApiProcessing}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 backdrop-blur border border-primary/40 text-xs font-medium text-primary hover:bg-primary/20 shadow-sm transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-2 rounded-lg bg-primary/10 backdrop-blur border border-primary/40 text-xs font-medium text-primary hover:bg-primary/20 shadow-sm transition-colors"
                   title="Run decision pipeline on Django backend"
                 >
                   {isApiProcessing ? "Processing..." : "⚡ Sync Django API"}
@@ -740,7 +740,7 @@ export default function WasteChakraSimulation() {
                 <button
                   onClick={() => zoomCanvas(0.85)}
 
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  className="flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
                   title="Zoom Out"
                 >
                   <Minus className="w-4 h-4" />
@@ -749,7 +749,7 @@ export default function WasteChakraSimulation() {
                 {/* Zoom In */}
                 <button
                   onClick={() => zoomCanvas(1.18)}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  className="flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
                   title="Zoom In"
                 >
                   <Plus className="w-4 h-4" />
@@ -758,7 +758,7 @@ export default function WasteChakraSimulation() {
                 {/* Reset View/Positions */}
                 <button
                   onClick={resetView}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  className="flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
                   title="Reset View & Positions"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -767,7 +767,7 @@ export default function WasteChakraSimulation() {
                 {/* Fullscreen Toggle */}
                 <button
                   onClick={toggleFullscreen}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
+                  className="flex items-center justify-center cursor-pointer w-8 h-8 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-text-muted shadow-sm hover:text-primary hover:border-primary/40 transition-colors"
                   title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                 >
                   {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
@@ -777,7 +777,7 @@ export default function WasteChakraSimulation() {
                 <div ref={langRef} className="relative">
                   <button
                     onClick={() => setLangOpen((o) => !o)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-on-surface shadow-sm hover:border-primary/40 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 cursor-pointer rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-on-surface shadow-sm hover:border-primary/40 transition-colors"
                   >
                     <Languages className="w-3.5 h-3.5 text-primary" />
                     {t.langLabel}
@@ -789,14 +789,14 @@ export default function WasteChakraSimulation() {
                     <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-border-industrial bg-surface-bright shadow-xl overflow-hidden">
                       <button
                         onClick={() => selectLang("en")}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${language === "en" ? "text-primary bg-primary/5" : "text-on-surface"
+                        className={`w-full text-left px-3 py-2 cursor-pointer text-xs font-medium hover:bg-primary/5 transition-colors ${language === "en" ? "text-primary bg-primary/5" : "text-on-surface"
                           }`}
                       >
                         English
                       </button>
                       <button
                         onClick={() => selectLang("hi")}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-primary/5 transition-colors ${language === "hi" ? "text-primary bg-primary/5" : "text-on-surface"
+                        className={`w-full text-left px-3 py-2 cursor-pointer text-xs font-medium hover:bg-primary/5 transition-colors ${language === "hi" ? "text-primary bg-primary/5" : "text-on-surface"
                           }`}
                       >
                         हिन्दी
@@ -896,7 +896,118 @@ export default function WasteChakraSimulation() {
                     >
                       ✕
                     </button>
-                  </div>
+                    {/* Waste Input Selector Modal */}
+                    {wasteInputOpen && (
+                      <div
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                        onClick={() => setWasteInputOpen(false)}
+                      >
+                        <div
+                          className="w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-surface-bright shadow-2xl"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-start justify-between px-5 py-4 border-b border-border-industrial">
+                            <div>
+                              <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+                                {t.wasteInputTitle}
+                              </h3>
+                              <p className="text-xs text-text-muted mt-1">{t.wasteInputSub}</p>
+                            </div>
+                            <button
+                              onClick={() => setWasteInputOpen(false)}
+                              className="p-2 rounded-lg border border-border-industrial text-on-surface hover:border-primary/50 hover:text-primary transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="overflow-y-auto px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {WASTE_ITEMS.map((it) => {
+                              const n = wasteCounts[it.id] || 0;
+                              const size =
+                                it.mass < 1 ? `${Math.round(it.mass * 1000)} g` : `${it.mass} kg`;
+                              return (
+                                <div
+                                  key={it.id}
+                                  onClick={() => toggleWaste(it.id)}
+                                  className={`flex items-center gap-3 rounded-xl border p-3 transition-all cursor-pointer select-none ${n > 0
+                                      ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                      : "border-border-industrial bg-surface hover:border-primary/40"
+                                    }`}
+                                >
+                                  <span
+                                    className="w-3 h-3 rounded-full shrink-0"
+                                    style={{ background: MATERIAL_COLORS[it.material] }}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-on-surface truncate">
+                                      {it.name[language]}
+                                    </p>
+                                    <p className="text-[10px] text-text-muted font-mono">
+                                      {t.material[it.material]} · {size} · {t.moisture} {it.moisture}%
+                                    </p>
+                                  </div>
+                                  <div
+                                    className="flex items-center gap-1.5 shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <button
+                                      onClick={() => bumpWaste(it.id, -1)}
+                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
+                                    >
+                                      <Minus className="w-3.5 h-3.5" />
+                                    </button>
+                                    <span
+                                      className={`w-7 text-center text-sm font-mono font-bold ${n > 0 ? "text-primary" : "text-text-muted"
+                                        }`}
+                                    >
+                                      {n}
+                                    </span>
+                                    <button
+                                      onClick={() => bumpWaste(it.id, 1)}
+                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
+                                    >
+                                      <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-t border-border-industrial">
+                            <div className="text-xs">
+                              <span className="text-text-muted">{t.totalLoad}: </span>
+                              <span className="font-mono font-bold text-primary">
+                                {warpTotal.toFixed(2)} kg
+                              </span>
+                              <span className="text-text-muted">
+                                {" "}· {warpCount} {t.itemsLabel}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setWasteCounts({})}
+                                className="btn-industrial btn-industrial--neutral btn-industrial--small"
+                              >
+                                {t.clearWaste}
+                              </button>
+                              <button
+                                onClick={injectWaste}
+                                disabled={warpTotal <= 0}
+                                className="btn-industrial btn-industrial--primary btn-industrial--small"
+                              >
+                                <Zap className="w-3.5 h-3.5" /> {t.inject}
+                              </button>
+                            </div>
+                          </div>
+                          {warpTotal <= 0 && (
+                            <p className="px-5 pb-3 -mt-1 text-[11px] text-amber-600">{t.emptyWaste}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-on-surface">
                     <div><span className="text-text-muted">Category:</span> <span className="font-semibold text-emerald-400">{lastApiRecord.final_category}</span></div>
                     <div><span className="text-text-muted">Material:</span> <span className="font-semibold">{lastApiRecord.material}</span></div>
@@ -912,9 +1023,9 @@ export default function WasteChakraSimulation() {
                   )}
                   <button
                     onClick={() => injectRecordIntoPlant(lastApiRecord, true)}
-                    className="mt-2.5 w-full flex items-center justify-center gap-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold border border-emerald-500/40 text-xs transition-colors shadow-sm"
+                    className="mt-2.5 w-full flex cursor-pointer items-center justify-center gap-1 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-semibold border border-emerald-500/40 text-xs transition-colors shadow-sm"
                   >
-                    ▶ Run Plant Simulation with Injected Waste
+                    ▶ Run Plant Simulation
                   </button>
                 </div>
               )}
@@ -1132,117 +1243,6 @@ export default function WasteChakraSimulation() {
         </div>
       </div>
 
-      {/* Waste Input Selector Modal */}
-      {wasteInputOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-          onClick={() => setWasteInputOpen(false)}
-        >
-          <div
-            className="w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl border border-primary/40 bg-surface-bright shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between px-5 py-4 border-b border-border-industrial">
-              <div>
-                <h3 className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
-                  {t.wasteInputTitle}
-                </h3>
-                <p className="text-xs text-text-muted mt-1">{t.wasteInputSub}</p>
-              </div>
-              <button
-                onClick={() => setWasteInputOpen(false)}
-                className="p-2 rounded-lg border border-border-industrial text-on-surface hover:border-primary/50 hover:text-primary transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {WASTE_ITEMS.map((it) => {
-                const n = wasteCounts[it.id] || 0;
-                const size =
-                  it.mass < 1 ? `${Math.round(it.mass * 1000)} g` : `${it.mass} kg`;
-                return (
-                  <div
-                    key={it.id}
-                    onClick={() => toggleWaste(it.id)}
-                    className={`flex items-center gap-3 rounded-xl border p-3 transition-all cursor-pointer select-none ${n > 0
-                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                        : "border-border-industrial bg-surface hover:border-primary/40"
-                      }`}
-                  >
-                    <span
-                      className="w-3 h-3 rounded-full shrink-0"
-                      style={{ background: MATERIAL_COLORS[it.material] }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-on-surface truncate">
-                        {it.name[language]}
-                      </p>
-                      <p className="text-[10px] text-text-muted font-mono">
-                        {t.material[it.material]} · {size} · {t.moisture} {it.moisture}%
-                      </p>
-                    </div>
-                    <div
-                      className="flex items-center gap-1.5 shrink-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        onClick={() => bumpWaste(it.id, -1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span
-                        className={`w-7 text-center text-sm font-mono font-bold ${n > 0 ? "text-primary" : "text-text-muted"
-                          }`}
-                      >
-                        {n}
-                      </span>
-                      <button
-                        onClick={() => bumpWaste(it.id, 1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-md border border-border-industrial text-on-surface hover:border-primary/50 transition-colors"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-t border-border-industrial">
-              <div className="text-xs">
-                <span className="text-text-muted">{t.totalLoad}: </span>
-                <span className="font-mono font-bold text-primary">
-                  {warpTotal.toFixed(2)} kg
-                </span>
-                <span className="text-text-muted">
-                  {" "}· {warpCount} {t.itemsLabel}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setWasteCounts({})}
-                  className="btn-industrial btn-industrial--neutral btn-industrial--small"
-                >
-                  {t.clearWaste}
-                </button>
-                <button
-                  onClick={injectWaste}
-                  disabled={warpTotal <= 0}
-                  className="btn-industrial btn-industrial--primary btn-industrial--small"
-                >
-                  <Zap className="w-3.5 h-3.5" /> {t.inject}
-                </button>
-              </div>
-            </div>
-            {warpTotal <= 0 && (
-              <p className="px-5 pb-3 -mt-1 text-[11px] text-amber-600">{t.emptyWaste}</p>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
