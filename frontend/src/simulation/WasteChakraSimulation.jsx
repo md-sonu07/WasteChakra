@@ -711,11 +711,11 @@ export default function WasteChakraSimulation() {
                   title={backendConnected ? `Django REST API active on ${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://wastechakra.onrender.com')}` : "Django API offline"}
                 >
                   <span className={`w-2 h-2 rounded-full ${backendConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
-                  <span>{backendConnected ? "Django API Online" : "Django Offline"}</span>
+                  <span>{backendConnected ? "API Online" : " Offline"}</span>
                 </div>
 
                 {/* Upload Waste Image to Django API */}
-                <label className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-primary hover:border-primary/60 cursor-pointer shadow-sm transition-colors">
+                <label className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg bg-surface-bright/95 backdrop-blur border border-border-industrial text-xs font-medium text-primary border-primary/60 cursor-pointer shadow-sm transition-colors">
                   <span>📷 Upload Image API</span>
                   <input
                     type="file"
