@@ -708,7 +708,7 @@ export default function WasteChakraSimulation() {
                       ? "bg-emerald-950/80 border-emerald-500/40 text-emerald-400"
                       : "bg-amber-950/80 border-amber-500/40 text-amber-400"
                   }`}
-                  title={backendConnected ? "Django REST API active on http://localhost:8000" : "Django API offline"}
+                  title={backendConnected ? `Django REST API active on ${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://wastechakra.onrender.com')}` : "Django API offline"}
                 >
                   <span className={`w-2 h-2 rounded-full ${backendConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
                   <span>{backendConnected ? "Django API Online" : "Django Offline"}</span>
