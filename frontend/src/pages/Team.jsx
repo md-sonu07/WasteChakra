@@ -33,28 +33,28 @@ export default function Team() {
   ];
 
   return (
-    <div className="flex-grow w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-margin-desktop">
+    <div className="flex-grow w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-space-3xl">
       {/* About Comestro Section */}
       <section className="mb-24">
         <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-border-industrial bg-surface-bright">
-            <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">ABOUT COMESTRO</span>
+          <div className="inline-flex items-center gap-2 px-space-sm py-space-xxs rounded-full border border-surface-container-high bg-surface-container-low mb-6">
+            <span className="font-eyebrow-tag text-eyebrow-tag text-primary uppercase">ABOUT COMESTRO</span>
           </div>
-          <h1 className="font-display-lg text-headline-lg-mobile md:text-6xl text-on-surface mb-8 uppercase">
+          <h1 className="font-headline-lg text-headline-lg-mobile md:text-display-hero text-primary mb-8">
             ENGINEERING PRECISION. <br/>
-            <span className="text-text-muted">LABORATORY DISCIPLINE.</span>
+            <span className="text-on-surface-variant">LABORATORY DISCIPLINE.</span>
           </h1>
-          <p className="font-body-md text-text-muted text-lg mb-8">
+          <p className="font-body-lg text-body-lg text-on-surface-variant mb-8">
             Comestro was forged at Jamia Millia Islamia with a singular mission: to bring absolute certainty to chaotic urban environments. We are a collective of engineers, architects, and technologists dedicated to solving the world's most complex resource recovery challenges.
           </p>
-          <div className="flex gap-12 border-t border-border-industrial pt-8 mt-12">
+          <div className="flex gap-12 border-t border-surface-container-highest pt-8 mt-12">
             <div>
-              <div className="font-mono-data text-[10px] text-text-muted uppercase mb-1">Origin</div>
-              <div className="font-label-caps text-on-surface">Jamia Millia Islamia</div>
+              <div className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1 font-bold tracking-wider">Origin</div>
+              <div className="font-headline-sm text-headline-sm text-primary">Jamia Millia Islamia</div>
             </div>
             <div>
-              <div className="font-mono-data text-[10px] text-text-muted uppercase mb-1">Domain</div>
-              <div className="font-label-caps text-on-surface">Adaptive MSW Architecture</div>
+              <div className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1 font-bold tracking-wider">Domain</div>
+              <div className="font-headline-sm text-headline-sm text-primary">Adaptive MSW Architecture</div>
             </div>
           </div>
         </div>
@@ -62,30 +62,30 @@ export default function Team() {
 
       {/* Team Roster Section */}
       <section>
-        <div className="mb-16 border-t border-border-industrial pt-16 flex items-center justify-between">
+        <div className="mb-16 border-t border-surface-container-highest pt-16 flex items-center justify-between">
           <div>
-            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2 uppercase">Core Architecture Team</h2>
-            <p className="font-mono-data text-xs text-text-muted uppercase tracking-widest">Team Comestro Personnel</p>
+            <h2 className="font-headline-lg text-headline-lg text-primary mb-2">Core Architecture Team</h2>
+            <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Team Comestro Personnel</p>
           </div>
-          <span className="material-symbols-outlined text-4xl text-border-industrial">group_work</span>
+          <span className="material-symbols-outlined text-4xl text-surface-container-highest">group_work</span>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-gutter">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-space-lg">
           {teamMembers.map((member) => (
-            <div key={member.id} className="bg-surface-bright border border-border-industrial rounded p-1 group hover:border-primary transition-colors duration-300">
-              <div className="h-56 w-full bg-surface-container-low mb-4 relative overflow-hidden rounded-sm">
-                <img 
-                  className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" 
-                  src={member.img} 
-                  alt={member.name} 
+            <div key={member.id} className="bg-surface-container-lowest border border-surface-container-high rounded-[24px] p-1.5 group hover:border-forest transition-colors duration-300 technical-shadow">
+              <div className="h-56 w-full bg-surface-container-low mb-4 relative overflow-hidden rounded-[18px]">
+                <img
+                  className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
+                  src={member.img}
+                  alt={member.name}
                 />
-                <div className="absolute top-2 right-2 bg-surface-bright/90 backdrop-blur px-2 py-1 border border-border-industrial font-mono-data text-[10px] text-text-muted">
+                <div className="absolute top-2 right-2 bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded-full border border-surface-container-high font-label-sm text-label-sm text-on-surface-variant">
                   ID: {member.id.split('-')[1]}
                 </div>
               </div>
               <div className="px-3 pb-3">
-                <h3 className="font-label-caps text-label-caps text-on-surface uppercase mb-1">{member.name}</h3>
-                <p className="font-mono-data text-mono-data text-primary text-xs">{member.role}</p>
+                <h3 className="font-headline-sm text-headline-sm text-primary mb-1">{member.name}</h3>
+                <p className="font-label-md text-label-md text-secondary">{member.role}</p>
               </div>
             </div>
           ))}
@@ -93,10 +93,10 @@ export default function Team() {
       </section>
 
       {/* Join the Mission (Optional callout) */}
-      <section className="mt-32 bg-surface-bright border border-border-industrial p-12 text-center">
+      <section className="mt-32 bg-surface-container-low border border-surface-container-high rounded-[28px] p-12 text-center technical-shadow">
         <span className="material-symbols-outlined text-primary mb-4 text-3xl">science</span>
-        <h3 className="font-headline-lg text-headline-lg text-on-surface mb-4">DRIVEN BY DATA</h3>
-        <p className="font-body-md text-text-muted max-w-2xl mx-auto">
+        <h3 className="font-headline-lg text-headline-lg text-primary mb-4">DRIVEN BY DATA</h3>
+        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
           We don't guess. We measure, adapt, and refine. If you are passionate about applying rigorous engineering to decentralized resource recovery, our mission is just beginning.
         </p>
       </section>

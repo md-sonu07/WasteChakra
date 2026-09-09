@@ -562,10 +562,10 @@ export default function WasteChakraSimulation() {
 
   return (
     <div
-      className="min-h-screen w-full bg-surface text-on-surface"
+      className="min-h-screen pt-20 w-full bg-surface text-on-surface"
       style={{
         background:
-          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,197,94,0.06), transparent 60%)",
+          "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(13,42,26,0.06), transparent 60%)",
       }}
     >
 
@@ -705,12 +705,12 @@ export default function WasteChakraSimulation() {
                 <div
                   className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-mono border backdrop-blur shadow-sm ${
                     backendConnected
-                      ? "bg-emerald-950/80 border-emerald-500/40 text-emerald-400"
-                      : "bg-amber-950/80 border-amber-500/40 text-amber-400"
+                      ? "bg-secondary-container/20 border-secondary/40 text-secondary"
+                      : "bg-error-container/40 border-error/40 text-error"
                   }`}
                   title={backendConnected ? `Django REST API active on ${import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://wastechakra.onrender.com')}` : "Django API offline"}
                 >
-                  <span className={`w-2 h-2 rounded-full ${backendConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                  <span className={`w-2 h-2 rounded-full ${backendConnected ? "bg-secondary animate-pulse" : "bg-error"}`} />
                   <span>{backendConnected ? "API Online" : " Offline"}</span>
                 </div>
 
@@ -899,7 +899,7 @@ export default function WasteChakraSimulation() {
                     {/* Waste Input Selector Modal */}
                     {wasteInputOpen && (
                       <div
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest/70 backdrop-blur-sm"
                         onClick={() => setWasteInputOpen(false)}
                       >
                         <div
@@ -1073,7 +1073,7 @@ export default function WasteChakraSimulation() {
                   value={speed}
                   onChange={(e) => setSpeed(Number(e.target.value))}
                   className="w-32 waste-slider"
-                  style={{ background: `linear-gradient(to right, #006e2f ${((speed - 0.5) / 2.5) * 100}%, #e2e8f0 ${((speed - 0.5) / 2.5) * 100}%)` }}
+                  style={{ background: `linear-gradient(to right, #0d2a1a ${((speed - 0.5) / 2.5) * 100}%, #dce5db ${((speed - 0.5) / 2.5) * 100}%)` }}
                 />
                 <span className="text-xs text-text-muted w-10 font-mono-data">{speed}x</span>
               </div>
@@ -1083,16 +1083,16 @@ export default function WasteChakraSimulation() {
           {/* Final results */}
           {finalResult && (
             <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
-              <ResultCard label={t.input} value={`${finalResult.input} kg`} color="text-slate-700" />
-              <ResultCard label={t.recovered} value={`${finalResult.recovered} kg`} color="text-emerald-600" />
-              <ResultCard label={t.residual} value={`${finalResult.residual} kg`} color="text-amber-600" />
+              <ResultCard label={t.input} value={`${finalResult.input} kg`} color="text-on-surface-variant" />
+              <ResultCard label={t.recovered} value={`${finalResult.recovered} kg`} color="text-secondary" />
+              <ResultCard label={t.residual} value={`${finalResult.residual} kg`} color="text-error" />
               <ResultCard label={t.diversion} value={`${finalResult.diversion}%`} color="text-primary" />
-              <ResultCard label={t.recoveredValue} value={`₹${finalResult.recoveredValue.toLocaleString("en-IN")}`} color="text-teal-700" />
+              <ResultCard label={t.recoveredValue} value={`₹${finalResult.recoveredValue.toLocaleString("en-IN")}`} color="text-forest" />
             </div>
           )}
 
           {demoMode && finalResult && (
-            <div className="mt-4 text-center py-6 rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/10 to-teal-200/30">
+            <div className="mt-4 text-center py-6 rounded-2xl border border-primary/40 bg-gradient-to-r from-primary/10 to-secondary-container/30">
               <p className="text-2xl font-bold tracking-wider text-primary">{t.bannerTitle}</p>
               <p className="text-sm text-text-muted mt-1">{t.bannerSub(finalResult.diversion)}</p>
             </div>
@@ -1429,7 +1429,7 @@ function drawStageStatus(ctx, ps) {
     grad.addColorStop(0, "#ffffff");
     grad.addColorStop(1, "#f0fdf4");
     ctx.fillStyle = grad;
-    ctx.strokeStyle = "#22c55e";
+    ctx.strokeStyle = "#0d2a1a";
     ctx.lineWidth = 1.4;
     roundRect(ctx, bx, by, w, h, 12);
     ctx.fill();
@@ -1437,12 +1437,12 @@ function drawStageStatus(ctx, ps) {
     ctx.globalAlpha = 1;
 
     // Live dot
-    ctx.fillStyle = "#16a34a";
+    ctx.fillStyle = "#3d6a00";
     ctx.beginPath();
     ctx.arc(bx + 14, by + 22, 4 + Math.sin(now * 6) * 1.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.font = "bold 12px 'Space Grotesk', sans-serif";
-    ctx.fillStyle = "#085c2f";
+    ctx.fillStyle = "#00180b";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText("LIVE · " + action, bx + 26, by + 22);
@@ -1476,7 +1476,7 @@ function drawStageStatus(ctx, ps) {
     // Capsule background
     ctx.globalAlpha = 0.92;
     ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#22c55e";
+    ctx.strokeStyle = "#0d2a1a";
     ctx.lineWidth = 1.2;
     roundRect(ctx, bx, by, w, h, h / 2);
     ctx.fill();
@@ -1485,13 +1485,13 @@ function drawStageStatus(ctx, ps) {
 
     // Animated pulse dot
     const dotR = 2.5 + Math.sin(now * 6 + id.length) * 0.8;
-    ctx.fillStyle = "#16a34a";
+    ctx.fillStyle = "#3d6a00";
     ctx.beginPath();
     ctx.arc(bx + 9, by + h / 2, dotR, 0, Math.PI * 2);
     ctx.fill();
 
     // Text
-    ctx.fillStyle = "#085c2f";
+    ctx.fillStyle = "#00180b";
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillText(label, bx + padX + 3, by + h / 2 + 0.5);
@@ -1516,14 +1516,14 @@ function drawMachine(ctx, id, cx, cy, sel) {
   // Body with vertical gradient
   const bodyGrad = ctx.createLinearGradient(x, y, x, y + h);
   if (sel) {
-    bodyGrad.addColorStop(0, "#22c55e");
-    bodyGrad.addColorStop(1, "#15803d");
+    bodyGrad.addColorStop(0, "#0d2a1a");
+    bodyGrad.addColorStop(1, "#00180b");
   } else {
     bodyGrad.addColorStop(0, "#e2e8f0");
     bodyGrad.addColorStop(1, "#cbd5e1");
   }
   ctx.fillStyle = bodyGrad;
-  ctx.strokeStyle = sel ? "#15803d" : "#94a3b8";
+  ctx.strokeStyle = sel ? "#0d2a1a" : "#94a3b8";
   ctx.lineWidth = sel ? 3 : 2;
   roundRect(ctx, x, y, w, h, 6);
   ctx.fill();
@@ -1544,7 +1544,7 @@ function drawMachine(ctx, id, cx, cy, sel) {
   }
 
   // Top label bar
-  ctx.fillStyle = sel ? "#16a34a" : "#64748b";
+  ctx.fillStyle = sel ? "#3d6a00" : "#64748b";
   roundRect(ctx, x, y, w, 14, 6);
   ctx.fill();
   ctx.fillStyle = labelColor;
@@ -1776,17 +1776,17 @@ function drawQualitySensor(ctx, cx, cy) {
   ctx.fillStyle = "#334155";
   roundRect(ctx, cx - 22, cy - 14, 44, 28, 4);
   ctx.fill();
-  ctx.strokeStyle = "#16a34a";
+  ctx.strokeStyle = "#3d6a00";
   ctx.lineWidth = 1.5;
   ctx.stroke();
-  ctx.fillStyle = "#052e16";
+  ctx.fillStyle = "#00180b";
   roundRect(ctx, cx - 16, cy - 10, 32, 12, 2);
   ctx.fill();
-  ctx.fillStyle = "#4ade80";
+  ctx.fillStyle = "#abf854";
   ctx.font = "6px monospace";
   ctx.textAlign = "center";
   ctx.fillText("SCAN", cx, cy - 2);
-  ctx.strokeStyle = "#4ade80";
+  ctx.strokeStyle = "#abf854";
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i < 32; i++) {
@@ -2245,7 +2245,7 @@ function ParamSlider({ label, value, min, max, step, unit, onChange }) {
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full waste-slider"
-        style={{ background: `linear-gradient(to right, #006e2f ${pct}%, #e2e8f0 ${pct}%)` }}
+        style={{ background: `linear-gradient(to right, #0d2a1a ${pct}%, #dce5db ${pct}%)` }}
       />
     </div>
   );
