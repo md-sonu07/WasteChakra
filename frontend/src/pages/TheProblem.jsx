@@ -1,3 +1,4 @@
+import { Icon } from '../components/AppIcons';
 export default function TheProblem() {
   return (
     <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-space-3xl">
@@ -36,7 +37,7 @@ export default function TheProblem() {
             <div className="flex items-end justify-between mb-2">
               <span className="font-headline-md text-headline-md text-primary">87.4<span className="text-on-surface-variant text-xl">%</span></span>
               <span className="inline-flex items-center space-x-1 text-error bg-error-container/40 px-2 py-1 rounded-full border border-error/30">
-                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                <Icon name="warning" className="text-sm" />
                 <span className="font-label-sm text-label-sm font-bold">HIGH FLUCTUATION</span>
               </span>
             </div>
@@ -66,7 +67,7 @@ export default function TheProblem() {
             <h3 className="font-label-md text-label-md text-primary mb-4 uppercase border-b border-surface-container-highest pb-2">MATERIAL LOSS RATE</h3>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full border-4 border-error-container border-t-error flex items-center justify-center transform -rotate-45">
-                <span className="material-symbols-outlined text-error" style={{ fontVariationSettings: "'FILL' 1" }}>delete_sweep</span>
+                <Icon name="delete_sweep" className="text-error" />
               </div>
               <div>
                 <div className="font-label-sm text-label-sm text-on-surface-variant uppercase text-xs mb-1 font-bold tracking-wider">CURRENT INEFFICIENCY</div>

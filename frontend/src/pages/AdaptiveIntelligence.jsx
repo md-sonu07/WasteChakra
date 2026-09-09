@@ -1,3 +1,4 @@
+import { Icon } from '../components/AppIcons';
 export default function AdaptiveIntelligence() {
   return (
     <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-space-3xl flex flex-col gap-16">
@@ -22,7 +23,7 @@ export default function AdaptiveIntelligence() {
 
           <div className="bg-surface-container-lowest border border-surface-container-high rounded-[20px] p-6 flex flex-col items-start gap-4">
             <div className="w-10 h-10 border border-forest text-forest flex items-center justify-center bg-surface-container-low rounded-full">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>sensors</span>
+              <Icon name="sensors" className="" />
             </div>
             <div>
               <h3 className="font-headline-sm text-headline-sm text-primary mb-1">PHASE 01 // SENSE</h3>
@@ -32,7 +33,7 @@ export default function AdaptiveIntelligence() {
 
           <div className="bg-surface-container-lowest border border-surface-container-high rounded-[20px] p-6 flex flex-col items-start gap-4">
             <div className="w-10 h-10 border border-forest text-forest flex items-center justify-center bg-surface-container-low rounded-full">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
+              <Icon name="analytics" className="" />
             </div>
             <div>
               <h3 className="font-headline-sm text-headline-sm text-primary mb-1">PHASE 02 // ASSESS</h3>
@@ -42,7 +43,7 @@ export default function AdaptiveIntelligence() {
 
           <div className="border border-surface-container-high rounded-[20px] p-6 flex flex-col justify-between min-h-50 relative group hover:border-forest transition-colors">
             <div className="w-10 h-10 bg-secondary-container text-primary flex items-center justify-center rounded-full">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
+              <Icon name="tune" className="" />
             </div>
             <div>
               <h3 className="font-headline-sm text-headline-sm text-primary mb-1">PHASE 03 // ADJUST</h3>
@@ -52,7 +53,7 @@ export default function AdaptiveIntelligence() {
 
           <div className="bg-surface-container-lowest border border-surface-container-high rounded-[20px] p-6 flex flex-col items-start gap-4">
             <div className="w-10 h-10 bg-surface-container-high text-on-surface-variant flex items-center justify-center bg-surface-container-low rounded-full">
-              <span className="material-symbols-outlined">call_split</span>
+              <Icon name="call_split" className="" />
             </div>
             <div>
               <h3 className="font-headline-sm text-headline-sm text-primary mb-1">PHASE 04 // SEPARATE</h3>
@@ -65,7 +66,7 @@ export default function AdaptiveIntelligence() {
       {/* Telemetry Data Grid */}
       <section className="w-full">
         <h2 className="font-label-md text-label-md text-on-surface-variant mb-6 flex items-center gap-2 font-bold uppercase tracking-wider">
-          <span className="material-symbols-outlined text-[16px]">troubleshoot</span>
+          <Icon name="troubleshoot" className="text-[16px]" />
           LIVE TELEMETRY // SYSTEM CALIBRATION
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">

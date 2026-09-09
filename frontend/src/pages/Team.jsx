@@ -1,3 +1,4 @@
+import { Icon } from '../components/AppIcons';
 export default function Team() {
   const teamMembers = [
     {
@@ -67,7 +68,7 @@ export default function Team() {
             <h2 className="font-headline-lg text-headline-lg text-primary mb-2">Core Architecture Team</h2>
             <p className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Team Comestro Personnel</p>
           </div>
-          <span className="material-symbols-outlined text-4xl text-surface-container-highest">group_work</span>
+          <Icon name="group_work" className="text-4xl text-surface-container-highest" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-space-lg">
@@ -94,7 +95,7 @@ export default function Team() {
 
       {/* Join the Mission (Optional callout) */}
       <section className="mt-32 bg-surface-container-low border border-surface-container-high rounded-[28px] p-12 text-center technical-shadow">
-        <span className="material-symbols-outlined text-primary mb-4 text-3xl">science</span>
+        <Icon name="science" className="text-primary mb-4 text-3xl" />
         <h3 className="font-headline-lg text-headline-lg text-primary mb-4">DRIVEN BY DATA</h3>
         <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
           We don't guess. We measure, adapt, and refine. If you are passionate about applying rigorous engineering to decentralized resource recovery, our mission is just beginning.

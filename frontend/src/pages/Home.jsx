@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { Icon } from '../components/AppIcons';
+
 export default function Home() {
   return (
     <div className="w-full">
@@ -21,49 +24,59 @@ export default function Home() {
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-[#164a35] backdrop-blur-md border border-[#1e5c43] w-fit">
               <span className="font-bold text-sm text-white">4.9</span>
               <div className="flex text-[#F59E0B]">
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
+                <Icon name="star" className="text-[14px]" />
+                <Icon name="star" className="text-[14px]" />
+                <Icon name="star" className="text-[14px]" />
+                <Icon name="star" className="text-[14px]" />
+                <Icon name="star" className="text-[14px]" />
               </div>
               <span className="text-white/90 text-sm font-medium">5K+ Reviews</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-5xl md:text-[68px] leading-[1.05] text-white font-bold tracking-tight">
-              Clean-safe-reliable<br />
+              Clean, safe, reliable<br />
               waste <span className="text-[#A8E05A]">management</span><br />
               for home &amp; business
             </h1>
 
             {/* Subheadline */}
             <p className="text-white/80 text-base md:text-lg max-w-2xl mt-2 leading-relaxed">
-              Keep your property clean with dependable waste management and junk removal services for homes and businesses, delivering timely collection, responsible disposal, and environmentally friendly solutions.
+              Turning unpredictable waste into measurable resources through smart collection, adaptive processing and responsible recovery.
             </p>
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-6 mt-4">
-              <a
+              <Link
                 className="group inline-flex items-center justify-center gap-3 pl-6 pr-2 py-2 rounded-full bg-[#A8E05A] text-[#0a3a2a] font-bold hover:bg-[#96d048] hover:shadow-[0_8px_24px_-6px_rgba(168,224,90,0.4)] transition-all duration-300"
-                href="#quote"
+                to="/app/report"
               >
-                <span className="text-sm tracking-wide">Book Now Online</span>
+                <span className="text-sm tracking-wide">Report Waste</span>
                 <span className="w-8 h-8 rounded-full bg-[#82bc33] flex items-center justify-center group-hover:bg-[#72a62a] transition-colors duration-300">
-                  <span className="material-symbols-outlined text-[18px] group-hover:rotate-45 transition-transform duration-300 -rotate-45">arrow_forward</span>
+                  <Icon name="arrow_forward" className="text-[18px] group-hover:rotate-45 transition-transform duration-300 -rotate-45" />
                 </span>
-              </a>
+              </Link>
+
+              <Link
+                className="group inline-flex items-center justify-center gap-3 pl-6 pr-2 py-2 rounded-full border-2 border-[#A8E05A]/40 text-white font-bold hover:bg-white/10 hover:border-[#A8E05A] transition-all duration-300"
+                to="/app/pickups"
+              >
+                <span className="text-sm tracking-wide">Schedule Pickup</span>
+                <span className="w-8 h-8 rounded-full bg-[#A8E05A]/20 flex items-center justify-center group-hover:bg-[#A8E05A] group-hover:text-[#0a3a2a] transition-all duration-300">
+                  <Icon name="schedule" className="text-[18px]" />
+                </span>
+              </Link>
 
               <a
-                className="group inline-flex items-center gap-4 py-2 text-white transition-all duration-300"
-                href="tel:1800242572"
+                className="group inline-flex items-center gap-3 pl-2 pr-2 py-2 text-white/90 hover:text-[#A8E05A] transition-all duration-300"
+                href="/simulation"
               >
-                <span className="w-12 h-12 rounded-full bg-[#A8E05A] flex items-center justify-center text-[#0a3a2a] group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(168,224,90,0.3)]">
-                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: '"FILL" 1' }}>call</span>
+                <span className="w-11 h-11 rounded-full bg-[#A8E05A]/10 border border-[#A8E05A]/40 flex items-center justify-center group-hover:bg-[#A8E05A] group-hover:text-[#0a3a2a] transition-all duration-300">
+                  <Icon name="view_in_ar" className="text-[20px]" />
                 </span>
                 <span className="flex flex-col items-start justify-center">
-                  <span className="text-[11px] uppercase tracking-wider text-white/70 font-semibold leading-none mb-1">Call Us Anytime</span>
-                  <span className="text-base font-bold text-white leading-none tracking-wide">+880 (8907) 202</span>
+                  <span className="text-[11px] uppercase tracking-wider text-white/70 font-semibold leading-none mb-1">Explore</span>
+                  <span className="text-sm font-bold text-white leading-none">3D Simulation</span>
                 </span>
               </a>
             </div>
@@ -113,6 +126,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 2.75 QUICK ACTIONS */}
+      <section className="w-full py-12 md:py-space-xl bg-surface">
+        <div className="w-full max-w-container-max mx-auto px-gutter">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-space-md">
+            {[
+              { title: 'Report Waste', desc: 'Upload a picture of garbage and we dispatch a pickup.', icon: 'photo_camera', to: '/app/report', tone: 'bg-[#A8E05A]' },
+              { title: 'Schedule Pickup', desc: 'Request waste collection from your home.', icon: 'home_work', to: '/app/pickups', tone: 'bg-[#0d2a1a]' },
+              { title: 'Find Waste Nearby', desc: 'View waste reports, collection points and community events.', icon: 'location_searching', to: '/app/map', tone: 'bg-[#3d6a00]' },
+              { title: 'Recycle With Us', desc: 'Learn how to submit recyclable materials.', icon: 'recycling', to: '/community', tone: 'bg-[#e2ebe1]' },
+            ].map((a) => (
+              <Link
+                key={a.title}
+                to={a.to}
+                className="group p-6 rounded-[24px] bg-surface-container-lowest border border-surface-container-high/80 hover:border-secondary hover:shadow-lg transition-all flex flex-col gap-4"
+              >
+                <span className={`w-12 h-12 rounded-2xl ${a.tone} text-white flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <Icon name={a.icon} className="text-[26px]" />
+                </span>
+                <div>
+                  <h3 className="font-title-md text-title-md text-primary font-bold">{a.title}</h3>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{a.desc}</p>
+                </div>
+                <span className="inline-flex items-center gap-1 font-label-sm text-label-sm font-bold text-secondary group-hover:text-primary transition-colors">
+                  Open <Icon name="arrow_forward" className="text-[16px]" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 3. ABOUT US & GET FREE QUOTE (Clean 2-Column Section) */}
       <section className="w-full py-16 md:py-space-3xl bg-surface" id="about">
         <div className="w-full max-w-container-max mx-auto px-gutter">
@@ -134,7 +178,7 @@ export default function Home() {
               <ul className="flex flex-col gap-4 mt-2">
                 <li className="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-lowest border border-surface-container-high/50 hover:border-secondary-container/50 hover:shadow-md transition-all duration-300 group">
                   <span className="w-10 h-10 shrink-0 rounded-xl bg-secondary-container/40 flex items-center justify-center text-primary group-hover:bg-secondary-container transition-colors duration-300">
-                    <span className="material-symbols-outlined text-[20px]">eco</span>
+                    <Icon name="eco" className="text-[20px]" />
                   </span>
                   <div className="flex flex-col pt-0.5">
                     <span className="font-bold text-primary text-sm tracking-wide">Licensed &amp; insured crews</span>
@@ -144,7 +188,7 @@ export default function Home() {
 
                 <li className="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-lowest border border-surface-container-high/50 hover:border-secondary-container/50 hover:shadow-md transition-all duration-300 group">
                   <span className="w-10 h-10 shrink-0 rounded-xl bg-secondary-container/40 flex items-center justify-center text-primary group-hover:bg-secondary-container transition-colors duration-300">
-                    <span className="material-symbols-outlined text-[20px]">recycling</span>
+                    <Icon name="recycling" className="text-[20px]" />
                   </span>
                   <div className="flex flex-col pt-0.5">
                     <span className="font-bold text-primary text-sm tracking-wide">Certified downstream partners</span>
@@ -154,7 +198,7 @@ export default function Home() {
 
                 <li className="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-lowest border border-surface-container-high/50 hover:border-secondary-container/50 hover:shadow-md transition-all duration-300 group">
                   <span className="w-10 h-10 shrink-0 rounded-xl bg-secondary-container/40 flex items-center justify-center text-primary group-hover:bg-secondary-container transition-colors duration-300">
-                    <span className="material-symbols-outlined text-[20px]">verified</span>
+                    <Icon name="verified" className="text-[20px]" />
                   </span>
                   <div className="flex flex-col pt-0.5">
                     <span className="font-bold text-primary text-sm tracking-wide">Digital ESG reporting</span>
@@ -195,17 +239,17 @@ export default function Home() {
                       <option>E-Waste &amp; Hazardous</option>
                       <option>Zero-Landfill Audit</option>
                     </select>
-                    <span className="material-symbols-outlined absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+                    <Icon name="expand_more" className="absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
                   </div>
                 </div>
 
                 <button type="submit" className="group mt-2 cursor-pointer inline-flex items-center justify-center gap-3 w-full px-6 md:px-8 py-3 md:py-4 rounded-xl bg-secondary-container text-primary font-bold hover:bg-[#bbfb64] hover:-translate-y-1 hover:shadow-[0_8px_24px_-6px_rgba(171,248,84,0.4)] transition-all duration-300 border border-secondary-container">
                   <span className="text-sm md:text-base tracking-wide">Request Callback</span>
                   <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-                    <span className="material-symbols-outlined text-[16px] md:text-[18px] group-hover:rotate-45 transition-transform duration-300">north_east</span>
+                    <Icon name="north_east" className="text-[16px] md:text-[18px] group-hover:rotate-45 transition-transform duration-300" />
                   </span>
                 </button>
-                <p className="text-center font-label-sm text-[11px] md:text-[12px] text-on-surface-variant/80 mt-1 flex items-center justify-center gap-1.5"><span className="material-symbols-outlined text-[14px]">verified_user</span> No obligation · Free on-site assessment</p>
+                <p className="text-center font-label-sm text-[11px] md:text-[12px] text-on-surface-variant/80 mt-1 flex items-center justify-center gap-1.5"><Icon name="verified_user" className="text-[14px]" /> No obligation · Free on-site assessment</p>
               </form>
             </div>
           </div>
@@ -232,80 +276,80 @@ export default function Home() {
             <div className="p-6 md:p-space-lg rounded-[24px] bg-surface-container-lowest border border-surface-container-high/80 hover:border-secondary hover:shadow-lg transition-all flex flex-col justify-between group">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-space-md transition-colors">
-                  <span className="material-symbols-outlined text-[26px]">delete_sweep</span>
+                  <Icon name="delete_sweep" className="text-[26px]" />
                 </div>
                 <h3 className="font-title-md text-title-md text-primary font-bold mb-space-xs">Residential &amp; Composting</h3>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-space-md">
                   Weekly scheduled trash, organic food scraps, and yard waste diverted straight to community compost facilities.
                 </p>
                 <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm border-t border-surface-container-high/50 pt-space-sm mb-space-md">
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Bi-weekly smart bin audits</li>
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Zero-odor seal containers</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Bi-weekly smart bin audits</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Zero-odor seal containers</li>
                 </ul>
               </div>
               <a className="inline-flex items-center gap-1 font-label-md text-label-md font-bold text-secondary hover:text-primary transition-colors" href="#quote">
                 <span>Explore Plans</span>
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <Icon name="arrow_forward" className="text-[16px]" />
               </a>
             </div>
 
             <div className="p-space-lg rounded-[24px] bg-surface-container-lowest border border-surface-container-high/80 hover:border-secondary hover:shadow-lg transition-all flex flex-col justify-between group">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-space-md transition-colors">
-                  <span className="material-symbols-outlined text-[26px]">corporate_fare</span>
+                  <Icon name="corporate_fare" className="text-[26px]" />
                 </div>
                 <h3 className="font-title-md text-title-md text-primary font-bold mb-space-xs">Commercial Bulk Collection</h3>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-space-md">
                   High-capacity roll-off dumpsters, compactors, and ongoing collection contracts tailored for offices, retail, and hospitality.
                 </p>
                 <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm border-t border-surface-container-high/50 pt-space-sm mb-space-md">
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Flexible nightly scheduling</li>
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Monthly diversion analytics</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Flexible nightly scheduling</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Monthly diversion analytics</li>
                 </ul>
               </div>
               <a className="inline-flex items-center gap-1 font-label-md text-label-md font-bold text-secondary hover:text-primary transition-colors" href="#quote">
                 <span>Commercial Rates</span>
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <Icon name="arrow_forward" className="text-[16px]" />
               </a>
             </div>
 
             <div className="p-space-lg rounded-[24px] bg-surface-container-lowest border border-surface-container-high/80 hover:border-secondary hover:shadow-lg transition-all flex flex-col justify-between group">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-space-md transition-colors">
-                  <span className="material-symbols-outlined text-[26px]">devices_other</span>
+                  <Icon name="devices_other" className="text-[26px]" />
                 </div>
                 <h3 className="font-title-md text-title-md text-primary font-bold mb-space-xs">E-Waste &amp; Hazardous</h3>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-space-md">
                   Certified data destruction and precious metal recovery for computers, batteries, solar units, and chemicals.
                 </p>
                 <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm border-t border-surface-container-high/50 pt-space-sm mb-space-md">
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> R2v3 certified downstream</li>
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Certificate of destruction</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> R2v3 certified downstream</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Certificate of destruction</li>
                 </ul>
               </div>
               <a className="inline-flex items-center gap-1 font-label-md text-label-md font-bold text-secondary hover:text-primary transition-colors" href="#quote">
                 <span>E-Waste Protocol</span>
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <Icon name="arrow_forward" className="text-[16px]" />
               </a>
             </div>
 
             <div className="p-space-lg rounded-[24px] bg-surface-container-lowest border border-surface-container-high/80 hover:border-secondary hover:shadow-lg transition-all flex flex-col justify-between group">
               <div>
                 <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-space-md transition-colors">
-                  <span className="material-symbols-outlined text-[26px]">precision_manufacturing</span>
+                  <Icon name="precision_manufacturing" className="text-[26px]" />
                 </div>
                 <h3 className="font-title-md text-title-md text-primary font-bold mb-space-xs">Zero-Landfill Audit</h3>
                 <p className="font-label-sm text-label-sm text-on-surface-variant mb-space-md">
                   Comprehensive onsite waste stream auditing for manufacturing facilities striving for TRUE zero-waste certification.
                 </p>
                 <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm border-t border-surface-container-high/50 pt-space-sm mb-space-md">
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> ESG compliance reporting</li>
-                  <li className="flex items-center gap-1.5"><span className="material-symbols-outlined text-secondary text-[16px]">check_circle</span> Circular byproduct matching</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> ESG compliance reporting</li>
+                  <li className="flex items-center gap-1.5"><Icon name="check_circle" className="text-secondary text-[16px]" /> Circular byproduct matching</li>
                 </ul>
               </div>
               <a className="inline-flex items-center gap-1 font-label-md text-label-md font-bold text-secondary hover:text-primary transition-colors" href="#quote">
                 <span>Schedule Audit</span>
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <Icon name="arrow_forward" className="text-[16px]" />
               </a>
             </div>
           </div>
@@ -332,7 +376,7 @@ export default function Home() {
                   <a className="inline-flex items-center gap-space-xs pl-space-md pr-space-xs py-space-xs rounded-full bg-primary text-on-primary hover:bg-primary-container transition-all font-label-md text-label-md font-bold shadow-sm" href="#quote">
                     <span>Get Started Now</span>
                     <span className="w-6 h-6 rounded-full bg-surface-container-high/20 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-[16px]">north_east</span>
+                      <Icon name="north_east" className="text-[16px]" />
                     </span>
                   </a>
                 </div>
@@ -349,7 +393,7 @@ export default function Home() {
                 <div className="flex-1 flex flex-col gap-space-xs">
                   <div className="flex items-center gap-space-xs mb-space-xxs">
                     <span className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary shrink-0">
-                      <span className="material-symbols-outlined text-[18px]">recycling</span>
+                      <Icon name="recycling" className="text-[18px]" />
                     </span>
                     <h3 className="font-title-md text-title-md text-primary font-bold">Mission — Building zero waste</h3>
                   </div>
@@ -358,11 +402,11 @@ export default function Home() {
                   </p>
                   <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm pt-space-xs">
                     <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
+                      <Icon name="check" className="text-secondary text-[16px]" />
                       <span>Responsible waste collection</span>
                     </li>
                     <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
+                      <Icon name="check" className="text-secondary text-[16px]" />
                       <span>Sustainable community impact</span>
                     </li>
                   </ul>
@@ -376,7 +420,7 @@ export default function Home() {
                 <div className="flex-1 flex flex-col gap-space-xs">
                   <div className="flex items-center gap-space-xs mb-space-xxs">
                     <span className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary shrink-0">
-                      <span className="material-symbols-outlined text-[18px]">eco</span>
+                      <Icon name="eco" className="text-[18px]" />
                     </span>
                     <h3 className="font-title-md text-title-md text-primary font-bold">Vision — Greener future vision</h3>
                   </div>
@@ -385,11 +429,11 @@ export default function Home() {
                   </p>
                   <ul className="flex flex-col gap-space-xxs text-primary font-label-sm text-label-sm pt-space-xs">
                     <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
+                      <Icon name="check" className="text-secondary text-[16px]" />
                       <span>Long-term environmental protection</span>
                     </li>
                     <li className="flex items-center gap-space-xs">
-                      <span className="material-symbols-outlined text-secondary text-[16px]">check</span>
+                      <Icon name="check" className="text-secondary text-[16px]" />
                       <span>Advanced recycling solutions</span>
                     </li>
                   </ul>
@@ -429,7 +473,7 @@ export default function Home() {
                 Select your waste volume, pickup window, and location in under 2 minutes. Receive upfront transparent pricing instantly.
               </p>
               <div className="mt-auto flex items-center gap-2 text-secondary font-label-sm text-label-sm font-bold">
-                <span className="material-symbols-outlined text-[18px]">touch_app</span>
+                <Icon name="touch_app" className="text-[18px]" />
                 Instant digital dispatch
               </div>
             </div>
@@ -443,7 +487,7 @@ export default function Home() {
                 Our uniformed, insured field crew arrives on schedule with low-emission collection vehicles. We sort and load all materials safely.
               </p>
               <div className="mt-auto flex items-center gap-2 text-secondary font-label-sm text-label-sm font-bold">
-                <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+                <Icon name="local_shipping" className="text-[18px]" />
                 Real-time GPS tracking
               </div>
             </div>
@@ -457,7 +501,7 @@ export default function Home() {
                 Items are transferred to our circular sorting hubs. Organics become compost, recyclables rejoin manufacturing streams, and junk is responsibly handled.
               </p>
               <div className="mt-auto flex items-center gap-2 text-secondary font-label-sm text-label-sm font-bold">
-                <span className="material-symbols-outlined text-[18px]">compost</span>
+                <Icon name="compost" className="text-[18px]" />
                 ESG diversion receipt issued
               </div>
             </div>
@@ -555,11 +599,11 @@ export default function Home() {
             <div className="bg-surface-container-lowest p-space-xl rounded-[24px] border border-surface-container-high/70 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex text-secondary mb-space-sm">
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
                 </div>
                 <p className="font-body-md text-body-md text-primary italic mb-space-md">
                   "WasteChakra transformed our city center retail complex. Pickups happen like clockwork before store opening hours, and our landfill diversion metrics climbed from 35% to 88% in six months."
@@ -577,11 +621,11 @@ export default function Home() {
             <div className="bg-surface-container-lowest p-space-xl rounded-[24px] border border-surface-container-high/70 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex text-secondary mb-space-sm">
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
                 </div>
                 <p className="font-body-md text-body-md text-primary italic mb-space-md">
                   "Their on-demand bulky junk removal saved our residential association thousands in municipal fines. Professional crew, courteous drivers, and spotless cleanups every single time."
@@ -599,11 +643,11 @@ export default function Home() {
             <div className="bg-surface-container-lowest p-space-xl rounded-[24px] border border-surface-container-high/70 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex text-secondary mb-space-sm">
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
-                  <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: '"FILL" 1' }}>star</span>
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
+                  <Icon name="star" className="text-[18px]" />
                 </div>
                 <p className="font-body-md text-body-md text-primary italic mb-space-md">
                   "The digital manifest tracking makes ESG reporting so effortless. We have verifiable paperwork for every ton of e-waste and recycled plastics. Exceptional team."
@@ -639,10 +683,10 @@ export default function Home() {
               <div className="flex flex-wrap items-center justify-center gap-space-sm pt-space-xs">
                 <a className="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-secondary-container text-primary font-label-md text-label-md font-bold hover:bg-secondary-fixed-dim transition-all shadow-lg" href="#quote">
                   <span>Get Your Custom Quote</span>
-                  <span className="material-symbols-outlined text-[18px]">north_east</span>
+                  <Icon name="north_east" className="text-[18px]" />
                 </a>
                 <a className="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-surface-container-high/15 hover:bg-surface-container-high/25 text-surface-bright font-label-md text-label-md font-bold transition-colors" href="tel:1800242572">
-                  <span className="material-symbols-outlined text-[18px]">call</span>
+                  <Icon name="call" className="text-[18px]" />
                   <span>Speak with Dispatch</span>
                 </a>
               </div>

@@ -1,3 +1,4 @@
+import { Icon } from '../components/AppIcons';
 export default function Impact() {
   return (
     <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-space-3xl">
@@ -37,7 +38,7 @@ export default function Impact() {
           <div className="lg:col-span-4 flex flex-col gap-space-lg">
             <div className="bg-surface-container-lowest border border-surface-container-high rounded-[24px] p-8 flex flex-col justify-between h-full group hover:border-forest transition-colors technical-shadow">
               <div className="flex justify-between items-start mb-8">
-                <span className="material-symbols-outlined text-primary text-3xl">delete_sweep</span>
+                <Icon name="delete_sweep" className="text-primary text-3xl" />
                 <span className="font-label-sm text-label-sm text-on-surface-variant">STAT-01</span>
               </div>
               <div>
@@ -49,7 +50,7 @@ export default function Impact() {
 
             <div className="bg-surface-container-lowest border border-surface-container-high rounded-[24px] p-8 flex flex-col justify-between h-full group hover:border-forest transition-colors technical-shadow">
               <div className="flex justify-between items-start mb-8">
-                <span className="material-symbols-outlined text-forest text-3xl">bolt</span>
+                <Icon name="bolt" className="text-forest text-3xl" />
                 <span className="font-label-sm text-label-sm text-on-surface-variant">STAT-02</span>
               </div>
               <div>
@@ -61,7 +62,7 @@ export default function Impact() {
 
             <div className="bg-surface-container-lowest border border-surface-container-high rounded-[24px] p-8 flex flex-col justify-between h-full group hover:border-forest transition-colors technical-shadow">
               <div className="flex justify-between items-start mb-8">
-                <span className="material-symbols-outlined text-secondary text-3xl">co2</span>
+                <Icon name="co2" className="text-secondary text-3xl" />
                 <span className="font-label-sm text-label-sm text-on-surface-variant">STAT-03</span>
               </div>
               <div>
@@ -87,15 +88,15 @@ export default function Impact() {
               </p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  <Icon name="check_circle" className="text-secondary mt-1" />
                   <span className="font-body-md text-body-md text-on-surface-variant">Eliminates heavy transport logistics to distant landfills.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  <Icon name="check_circle" className="text-secondary mt-1" />
                   <span className="font-body-md text-body-md text-on-surface-variant">Recovers valuable recyclables before they are contaminated.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary mt-1" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  <Icon name="check_circle" className="text-secondary mt-1" />
                   <span className="font-body-md text-body-md text-on-surface-variant">Produces a predictable, commodity-grade energy resource.</span>
                 </li>
               </ul>
@@ -103,7 +104,7 @@ export default function Impact() {
             <div className="bg-surface-container-lowest border border-surface-container-high rounded-[24px] p-8 flex flex-col justify-center technical-shadow">
               <div className="flex items-center gap-4 mb-8 pb-8 border-b border-surface-container-highest">
                 <div className="w-16 h-16 bg-secondary-container/20 flex items-center justify-center rounded-2xl text-forest">
-                  <span className="material-symbols-outlined text-3xl">recycling</span>
+                  <Icon name="recycling" className="text-3xl" />
                 </div>
                 <div>
                   <div className="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">RESOURCE RECOVERY</div>
@@ -112,7 +113,7 @@ export default function Impact() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-forest/10 flex items-center justify-center rounded-2xl text-forest">
-                  <span className="material-symbols-outlined text-3xl">account_balance</span>
+                  <Icon name="account_balance" className="text-3xl" />
                 </div>
                 <div>
                   <div className="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">ECONOMIC VIABILITY</div>

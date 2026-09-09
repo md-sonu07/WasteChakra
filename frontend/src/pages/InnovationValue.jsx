@@ -1,3 +1,4 @@
+import { Icon } from '../components/AppIcons';
 export default function InnovationValue() {
   return (
     <div className="grow max-w-360 mx-auto w-full">
@@ -29,7 +30,7 @@ export default function InnovationValue() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
           <div className="data-card p-8 group hover:border-forest transition-colors duration-300 flex flex-col">
             <div className="flex justify-between items-start mb-12">
-              <span className="material-symbols-outlined text-primary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>memory</span>
+              <Icon name="memory" className="text-primary text-4xl" />
               <span className="font-label-md text-label-md text-on-surface-variant">ID: TECH-01</span>
             </div>
             <h3 className="font-headline-md text-headline-md text-primary mb-4">Established Tech</h3>
@@ -43,7 +44,7 @@ export default function InnovationValue() {
 
           <div className="data-card p-8 group hover:border-forest transition-colors duration-300 flex flex-col">
             <div className="flex justify-between items-start mb-12">
-              <span className="material-symbols-outlined text-secondary text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
+              <Icon name="tune" className="text-secondary text-4xl" />
               <span className="font-label-md text-label-md text-on-surface-variant">ID: ADPT-02</span>
             </div>
             <h3 className="font-headline-md text-headline-md text-primary mb-4">Adaptive Control</h3>
@@ -57,7 +58,7 @@ export default function InnovationValue() {
 
           <div className="data-card p-8 group hover:border-forest transition-colors duration-300 flex flex-col">
             <div className="flex justify-between items-start mb-12">
-              <span className="material-symbols-outlined text-forest text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>fact_check</span>
+              <Icon name="fact_check" className="text-forest text-4xl" />
               <span className="font-label-md text-label-md text-on-surface-variant">ID: STD-03</span>
             </div>
             <h3 className="font-headline-md text-headline-md text-primary mb-4">Output Standardization</h3>
@@ -94,7 +95,7 @@ export default function InnovationValue() {
             <div className="flex-grow flex items-center justify-center relative min-h-[200px]">
               <div className="hidden lg:block absolute w-full h-px bg-surface-container-highest top-1/2 -z-10"></div>
               <div className="w-32 h-32 rounded-full border-2 border-forest flex items-center justify-center bg-surface-container-lowest shadow-[0_0_20px_rgba(13,42,26,0.15)] relative">
-                <span className="material-symbols-outlined text-forest text-5xl animate-spin" style={{ animationDuration: '4s' }}>sync</span>
+                <Icon name="sync" className="text-forest text-5xl animate-spin" style={{ animationDuration: '4s' }} />
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm whitespace-nowrap bg-surface-container-lowest px-2 rounded-full border border-surface-container-high">
                   PROCESSING_CORE
                 </div>
@@ -107,7 +108,7 @@ export default function InnovationValue() {
                   <span className="font-label-sm text-label-sm text-on-surface-variant block font-bold tracking-wider">OUT_A</span>
                   <span className="font-headline-md text-headline-md text-primary">Recyclables</span>
                 </div>
-                <span className="material-symbols-outlined text-forest">recycling</span>
+                <Icon name="recycling" className="text-forest" />
               </div>
 
               <div className="data-card p-4 border-r-4 border-r-secondary-container flex items-center justify-between">
@@ -115,7 +116,7 @@ export default function InnovationValue() {
                   <span className="font-label-sm text-label-sm text-on-surface-variant block font-bold tracking-wider">OUT_B</span>
                   <span className="font-headline-md text-headline-md text-primary">Refuse-Derived Fuel (RDF)</span>
                 </div>
-                <span className="material-symbols-outlined text-secondary">local_fire_department</span>
+                <Icon name="local_fire_department" className="text-secondary" />
               </div>
 
               <div className="data-card p-4 border-r-4 border-r-primary flex items-center justify-between">
@@ -123,7 +124,7 @@ export default function InnovationValue() {
                   <span className="font-label-sm text-label-sm text-on-surface-variant block font-bold tracking-wider">OUT_C</span>
                   <span className="font-headline-md text-headline-md text-primary">Organic Fraction</span>
                 </div>
-                <span className="material-symbols-outlined text-primary">compost</span>
+                <Icon name="compost" className="text-primary" />
               </div>
             </div>
           </div>

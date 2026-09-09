@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Icon } from '../components/AppIcons';
 
 export default function FinalCTA() {
   return (
@@ -32,7 +33,7 @@ export default function FinalCTA() {
               <Link to="/impact" className="group relative inline-flex items-center justify-center bg-secondary-container text-primary font-label-md font-bold px-8 py-5 text-sm rounded-full transition-all hover:bg-secondary-fixed-dim shadow-lg overflow-hidden">
                 <span className="relative z-10 flex items-center gap-2">
                   REQUEST TECHNICAL SPECIFICATIONS
-                  <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                  <Icon name="arrow_forward" className="text-sm group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
               <Link to="/simulation" className="inline-flex items-center justify-center font-label-md font-bold text-primary bg-surface-container hover:bg-surface-container-high rounded-full border border-surface-container-high px-8 py-5 text-sm transition-colors">

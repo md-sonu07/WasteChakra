@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../components/AppIcons';
 
 export default function SystemProcess() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function SystemProcess() {
           <img className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-transform duration-700 ease-in-out" src="/images/system.png" alt="System Architecture" />
 
           <div className="absolute inset-0 bg-forest/0 group-hover:bg-forest/10 transition-colors flex items-center justify-center pointer-events-none">
-            <span className="material-symbols-outlined text-transparent group-hover:text-forest transition-colors text-6xl drop-shadow-md">zoom_in</span>
+            <Icon name="zoom_in" className="text-transparent group-hover:text-forest transition-colors text-6xl drop-shadow-md" />
           </div>
         </div>
 
@@ -79,7 +80,7 @@ export default function SystemProcess() {
             <div key={seq.id} className="bg-surface-container-lowest border border-surface-container-high rounded-[20px] p-6 hover:border-forest transition-colors cursor-pointer group relative">
               <div className="absolute top-3 right-3 font-label-sm text-label-sm text-on-surface-variant">SEQ: {seq.id}</div>
               <div className={`w-10 h-10 rounded-full ${seq.accent === 'secondary' ? 'bg-secondary-container/30 text-secondary' : 'bg-forest/10 text-forest'} flex items-center justify-center mb-4 transition-colors`}>
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>{seq.icon}</span>
+                <Icon name={seq.icon} className="" />
               </div>
               <h3 className="font-title-md text-title-md font-semibold text-primary mb-2">{seq.title}</h3>
               <p className="font-body-md text-body-md text-on-surface-variant line-clamp-3">{seq.desc}</p>
@@ -102,7 +103,7 @@ export default function SystemProcess() {
                 setIsImageModalOpen(false);
               }}
             >
-              <span className="material-symbols-outlined">close</span>
+              <Icon name="close" className="" />
             </button>
             <img
               src="/images/system.png"
