@@ -52,7 +52,7 @@ export default function About() {
           <span>✳</span>
           <span>About WasteChakra</span>
         </div>
-        <h1 className="font-headline-lg text-headline-lg-mobile md:text-display-hero text-primary font-bold tracking-tight max-w-4xl leading-tight">
+        <h1 className="font-headline-lg text-headline-lg-mobile md:text-display-hero text-primary font-bold tracking-tight max-w-5xl leading-tight">
           Responsible waste management, <span className="text-transparent bg-clip-text bg-gradient-to-r from-forest to-secondary">measurable recovery</span>
         </h1>
         <p className="font-body-lg text-body-lg text-on-surface-variant mt-space-md max-w-2xl">
