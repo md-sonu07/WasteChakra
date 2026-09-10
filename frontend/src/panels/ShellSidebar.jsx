@@ -9,8 +9,8 @@ export default function ShellSidebar({ items }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-5 flex items-center gap-3 border-b border-white/10">
-        <img alt="WasteChakra" className="h-9 w-auto object-contain bg-white rounded-lg p-1" src="/images/logo-aida.png" />
+      <div className="p-2 flex items-center gap-3 border-b border-white/10">
+        <img alt="WasteChakra" className="h-12 w-full object-contain bg-white rounded-lg " src="/images/logo-aida.png" />
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         {items.map((item) => (
