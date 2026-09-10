@@ -148,7 +148,7 @@ export default function Layout() {
         )}
       </nav>
 
-      <main className="flex-grow flex flex-col items-center w-full">
+      <main className="flex-grow pt-20 flex flex-col items-center w-full">
         <Outlet />
       </main>
 

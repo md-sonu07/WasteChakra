@@ -140,23 +140,21 @@ export default function CitizenProfile() {
               { key: 'weeklySummary', label: 'Weekly Summary', desc: 'Weekly impact recap' },
               { key: 'promotional', label: 'Promotions', desc: 'Event and reward updates' },
             ].map((item) => (
-              <>
-                <label key={item.key} className="flex items-center justify-between gap-3 p-4 rounded-xl border border-surface-container-high/50 bg-surface-container-lowest hover:border-secondary/50 hover:bg-surface transition-colors cursor-pointer group">
-                  <div>
-                    <p className="font-body-md text-primary font-bold group-hover:text-[#0a3a2a] transition-colors">{item.label}</p>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{item.desc}</p>
-                  </div>
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={settings[item.key]}
-                      onChange={(e) => setSettings({ ...settings, [item.key]: e.target.checked })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#A8E05A]"></div>
-                  </div>
-                </label>
-              </>
+              <label key={item.key} className="flex items-center justify-between gap-3 p-4 rounded-xl border border-surface-container-high/50 bg-surface-container-lowest hover:border-secondary/50 hover:bg-surface transition-colors cursor-pointer group">
+                <div>
+                  <p className="font-body-md text-primary font-bold group-hover:text-[#0a3a2a] transition-colors">{item.label}</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">{item.desc}</p>
+                </div>
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={settings[item.key]}
+                    onChange={(e) => setSettings({ ...settings, [item.key]: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#A8E05A]"></div>
+                </div>
+              </label>
             ))}
           </div>
           <div className="pt-4 flex w-full  justify-center">
