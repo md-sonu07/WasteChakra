@@ -25,9 +25,18 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
 
+    ALLOWED_ROLES = ['CITIZEN', 'COLLECTOR', 'BUSINESS', 'FACILITY_MANAGER']
+
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name']
+        fields = ['email', 'username', 'password', 'password_confirm', 'first_name', 'last_name', 'role']
+
+    def validate_role(self, value):
+        if value and value not in self.ALLOWED_ROLES:
+            raise serializers.ValidationError(
+                f"Invalid role. Allowed: {', '.join(self.ALLOWED_ROLES)}"
+            )
+        return value or 'CITIZEN'
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -38,6 +47,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         user = User.objects.create_user(**validated_data)
         UserProfile.objects.create(user=user)
+        # Auto-create CollectorProfile if role is COLLECTOR
+        if user.role == 'COLLECTOR':
+            CollectorProfile.objects.create(user=user)
         return user
 
 

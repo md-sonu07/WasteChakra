@@ -4,10 +4,24 @@ import { useAuth } from '../context/AuthContext';
 import { Spinner } from '../components/ui';
 import { Icon } from '../components/AppIcons';
 
+const ROLES = [
+  { value: 'CITIZEN', label: 'Citizen', icon: 'person', desc: 'Report waste & schedule pickups' },
+  { value: 'COLLECTOR', label: 'Collector', icon: 'local_shipping', desc: 'Collect & transport waste' },
+  { value: 'BUSINESS', label: 'Business', icon: 'business_center', desc: 'Manage business waste' },
+  { value: 'FACILITY_MANAGER', label: 'Facility Manager', icon: 'factory', desc: 'Manage processing facility' },
+];
+
+const homeFor = (role) => {
+  if (role === 'COLLECTOR') return '/collector';
+  if (role === 'BUSINESS') return '/business';
+  if (role === 'FACILITY_MANAGER') return '/facility';
+  return '/app';
+};
+
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', username: '', first_name: '', last_name: '', password: '', password_confirm: '' });
+  const [form, setForm] = useState({ email: '', username: '', first_name: '', last_name: '', password: '', password_confirm: '', role: 'CITIZEN' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +33,7 @@ export default function Register() {
     setError('');
     try {
       const user = await register(form);
-      navigate(user.role === 'COLLECTOR' ? '/collector' : '/app');
+      navigate(homeFor(user.role));
     } catch (err) {
       const data = err.response?.data;
       if (data) {
@@ -42,6 +56,35 @@ export default function Register() {
             <Link to="/"><img alt="WasteChakra" className="h-12 object-contain bg-white rounded-lg" src="/images/logo-aida.png" /></Link>
             <h1 className="font-headline-md text-headline-md text-primary font-bold mt-4">Create your account</h1>
             <p className="font-label-sm text-label-sm text-on-surface-variant">Join the circular economy</p>
+          </div>
+
+          {/* Role Selector */}
+          <div className="mb-5">
+            <label className="font-label-sm text-xs text-primary font-bold uppercase tracking-widest ml-1 mb-2 block">I am a</label>
+            <div className="grid grid-cols-2 gap-2">
+              {ROLES.map((r) => (
+                <button
+                  key={r.value}
+                  type="button"
+                  onClick={() => setForm({ ...form, role: r.value })}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 transition-all text-left ${
+                    form.role === r.value
+                      ? 'border-secondary bg-secondary-container/30 shadow-sm'
+                      : 'border-surface-container-high bg-surface-container-lowest hover:border-surface-container'
+                  }`}
+                >
+                  <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-lg ${
+                    form.role === r.value ? 'bg-secondary-container text-primary' : 'bg-surface-container-high text-on-surface-variant'
+                  }`}>
+                    <Icon name={r.icon} className="text-[18px]" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className={`text-xs font-bold leading-tight ${form.role === r.value ? 'text-primary' : 'text-on-surface'}`}>{r.label}</div>
+                    <div className="text-[10px] text-on-surface-variant leading-tight truncate">{r.desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
