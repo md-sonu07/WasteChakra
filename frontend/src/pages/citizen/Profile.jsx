@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { dataProvider } from '../../services/dataProvider';
-import { api } from '../../services/api';
+import { authApi } from '../../services/authApi';
 import { Card, Button, Avatar, Skeleton, ErrorState } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
@@ -16,9 +16,9 @@ export default function CitizenProfile() {
   const [form, setForm] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
-    phone: user?.phone || '',
-    city: user?.city || '',
-    address: user?.address || '',
+    phone: user?.profile?.phone || user?.phone || '',
+    city: user?.profile?.city || user?.city || '',
+    address: user?.profile?.address || user?.address || '',
   });
   const [settings, setSettings] = useState({
     pickupReminders: true,
@@ -27,25 +27,43 @@ export default function CitizenProfile() {
     promotional: false,
   });
 
+  useEffect(() => {
+    refreshProfile();
+    dataProvider
+      .getImpact()
+      .then(setImpact)
+      .finally(() => setLoadingImpact(false))
+      .catch(() => setLoadingImpact(false));
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    if (user) {
+      setForm({
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone: user.profile?.phone || user.phone || '',
+        city: user.profile?.city || user.city || '',
+        address: user.profile?.address || user.address || '',
+      });
+    }
+  }, [user]);
+
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
     try {
-      await api.updateProfile(form);
+      await authApi.updateProfile(form);
       await refreshProfile();
       setSaved(true);
-    } catch {
-      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch (err) {
+      console.error("Failed to save profile:", err);
     } finally {
       setSaving(false);
     }
   };
 
-  if (loadingImpact) {
-    dataProvider.getImpact().then(setImpact).finally(() => setLoadingImpact(false)).catch(() => setLoadingImpact(false));
-  }
-
-  const fullName = `${form.first_name || ''} ${form.last_name || ''}`.trim() || 'Citizen';
+  const fullName = `${form.first_name || user?.first_name || ''} ${form.last_name || user?.last_name || ''}`.trim() || user?.email || 'Citizen';
 
   const handleSignOut = () => {
     logout();

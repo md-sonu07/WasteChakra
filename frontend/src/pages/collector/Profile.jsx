@@ -1,27 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
+import { authApi } from '../../services/authApi';
 import { Card, Avatar, Button } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(user?.is_active ?? true);
-  const [vehicleNumber, setVehicleNumber] = useState(user?.vehicle_number || 'KA 01 AB 2345');
-  const [vehicleType, setVehicleType] = useState(user?.vehicle_type || 'Electric Auto');
-  const [contact, setContact] = useState(user?.phone || '+91 98765 43210');
+  const [vehicleNumber, setVehicleNumber] = useState(user?.vehicle_number || '');
+  const [vehicleType, setVehicleType] = useState(user?.vehicle_type || '');
+  const [contact, setContact] = useState(user?.profile?.phone || user?.phone || '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const fullName = user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : (user?.first_name || 'Collector');
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    if (user) {
+      setContact(user.profile?.phone || user.phone || '');
+      if (user.vehicle_number) setVehicleNumber(user.vehicle_number);
+      if (user.vehicle_type) setVehicleType(user.vehicle_type);
+    }
+  }, [user]);
+
+  const fullName = user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : (user?.first_name || user?.email || 'Collector');
 
   const save = async () => {
     setSaving(true);
     setSaved(false);
     try {
-      await api.updateProfile({ vehicle_number: vehicleNumber, vehicle_type: vehicleType, phone: contact, is_active: isActive });
+      await authApi.updateProfile({ vehicle_number: vehicleNumber, vehicle_type: vehicleType, phone: contact, is_active: isActive });
+      await refreshProfile();
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch {
@@ -35,7 +48,7 @@ export default function Profile() {
   const toggleActive = async (val) => {
     setIsActive(val);
     try {
-      await api.updateProfile({ is_active: val });
+      await authApi.updateProfile({ is_active: val });
     } catch {
       // fallback: keep local state
     }
