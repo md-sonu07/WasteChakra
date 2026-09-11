@@ -31,6 +31,10 @@ const Services = lazy(() => import('./pages/Services'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const Community = lazy(() => import('./pages/Community'));
 const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const EnvironmentalCompliance = lazy(() => import('./pages/EnvironmentalCompliance'));
+const Security = lazy(() => import('./pages/Security'));
 
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -58,6 +62,10 @@ function App() {
             <Route path="how-it-works" element={<Lazy><HowItWorks /></Lazy>} />
             <Route path="community" element={<Lazy><Community /></Lazy>} />
             <Route path="contact" element={<Lazy><Contact /></Lazy>} />
+            <Route path="privacy" element={<Lazy><PrivacyPolicy /></Lazy>} />
+            <Route path="terms" element={<Lazy><TermsOfService /></Lazy>} />
+            <Route path="compliance" element={<Lazy><EnvironmentalCompliance /></Lazy>} />
+            <Route path="security" element={<Lazy><Security /></Lazy>} />
           </Route>
 
           <Route path="/login" element={<Lazy><Login /></Lazy>} />
