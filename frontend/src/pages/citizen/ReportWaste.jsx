@@ -51,6 +51,8 @@ export default function ReportWaste() {
   const [reportId, setReportId] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
 
+  const [submitError, setSubmitError] = useState(null);
+
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -100,19 +102,20 @@ export default function ReportWaste() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const formData = new FormData();
       if (image) formData.append('image', image);
-      formData.append('waste_type', category);
-      formData.append('estimated_quantity', quantity);
-      formData.append('description', description);
-      formData.append('urgency', urgency);
-      formData.append('address', location.address);
+      if (category) formData.append('waste_type', category);
+      if (quantity) formData.append('estimated_quantity', quantity);
+      if (description) formData.append('description', description);
+      if (urgency) formData.append('urgency', urgency);
+      formData.append('address', location.address || '');
       if (location.lat) formData.append('latitude', location.lat);
       if (location.lng) formData.append('longitude', location.lng);
 
       const result = await api.createWasteReport(formData);
-      setReportId(result.report_id || `WC-${String(Math.floor(1000 + Math.random() * 9000))}`);
+      setReportId(result.report_id || result.id || `WC-${String(Math.floor(1000 + Math.random() * 9000))}`);
       setSubmitted(true);
 
       if (image) {
@@ -131,21 +134,9 @@ export default function ReportWaste() {
           recommended_action: 'Pickup required',
         });
       }
-    } catch {
-      setReportId(`WC-${String(Math.floor(1000 + Math.random() * 9000))}`);
-      setSubmitted(true);
-      setAiAnalysis({
-        materials: [
-          { type: 'Plastic', percentage: 48 },
-          { type: 'Organic', percentage: 21 },
-          { type: 'Paper', percentage: 14 },
-          { type: 'Textile', percentage: 9 },
-          { type: 'Other', percentage: 8 },
-        ],
-        severity: 'Medium',
-        estimated_quantity: '20-30 kg',
-        recommended_action: 'Pickup required',
-      });
+    } catch (err) {
+      console.error("Waste report submit failed:", err);
+      setSubmitError(err.message || 'Failed to save waste report to server. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -483,6 +474,13 @@ export default function ReportWaste() {
                 <h2 className="text-2xl text-primary font-extrabold mb-2">Review Report</h2>
                 <p className="text-on-surface-variant">Please confirm the details before submitting.</p>
               </div>
+
+              {submitError && (
+                <div className="max-w-lg mx-auto mb-6 p-4 rounded-2xl bg-error/10 border border-error/30 text-error flex items-center gap-3">
+                  <Icon name="warning" className="text-xl shrink-0" />
+                  <p className="text-sm font-bold">{submitError}</p>
+                </div>
+              )}
 
               <div className="max-w-lg mx-auto bg-surface border border-surface-container-high rounded-3xl p-6 md:p-8 relative shadow-sm">
                 <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#f3fcf2] border-r border-surface-container-high rounded-full z-10 hidden md:block"></div>

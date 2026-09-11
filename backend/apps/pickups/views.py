@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, parsers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Count, Sum
@@ -27,6 +27,7 @@ def generate_passport_id():
 class WasteReportCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = WasteReportCreateSerializer
+    parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
 
     def perform_create(self, serializer):
         serializer.save(
