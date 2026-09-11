@@ -60,7 +60,7 @@ export default function PanelShell({ sidebar, navbar, nav }) {
           </nav>
         )}
 
-        <main className="flex-1 px-4 md:px-8 py-6 pb-24 lg:pb-6 max-w-[1400px] w-full mx-auto">
+        <main className="flex-1 px-4 md:px-12 py-6 pb-24 lg:pb-6 max-w-[1400px] w-full mx-auto">
           <Outlet />
         </main>
       </div>

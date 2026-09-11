@@ -3,7 +3,7 @@ import { Icon } from '../components/AppIcons';
 
 export default function Home() {
   return (
-    <div className="w-full">
+    <div className="w-full -mt-20">
       {/* 1. HERO WRAPPER */}
       <div className="w-full relative">
         {/* HERO CONTAINER */}
@@ -131,10 +131,10 @@ export default function Home() {
         <div className="w-full max-w-container-max mx-auto px-gutter">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-space-md">
             {[
-              { title: 'Report Waste', desc: 'Upload a picture of garbage and we dispatch a pickup.', icon: 'photo_camera', to: '/app/report', tone: 'bg-[#A8E05A]' },
+              { title: 'Report Waste', desc: 'Upload a picture of garbage and we dispatch a pickup.', icon: 'photo_camera', to: '/app/report', tone: 'bg-[#3d6a00]' },
               { title: 'Schedule Pickup', desc: 'Request waste collection from your home.', icon: 'home_work', to: '/app/pickups', tone: 'bg-[#0d2a1a]' },
               { title: 'Find Waste Nearby', desc: 'View waste reports, collection points and community events.', icon: 'location_searching', to: '/app/map', tone: 'bg-[#3d6a00]' },
-              { title: 'Recycle With Us', desc: 'Learn how to submit recyclable materials.', icon: 'recycling', to: '/community', tone: 'bg-[#e2ebe1]' },
+              { title: 'Recycle With Us', desc: 'Learn how to submit recyclable materials.', icon: 'recycling', to: '/community', tone: 'bg-[#0d2a1a]' },
             ].map((a) => (
               <Link
                 key={a.title}

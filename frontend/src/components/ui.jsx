@@ -7,7 +7,7 @@ export function Spinner({ size = 'md', light = false }) {
 
 export function Button({ variant = 'primary', size = 'md', loading = false, disabled, children, className = '', ...props }) {
   const variants = {
-    primary: 'bg-secondary-container text-primary hover:bg-[#bbfb64] border-secondary-container',
+    primary: 'bg-primary text-on-primary hover:bg-primary-container border-secondary-container',
     dark: 'bg-primary text-on-primary hover:bg-primary-container',
     outline: 'bg-transparent border border-surface-container-highest text-primary hover:bg-surface-container-low',
     ghost: 'bg-transparent text-on-surface-variant hover:bg-surface-container-low',
@@ -17,7 +17,7 @@ export function Button({ variant = 'primary', size = 'md', loading = false, disa
   return (
     <button
       disabled={loading || disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-bold transition-all disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {loading && <Spinner size="sm" />}
