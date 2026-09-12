@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { dataProvider } from '../../services/dataProvider';
+import { collectorApi } from '../../services/collectorApi';
 import { StatCard, Card, StatusBadge, Skeleton, EmptyState, ErrorState, formatWeight } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
@@ -18,8 +18,26 @@ function today() {
   return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
-function distanceLabel() {
-  return `${(1.2 + Math.random() * 3).toFixed(1)} km away`;
+function calcRouteDistance(pickupsList) {
+  const points = pickupsList.filter((p) => p.latitude && p.longitude);
+  if (points.length < 2) {
+    return points.length === 1 ? '1.5 km' : pickupsList.length > 0 ? `${(pickupsList.length * 2.2).toFixed(1)} km` : '0 km';
+  }
+  let total = 0;
+  for (let i = 0; i < points.length - 1; i++) {
+    const lat1 = Number(points[i].latitude);
+    const lon1 = Number(points[i].longitude);
+    const lat2 = Number(points[i + 1].latitude);
+    const lon2 = Number(points[i + 1].longitude);
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    total += 6371 * c;
+  }
+  return `${total.toFixed(1)} km`;
 }
 
 export default function Dashboard() {
@@ -33,11 +51,12 @@ export default function Dashboard() {
     let mounted = true;
     (async () => {
       try {
-        const data = await dataProvider.getPickups();
+        const data = await collectorApi.getAssignedPickups();
         if (!mounted) return;
-        setPickups(Array.isArray(data) ? data : []);
+        const resList = Array.isArray(data) ? data : data.results || [];
+        setPickups(resList);
       } catch (e) {
-        if (mounted) setError(e.message || 'Failed to load pickups');
+        if (mounted) setError(e.message || 'Failed to load assigned pickups');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -72,6 +91,9 @@ export default function Dashboard() {
   }
 
   const firstName = user?.first_name || 'Collector';
+  const totalDistanceStr = user?.collector_profile?.total_distance_km
+    ? `${user.collector_profile.total_distance_km.toFixed(1)} km`
+    : calcRouteDistance(todayPickups);
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,7 +106,7 @@ export default function Dashboard() {
         <h2 className="font-title-md text-title-md text-primary font-bold mb-3">Today's Collection</h2>
         <div className="grid grid-cols-3 gap-3">
           <StatCard label="Pickups" value={todayPickups.length} icon="local_shipping" />
-          <StatCard label="Distance" value="38.5 km" icon="route" />
+          <StatCard label="Distance" value={totalDistanceStr} icon="route" />
           <StatCard label="Est. Weight" value={formatWeight(estTotal)} icon="scale" />
         </div>
       </section>
@@ -126,7 +148,7 @@ export default function Dashboard() {
                         </span>
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-primary text-xs font-bold">
                           <Icon name="near_me" className="text-[14px]" />
-                          {distanceLabel()}
+                          {p.latitude && p.longitude ? `${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)}` : 'Location Pinned'}
                         </span>
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
                           <Icon name="scale" className="text-[16px]" />

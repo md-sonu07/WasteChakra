@@ -83,7 +83,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-secondary-container text-primary font-bold py-3 hover:bg-[#bbfb64] transition-all disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-secondary-container text-primary font-bold py-3 hover:bg-[#bbfb64] transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               {loading && <Spinner size="sm" />}
               {loading ? 'Signing in...' : 'Sign in'}
@@ -93,11 +93,11 @@ export default function Login() {
           <div className="mt-6 pt-6 border-t border-surface-container-high">
             <p className="text-xs text-on-surface-variant font-semibold mb-2 text-center">Demo accounts (password: admin12345)</p>
             <div className="flex flex-wrap gap-2 justify-center">
-              <button onClick={() => quickFill('citizen@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container">Citizen</button>
-              <button onClick={() => quickFill('collector@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container">Collector</button>
-              <button onClick={() => quickFill('business@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container">Business</button>
-              <button onClick={() => quickFill('facility@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container">Facility</button>
-              <button onClick={() => quickFill('admin@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container">Admin</button>
+              <button onClick={() => quickFill('citizen@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Citizen</button>
+              <button onClick={() => quickFill('collector@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Collector</button>
+              <button onClick={() => quickFill('business@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Business</button>
+              <button onClick={() => quickFill('facility@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Facility</button>
+              <button onClick={() => quickFill('admin@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Admin</button>
             </div>
           </div>
 

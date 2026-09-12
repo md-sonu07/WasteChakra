@@ -90,8 +90,12 @@ export default function MyWaste() {
             <Link key={report.id} to={`/app/waste/${report.id}`}>
               <Card className="hover:border-primary/50 transition-all">
                 <div className="flex items-start gap-3">
-                  <div className="w-16 h-16 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">
-                    <Icon name="delete" className="text-2xl text-on-surface-variant" />
+                  <div className="w-16 h-16 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden">
+                    {report.image ? (
+                      <img src={report.image} alt="Report waste" className="w-full h-full object-cover" />
+                    ) : (
+                      <Icon name="delete" className="text-2xl text-on-surface-variant" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 flex-wrap">

@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dataProvider } from '../../services/dataProvider';
-import { api } from '../../services/api';
+import { collectorApi } from '../../services/collectorApi';
 import { Card, StatusBadge, Skeleton, EmptyState, ErrorState } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
 function mapsUrl(p) {
-  return `https://maps.google.com/?q=${p.latitude},${p.longitude}`;
-}
-
-function distanceLabel() {
-  return `${(0.6 + Math.random() * 3).toFixed(1)} km`;
+  if (p.latitude && p.longitude) {
+    return `https://maps.google.com/?q=${p.latitude},${p.longitude}`;
+  }
+  return `https://maps.google.com/?q=${encodeURIComponent(p.address || 'India')}`;
 }
 
 export default function Routes() {
@@ -22,12 +20,13 @@ export default function Routes() {
     let mounted = true;
     (async () => {
       try {
-        const data = await dataProvider.getPickups();
+        const data = await collectorApi.getAssignedPickups();
         if (!mounted) return;
-        const ordered = (Array.isArray(data) ? data : []).slice().sort((a, b) => (a.status === 'EN_ROUTE' ? -1 : 1));
+        const resList = Array.isArray(data) ? data : data.results || [];
+        const ordered = resList.slice().sort((a, b) => (a.status === 'EN_ROUTE' ? -1 : 1));
         setPickups(ordered);
       } catch (e) {
-        if (mounted) setError(e.message || 'Failed to load pickups');
+        if (mounted) setError(e.message || 'Failed to load route');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -47,9 +46,9 @@ export default function Routes() {
 
   const markComplete = async (p) => {
     try {
-      await api.updatePickup(p.id, { status: 'COLLECTED' });
-    } catch {
-      // fallback: update local state only
+      await collectorApi.updatePickupStatus(p.id, { status: 'COLLECTED' });
+    } catch (err) {
+      console.error('Status update error:', err);
     }
     setPickups((prev) => {
       const i = prev.findIndex((x) => x.id === p.id);
@@ -139,7 +138,7 @@ export default function Routes() {
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">{p.address}</p>
                     <p className="text-xs font-semibold text-on-surface-variant mt-1 inline-flex items-center gap-1">
-                      <Icon name="near_me" className="text-[14px]" />{distanceLabel()}
+                      <Icon name="near_me" className="text-[14px]" />{p.latitude && p.longitude ? `${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)}` : 'On route list'}
                     </p>
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       <a

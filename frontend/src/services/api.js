@@ -1,3 +1,10 @@
+import { authApi } from './authApi';
+import { citizenApi } from './citizenApi';
+import { collectorApi } from './collectorApi';
+import { businessApi } from './businessApi';
+import { facilityApi } from './facilityApi';
+import { adminApi } from './adminApi';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000/api/v1' : 'https://wastechakra.onrender.com/api/v1');
 
 const TOKEN_KEY = 'wc_access_token';
@@ -31,7 +38,7 @@ export function setStoredUser(user) {
   if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-async function request(path, options = {}, retry = true) {
+export async function request(path, options = {}, retry = true) {
   const headers = { ...(options.headers || {}) };
   const token = getToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -60,7 +67,7 @@ async function request(path, options = {}, retry = true) {
   return response;
 }
 
-async function tryRefresh() {
+export async function tryRefresh() {
   const refresh = localStorage.getItem(REFRESH_KEY);
   if (!refresh) return false;
   try {
@@ -86,53 +93,26 @@ export function isAuthenticated() {
   return !!getToken();
 }
 
-export const api = {
-  // Auth
-  register: (data) => request('/auth/register/', { method: 'POST', body: JSON.stringify(data) }),
-  login: (data) => request('/auth/login/', { method: 'POST', body: JSON.stringify(data) }),
-  profile: () => request('/auth/profile/'),
-  updateProfile: (data) => request('/auth/profile/', { method: 'PATCH', body: JSON.stringify(data) }),
-
-  // Waste reports
-  createWasteReport: (formData) => request('/waste-reports/create/', { method: 'POST', body: formData }),
-  getWasteReports: (params = {}) => request(`/waste-reports/${qs(params)}`),
-  getWasteReport: (id) => request(`/waste-reports/${id}/`),
-
-  // Pickups
-  createPickup: (data) => request('/pickups/create/', { method: 'POST', body: JSON.stringify(data) }),
-  getPickups: (params = {}) => request(`/pickups/${qs(params)}`),
-  getPickup: (id) => request(`/pickups/${id}/`),
-  updatePickup: (id, data) => request(`/pickups/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
-
-  // Passports
-  getPassport: (id) => request(`/passports/${id}/`),
-
-  // Impact
-  getImpact: () => request('/user/impact/'),
-
-  // Detection pipeline (existing)
-  processWasteImage: (file, source = 'UPLOAD') => {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('source', source);
-    return request('/pipeline/process/', { method: 'POST', body: formData });
-  },
-  simulateWaste: (simParams) => request('/pipeline/simulate/', { method: 'POST', body: JSON.stringify(simParams) }),
-  getWasteRecords: (params = {}) => request(`/records/${qs(params)}`),
-  getStatsSummary: () => request('/stats/summary/'),
-  getDecisionConfig: () => request('/config/decision-rules/'),
-  updateDecisionConfig: (fields) => request('/config/decision-rules/', { method: 'PATCH', body: JSON.stringify(fields) }),
-};
-
-function qs(params) {
+export function qs(params) {
   const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''));
   const query = new URLSearchParams(clean).toString();
   return query ? `?${query}` : '';
 }
 
-export { API_BASE_URL };
+// Master combined API object
+export const api = {
+  ...authApi,
+  ...citizenApi,
+  ...collectorApi,
+  ...businessApi,
+  ...facilityApi,
+  ...adminApi,
+};
 
-// Convenience named exports (kept for backwards compatibility with the simulation)
+// Export individual modular role APIs
+export { authApi, citizenApi, collectorApi, businessApi, facilityApi, adminApi, API_BASE_URL };
+
+// Convenience named exports (kept for backwards compatibility)
 export const getStatsSummary = (...args) => api.getStatsSummary(...args);
 export const simulateWaste = (...args) => api.simulateWaste(...args);
 export const processWasteImage = (...args) => api.processWasteImage(...args);

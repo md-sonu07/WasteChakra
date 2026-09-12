@@ -4,26 +4,54 @@ from .models import WasteReport, Pickup, WastePassport
 
 class WasteReportSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = WasteReport
         fields = '__all__'
         read_only_fields = ['id', 'report_id', 'user', 'status', 'created_at', 'updated_at']
 
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
 
 class WasteReportCreateSerializer(serializers.ModelSerializer):
-    waste_type = serializers.ChoiceField(choices=[
-        'MIXED', 'PLASTIC', 'ORGANIC', 'PAPER', 'METAL', 'TEXTILE',
-        'E_WASTE', 'CONSTRUCTION', 'BULK', 'HAZARDOUS'
-    ])
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
-    address = serializers.CharField()
+    waste_type = serializers.ChoiceField(
+        choices=[
+            'MIXED', 'PLASTIC', 'ORGANIC', 'PAPER', 'METAL', 'TEXTILE',
+            'E_WASTE', 'CONSTRUCTION', 'BULK', 'HAZARDOUS'
+        ],
+        required=False,
+        default='MIXED'
+    )
+    latitude = serializers.FloatField(required=False, allow_null=True)
+    longitude = serializers.FloatField(required=False, allow_null=True)
+    address = serializers.CharField(required=False, allow_blank=True, default='')
+    description = serializers.CharField(required=False, allow_blank=True, default='')
+    urgency = serializers.ChoiceField(choices=['NORMAL', 'HIGH', 'URGENT'], required=False, default='NORMAL')
+    estimated_quantity = serializers.ChoiceField(choices=['<5', '5-20', '20-50', '50-100', '100+'], required=False, default='5-20')
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = WasteReport
-        fields = ['image', 'latitude', 'longitude', 'address', 'waste_type',
-                  'estimated_quantity', 'description', 'urgency']
+        fields = [
+            'id', 'report_id', 'user', 'image', 'latitude', 'longitude', 'address',
+            'waste_type', 'estimated_quantity', 'description', 'urgency', 'status', 'created_at'
+        ]
+        read_only_fields = ['id', 'report_id', 'user', 'status', 'created_at']
+
+    def to_internal_value(self, data):
+        if hasattr(data, 'copy'):
+            data = data.copy()
+        for field in ['latitude', 'longitude']:
+            if field in data and (data[field] == '' or data[field] is None):
+                data[field] = None
+        return super().to_internal_value(data)
 
 
 class PickupSerializer(serializers.ModelSerializer):

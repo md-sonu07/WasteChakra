@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { dataProvider } from '../../services/dataProvider';
-import { api } from '../../services/api';
+import { collectorApi } from '../../services/collectorApi';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card, StatusBadge, Skeleton, ErrorState, formatWeight } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
 function mapsUrl(p) {
-  return `https://maps.google.com/?q=${p.latitude},${p.longitude}`;
+  if (p.latitude && p.longitude) {
+    return `https://maps.google.com/?q=${p.latitude},${p.longitude}`;
+  }
+  return `https://maps.google.com/?q=${encodeURIComponent(p.address || 'India')}`;
 }
 
 function customerName(email) {
@@ -34,11 +36,14 @@ export default function PickupDetail() {
     let mounted = true;
     (async () => {
       try {
-        const data = await dataProvider.getPickup(id);
+        const data = await collectorApi.getPickupDetail(id);
         if (!mounted) return;
         setPickup(data);
+        if (data.status === 'COLLECTED' || data.status === 'COMPLETED') {
+          setCompleted(true);
+        }
       } catch (e) {
-        if (mounted) setError(e.message || 'Failed to load pickup');
+        if (mounted) setError(e.message || 'Failed to load pickup detail');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -49,12 +54,23 @@ export default function PickupDetail() {
   const confirmCollection = async () => {
     setConfirming(true);
     try {
-      await api.updatePickup(pickup.id, {
-        status: 'COLLECTED',
-        actual_weight_kg: Number(weight) || null,
-      });
-    } catch {
-      // fallback: update local state only
+      if (beforeFile || afterFile) {
+        const formData = new FormData();
+        formData.append('status', 'COLLECTED');
+        if (weight) formData.append('actual_weight_kg', weight);
+        if (notes) formData.append('collector_notes', notes);
+        if (beforeFile) formData.append('before_image', beforeFile);
+        if (afterFile) formData.append('after_image', afterFile);
+        await collectorApi.uploadPickupProof(pickup.id, formData);
+      } else {
+        await collectorApi.updatePickupStatus(pickup.id, {
+          status: 'COLLECTED',
+          actual_weight_kg: Number(weight) || null,
+          collector_notes: notes,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to confirm collection:', err);
     }
     setPickup((prev) => ({ ...prev, status: 'COLLECTED', actual_weight_kg: Number(weight) || null }));
     setProofOpen(false);
@@ -64,9 +80,9 @@ export default function PickupDetail() {
 
   const startPickup = async () => {
     try {
-      await api.updatePickup(pickup.id, { status: 'EN_ROUTE' });
-    } catch {
-      // fallback: local update
+      await collectorApi.updatePickupStatus(pickup.id, { status: 'EN_ROUTE' });
+    } catch (err) {
+      console.error('Failed to update status to EN_ROUTE:', err);
     }
     setPickup((prev) => ({ ...prev, status: 'EN_ROUTE' }));
     setProofOpen(true);
