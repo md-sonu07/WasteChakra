@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { dataProvider } from '../../services/dataProvider';
+import { collectorApi } from '../../services/collectorApi';
 import { StatCard, Card, StatusBadge, Skeleton, EmptyState, ErrorState, formatWeight, TimeAgo } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
@@ -12,9 +12,10 @@ export default function History() {
     let mounted = true;
     (async () => {
       try {
-        const data = await dataProvider.getPickups();
+        const data = await collectorApi.getAssignedPickups();
         if (!mounted) return;
-        setPickups(Array.isArray(data) ? data : []);
+        const resList = Array.isArray(data) ? data : data.results || [];
+        setPickups(resList);
       } catch (e) {
         if (mounted) setError(e.message || 'Failed to load history');
       } finally {
@@ -40,11 +41,12 @@ export default function History() {
     return <ErrorState title="Couldn't load history" message={error} onRetry={() => window.location.reload()} />;
   }
 
-  const completed = pickups.filter((p) => p.status === 'COMPLETED');
+  const completed = pickups.filter((p) => ['COLLECTED', 'COMPLETED'].includes(p.status));
   const cancelled = pickups.filter((p) => p.status === 'CANCELLED');
   const todayCount = pickups.filter((p) => {
-    if (!p.pickup_date) return false;
-    return new Date(p.pickup_date).toDateString() === new Date().toDateString();
+    if (!p.created_at && !p.pickup_date) return false;
+    const d = new Date(p.created_at || p.pickup_date);
+    return d.toDateString() === new Date().toDateString();
   }).length;
   const wasteCollected = completed.reduce((s, p) => s + (Number(p.actual_weight_kg) || 0), 0);
 

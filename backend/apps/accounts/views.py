@@ -65,6 +65,14 @@ class ProfileView(APIView):
             if field in request.data:
                 setattr(profile, field, request.data[field])
         profile.save()
+
+        if user.role == 'COLLECTOR' or hasattr(user, 'collector_profile'):
+            cp, _ = CollectorProfile.objects.get_or_create(user=user)
+            for field in ['vehicle_number', 'vehicle_type', 'is_active', 'current_lat', 'current_lng']:
+                if field in request.data:
+                    setattr(cp, field, request.data[field])
+            cp.save()
+
         return Response(UserSerializer(user).data)
 
 
@@ -83,4 +91,4 @@ class RefreshTokenView(APIView):
 
 
 # Import here to avoid circular imports
-from .models import UserProfile
+from .models import UserProfile, CollectorProfile

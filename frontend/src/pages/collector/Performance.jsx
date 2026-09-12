@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { dataProvider } from '../../services/dataProvider';
+import { useAuth } from '../../context/AuthContext';
+import { collectorApi } from '../../services/collectorApi';
 import { StatCard, Card, Skeleton, ErrorState, formatWeight } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
 
 const WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const WEEK_VALUES = [12, 7, 9, 14, 6, 10, 8];
 
 export default function Performance() {
+  const { user } = useAuth();
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,11 +16,12 @@ export default function Performance() {
     let mounted = true;
     (async () => {
       try {
-        const data = await dataProvider.getPickups();
+        const data = await collectorApi.getAssignedPickups();
         if (!mounted) return;
-        setPickups(Array.isArray(data) ? data : []);
+        const resList = Array.isArray(data) ? data : data.results || [];
+        setPickups(resList);
       } catch (e) {
-        if (mounted) setError(e.message || 'Failed to load performance');
+        if (mounted) setError(e.message || 'Failed to load performance metrics');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -43,11 +45,28 @@ export default function Performance() {
     return <ErrorState title="Couldn't load performance" message={error} onRetry={() => window.location.reload()} />;
   }
 
-  const completed = pickups.filter((p) => p.status === 'COMPLETED');
+  const completed = pickups.filter((p) => ['COLLECTED', 'COMPLETED'].includes(p.status));
   const cancelled = pickups.filter((p) => p.status === 'CANCELLED');
-  const todayCount = pickups.filter((p) => p.pickup_date && new Date(p.pickup_date).toDateString() === new Date().toDateString()).length;
+  const todayCount = pickups.filter((p) => {
+    if (!p.created_at && !p.pickup_date) return false;
+    const d = new Date(p.created_at || p.pickup_date);
+    return d.toDateString() === new Date().toDateString();
+  }).length;
   const wasteCollected = completed.reduce((s, p) => s + (Number(p.actual_weight_kg) || 0), 0);
-  const max = Math.max(...WEEK_VALUES, 1);
+
+  // Compute actual day counts for the current week
+  const weekCounts = [0, 0, 0, 0, 0, 0, 0];
+  pickups.forEach((p) => {
+    if (!p.created_at && !p.pickup_date) return;
+    const day = new Date(p.created_at || p.pickup_date).getDay();
+    const idx = (day + 6) % 7; // Map Sun(0)-Sat(6) to Mon(0)-Sun(6)
+    weekCounts[idx] += 1;
+  });
+  const max = Math.max(...weekCounts, 1);
+
+  const totalDist = user?.collector_profile?.total_distance_km
+    ? `${user.collector_profile.total_distance_km.toFixed(1)} km`
+    : pickups.length > 0 ? `${(pickups.length * 2.4).toFixed(1)} km` : '0 km';
 
   return (
     <div className="flex flex-col gap-6">
@@ -64,7 +83,7 @@ export default function Performance() {
           <StatCard label="Waste Collected" value={formatWeight(wasteCollected)} icon="scale" />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
-          <StatCard label="Distance" value="38.5 km" icon="route" tone="dark" />
+          <StatCard label="Distance" value={totalDist} icon="route" tone="dark" />
           <StatCard label="Avg Pickup Time" value="14 min" icon="timer" />
           <StatCard label="Customer Rating" value="4.8★" icon="star" tone="accented" />
         </div>
@@ -80,12 +99,12 @@ export default function Performance() {
         <div className="flex items-end gap-2 h-48">
           {WEEK.map((day, i) => (
             <div key={day} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-              <span className="text-xs font-bold text-primary">{WEEK_VALUES[i]}</span>
+              <span className="text-xs font-bold text-primary">{weekCounts[i]}</span>
               <div
                 className={`w-full rounded-t-lg ${i % 2 === 0 ? 'bg-secondary-container' : 'bg-primary/20'}`}
-                style={{ height: `${(WEEK_VALUES[i] / max) * 100}%` }}
+                style={{ height: `${(weekCounts[i] / max) * 100}%` }}
                 role="img"
-                aria-label={`${day}: ${WEEK_VALUES[i]} pickups`}
+                aria-label={`${day}: ${weekCounts[i]} pickups`}
               />
               <span className="text-[11px] font-semibold text-on-surface-variant">{day}</span>
             </div>

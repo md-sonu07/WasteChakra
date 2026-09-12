@@ -7,10 +7,11 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
+    collector_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'profile', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'profile', 'collector_profile', 'date_joined']
         read_only_fields = ['id', 'role', 'date_joined']
 
     def get_profile(self, obj):
@@ -18,6 +19,13 @@ class UserSerializer(serializers.ModelSerializer):
             p = obj.profile
             return UserProfileSerializer(p).data
         except UserProfile.DoesNotExist:
+            return None
+
+    def get_collector_profile(self, obj):
+        try:
+            cp = obj.collector_profile
+            return CollectorProfileSerializer(cp).data
+        except CollectorProfile.DoesNotExist:
             return None
 
 

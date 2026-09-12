@@ -84,9 +84,9 @@ export default function Layout() {
             {isAuthenticated ? (
               <Link
                 to={signInDest}
-                className="hidden lg:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary text-surface-bright font-bold text-xs hover:bg-primary-container transition-all shadow-sm"
+                className="hidden lg:inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-primary text-surface-bright font-bold text-sm hover:bg-primary-container transition-all shadow-sm"
               >
-                <Icon name="account_circle" className="text-[16px]" />
+                <Icon name="account_circle" className="text-[18px]" />
                 {user?.first_name ? `Hi, ${user.first_name}` : 'Dashboard'}
               </Link>
             ) : (
