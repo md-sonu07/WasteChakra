@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
+from rest_framework.permissions import AllowAny
 from django.db.models import Count
 
 from apps.detection.models import WasteImage
@@ -19,6 +20,7 @@ class ProcessWasteImageView(APIView):
     """One-shot combined pipeline for image processing.
     Uploads waste image -> classifies material -> generates software readings -> decides category -> logs record.
     """
+    permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser]
 
     def post(self, request):
@@ -31,7 +33,15 @@ class ProcessWasteImageView(APIView):
         # 1. Save uploaded waste image
         waste_image = WasteImage.objects.create(image=image_file, source=source)
 
-        # 2. Classify material
+        if source == "INSPECTION_OVERLAY":
+            from apps.detection.yolo_service.gemini_vision_service import GeminiVisionService
+            gemini_key = request.headers.get("X-Gemini-Key") or request.data.get("gemini_key")
+            result = GeminiVisionService.analyze_waste_image(waste_image.image.path, custom_api_key=gemini_key)
+            if not result:
+                return Response({"error": "Failed to analyze image with Vision Service"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(result, status=status.HTTP_200_OK)
+
+        # 2. Classify material (Legacy Simulation)
         image_file.seek(0)
         material, confidence, all_probs = virtual_classify(image_file)
         waste_image.detected_material = material
@@ -71,6 +81,8 @@ class ProcessWasteSimulateView(APIView):
     """One-shot combined pipeline for manual parameter simulation (React Sliders).
     Manual slider values -> validates features -> decides category -> logs record.
     """
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         features = manual_features(request.data)
 
@@ -111,6 +123,8 @@ class WasteRecordDetailView(generics.RetrieveAPIView):
 
 class StatsSummaryView(APIView):
     """Dashboard analytics: total count, category breakdown, diversion rate."""
+    permission_classes = [AllowAny]
+
     def get(self, request):
         qs = WasteRecord.objects.values("final_category").annotate(count=Count("id"))
         counts = {item["final_category"]: item["count"] for item in qs}

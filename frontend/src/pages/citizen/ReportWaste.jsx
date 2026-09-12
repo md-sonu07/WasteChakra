@@ -243,15 +243,15 @@ export default function ReportWaste() {
   const progressPercentage = ((step - 1) / (STEPS.length - 1)) * 100;
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto py-6 px-4 md:px-0">
+    <div className="flex flex-col w-full max-w-4xl mx-auto py-6 px-4 md:px-0">
       
       <div className="mb-10">
         <h1 className="font-headline-md text-3xl md:text-4xl text-primary font-extrabold mb-8 text-center tracking-tight">
           Report Waste
         </h1>
         
-        <div className="relative w-full max-w-2xl mx-auto px-2">
-          <div className="absolute top-1/2 left-0 right-0 h-1.5 bg-surface-container-high rounded-full -translate-y-1/2 z-0 overflow-hidden">
+        <div className="relative w-full max-w-3xl mx-auto px-2">
+          <div className="absolute top-1/2 left-2 right-5 h-1.5 bg-surface-container-high rounded-full -translate-y-1/2 z-0 overflow-hidden">
             <div 
               className="h-full bg-primary rounded-full transition-all duration-500 ease-out" 
               style={{ width: `${progressPercentage}%` }}

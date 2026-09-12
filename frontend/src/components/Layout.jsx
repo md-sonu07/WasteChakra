@@ -46,17 +46,30 @@ export default function Layout() {
     return '/app';
   })() : '/login';
 
+  const searchParams = new URLSearchParams(location.search);
+  const isEmbed = searchParams.get('embed') === 'true' || searchParams.get('embed') === '1';
+
+  if (isEmbed) {
+    return (
+      <div className="w-full h-full min-h-screen bg-surface flex flex-col">
+        <main className="grow flex flex-col">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-surface">
       {/* Navbar with inverted corners */}
       <nav className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[1200px] z-50">
         <div className="relative w-full bg-surface rounded-b-[20px] px-8 py-3.5 flex items-center justify-between">
-          
+
           {/* Left Inverted Corner SVG */}
           <svg className="absolute top-0 -left-[24px] w-[24px] h-[24px] text-surface fill-current" viewBox="0 0 24 24">
             <path d="M0,0 H24 V24 A24,24 0 0,0 0,0 Z" />
           </svg>
-          
+
           {/* Right Inverted Corner SVG */}
           <svg className="absolute top-0 -right-[24px] w-[24px] h-[24px] text-surface fill-current" viewBox="0 0 24 24">
             <path d="M24,0 H0 V24 A24,24 0 0,1 24,0 Z" />
@@ -65,7 +78,7 @@ export default function Layout() {
           <Link to="/" className="flex items-center gap-2.5">
             <img alt="WasteChakra" className="h-10 w-auto object-contain" src="/images/logo-aida.png" />
           </Link>
-          
+
           <nav className="hidden lg:flex items-center gap-6 font-semibold text-sm text-[#4a5568]">
             {SECTIONS.map((item) => (
               <div key={item.label} className="relative group flex items-center cursor-pointer">
@@ -79,7 +92,7 @@ export default function Layout() {
               </div>
             ))}
           </nav>
-          
+
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <Link
@@ -201,7 +214,7 @@ export default function Layout() {
               <div className="flex flex-col gap-space-xs font-label-md text-label-md text-primary-fixed-dim">
                 <div className="flex items-start gap-2">
                   <Icon name="location_on" className="text-[18px] text-secondary-fixed mt-0.5" />
-                  <span>104 Greenloop Way, Eco District, Metro 94016</span>
+                  <span>Purnia Bihar - 854301</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Icon name="call" className="text-[18px] text-secondary-fixed" />
