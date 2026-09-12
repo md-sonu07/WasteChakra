@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     WasteReportCreateView, WasteReportListView, WasteReportDetailView,
     PickupCreateView, PickupListView, PickupDetailView,
+    PickupAcceptView, PickupRejectView, PickupClaimView,
     WastePassportView, UserImpactView,
 )
 
@@ -12,6 +13,9 @@ urlpatterns = [
     path('pickups/', PickupListView.as_view(), name='pickup-list'),
     path('pickups/create/', PickupCreateView.as_view(), name='pickup-create'),
     path('pickups/<uuid:id>/', PickupDetailView.as_view(), name='pickup-detail'),
+    path('pickups/<uuid:id>/accept/', PickupAcceptView.as_view(), name='pickup-accept'),
+    path('pickups/<uuid:id>/reject/', PickupRejectView.as_view(), name='pickup-reject'),
+    path('pickups/<uuid:id>/claim/', PickupClaimView.as_view(), name='pickup-claim'),
     path('passports/<uuid:id>/', WastePassportView.as_view(), name='waste-passport'),
     path('user/impact/', UserImpactView.as_view(), name='user-impact'),
 ]

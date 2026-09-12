@@ -5,6 +5,7 @@ import { dataProvider } from '../../services/dataProvider';
 import { authApi } from '../../services/authApi';
 import { Card, Button, Avatar, Skeleton, ErrorState } from '../../components/ui';
 import { Icon } from '../../components/AppIcons';
+import LocationPicker from '../../components/LocationPicker';
 
 export default function CitizenProfile() {
   const { user, logout, refreshProfile } = useAuth();
@@ -17,7 +18,11 @@ export default function CitizenProfile() {
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
     phone: user?.profile?.phone || user?.phone || '',
+    address_line1: user?.profile?.address_line1 || '',
+    address_line2: user?.profile?.address_line2 || '',
     city: user?.profile?.city || user?.city || '',
+    state: user?.profile?.state || '',
+    pincode: user?.profile?.pincode || '',
     address: user?.profile?.address || user?.address || '',
   });
   const [settings, setSettings] = useState({
@@ -42,7 +47,11 @@ export default function CitizenProfile() {
         first_name: user.first_name || '',
         last_name: user.last_name || '',
         phone: user.profile?.phone || user.phone || '',
+        address_line1: user.profile?.address_line1 || '',
+        address_line2: user.profile?.address_line2 || '',
         city: user.profile?.city || user.city || '',
+        state: user.profile?.state || '',
+        pincode: user.profile?.pincode || '',
         address: user.profile?.address || user.address || '',
       });
     }
@@ -68,6 +77,14 @@ export default function CitizenProfile() {
   const handleSignOut = () => {
     logout();
     navigate('/');
+  };
+
+  const handleMapLocationChange = (loc) => {
+    setForm((prev) => ({
+      ...prev,
+      address_line1: loc.address ? loc.address.split(',')[0] : prev.address_line1,
+      address: loc.address || prev.address,
+    }));
   };
 
   return (
@@ -127,24 +144,75 @@ export default function CitizenProfile() {
               className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
             />
           </div>
-          <div className="flex flex-col gap-1.5 mb-4">
-            <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">City</label>
-            <input
-              value={form.city}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
-            />
+
+          <div className="pt-2 pb-2 border-t border-surface-container-high my-2 flex flex-col gap-4">
+            <h3 className="font-title-md text-sm text-primary font-bold">Address & Location Details</h3>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Address Line 1 (House/Flat, Street, Area)</label>
+              <input
+                value={form.address_line1}
+                onChange={(e) => setForm({ ...form, address_line1: e.target.value })}
+                className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
+                placeholder="Flat 302, Green Valley Apartments"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Address Line 2 (Landmark, Sector - Optional)</label>
+              <input
+                value={form.address_line2}
+                onChange={(e) => setForm({ ...form, address_line2: e.target.value })}
+                className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
+                placeholder="Near Eco Park"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">City</label>
+                <input
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
+                  placeholder="Bengaluru"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">State</label>
+                <input
+                  value={form.state}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
+                  placeholder="Karnataka"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Pincode</label>
+                <input
+                  value={form.pincode}
+                  onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+                  className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
+                  placeholder="560001"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2 mb-2 block">
+                Select Location on Map
+              </label>
+              <LocationPicker
+                value={{ address: form.address || form.address_line1 }}
+                onChange={handleMapLocationChange}
+                height={200}
+                showAddress={false}
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5 mb-6">
-            <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Address</label>
-            <textarea
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full rounded-xl border border-surface-container-high bg-surface-container-lowest px-4 py-3 font-body-md text-sm text-on-surface focus:outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_3px_rgba(168,224,90,0.1)] transition-all"
-              rows={2}
-            />
-          </div>
-          <Button variant="primary" size="lg" loading={saving} onClick={handleSave} className="w-full">
+
+          <Button variant="primary" size="lg" loading={saving} onClick={handleSave} className="w-full mt-4">
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </Card>

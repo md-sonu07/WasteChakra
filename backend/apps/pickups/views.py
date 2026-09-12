@@ -24,16 +24,38 @@ def generate_passport_id():
     return f"WP-{datetime.now().strftime('%Y')}-{str(uuid.uuid4())[:6].upper()}"
 
 
+from .utils import find_nearest_collector
+
+
 class WasteReportCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = WasteReportCreateSerializer
     parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
 
     def perform_create(self, serializer):
-        serializer.save(
+        report = serializer.save(
             user=self.request.user,
             report_id=generate_report_id(),
         )
+        # Auto-create Pickup and offer to nearest active collector
+        lat = report.latitude
+        lng = report.longitude
+        nearest_collector, dist = find_nearest_collector(lat, lng) if (lat and lng) else (None, None)
+
+        status_val = 'OFFERED' if nearest_collector else 'REQUESTED'
+        pickup = Pickup.objects.create(
+            pickup_id=generate_pickup_id(),
+            waste_report=report,
+            user=self.request.user,
+            offered_collector=nearest_collector,
+            latitude=lat,
+            longitude=lng,
+            address=report.address or '',
+            waste_type='MIXED',
+            status=status_val,
+        )
+        report.status = 'PICKUP_SCHEDULED'
+        report.save()
 
 
 class WasteReportListView(generics.ListAPIView):
@@ -72,6 +94,16 @@ class PickupCreateView(generics.CreateAPIView):
             pickup.waste_report.status = 'PICKUP_SCHEDULED'
             pickup.waste_report.save()
 
+        # Find nearest collector if lat/lng available
+        lat = pickup.latitude or (pickup.waste_report.latitude if pickup.waste_report else None)
+        lng = pickup.longitude or (pickup.waste_report.longitude if pickup.waste_report else None)
+        if lat and lng and not pickup.collector:
+            nearest_collector, _ = find_nearest_collector(lat, lng)
+            if nearest_collector:
+                pickup.offered_collector = nearest_collector
+                pickup.status = 'OFFERED'
+                pickup.save()
+
 
 class PickupListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -80,10 +112,82 @@ class PickupListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         if user.role in ('COLLECTOR',):
-            return Pickup.objects.filter(collector=user)
+            from django.db.models import Q
+            # Return assigned pickups, offered pickups, or unassigned open pool pickups
+            return Pickup.objects.filter(
+                Q(collector=user) |
+                Q(offered_collector=user) |
+                Q(collector__isnull=True, offered_collector__isnull=True)
+            ).distinct()
         if user.role in ('ADMIN', 'SUPER_ADMIN', 'FACILITY_MANAGER'):
             return Pickup.objects.all()
         return Pickup.objects.filter(user=user)
+
+
+class PickupAcceptView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, id):
+        try:
+            pickup = Pickup.objects.get(id=id)
+        except Pickup.DoesNotExist:
+            return Response({'error': 'Pickup not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user.role != 'COLLECTOR' and request.user.role not in ('ADMIN', 'SUPER_ADMIN'):
+            return Response({'error': 'Only collectors can accept pickups'}, status=status.HTTP_403_FORBIDDEN)
+
+        pickup.collector = request.user
+        pickup.offered_collector = None
+        pickup.status = 'ASSIGNED'
+        pickup.save()
+        return Response(PickupSerializer(pickup, context={'request': request}).data)
+
+
+class PickupRejectView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, id):
+        try:
+            pickup = Pickup.objects.get(id=id)
+        except Pickup.DoesNotExist:
+            return Response({'error': 'Pickup not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        pickup.rejected_collectors.add(request.user)
+        excluded_ids = list(pickup.rejected_collectors.values_list('id', flat=True))
+
+        lat = pickup.latitude or (pickup.waste_report.latitude if pickup.waste_report else None)
+        lng = pickup.longitude or (pickup.waste_report.longitude if pickup.waste_report else None)
+
+        next_collector, _ = find_nearest_collector(lat, lng, exclude_user_ids=excluded_ids) if (lat and lng) else (None, None)
+
+        if next_collector:
+            pickup.offered_collector = next_collector
+            pickup.status = 'OFFERED'
+        else:
+            pickup.offered_collector = None
+            pickup.status = 'REQUESTED'
+
+        pickup.save()
+        return Response(PickupSerializer(pickup, context={'request': request}).data)
+
+
+class PickupClaimView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, id):
+        try:
+            pickup = Pickup.objects.get(id=id)
+        except Pickup.DoesNotExist:
+            return Response({'error': 'Pickup not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if pickup.collector is not None:
+            return Response({'error': 'Pickup is already assigned'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pickup.collector = request.user
+        pickup.offered_collector = None
+        pickup.status = 'ASSIGNED'
+        pickup.save()
+        return Response(PickupSerializer(pickup, context={'request': request}).data)
 
 
 class PickupDetailView(generics.RetrieveUpdateAPIView):

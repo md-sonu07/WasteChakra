@@ -65,8 +65,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = [
-            'phone', 'address', 'city', 'chakra_points',
-            'total_waste_submitted_kg', 'total_waste_recovered_kg',
+            'phone', 'address', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'vehicle_number', 'vehicle_type',
+            'chakra_points', 'total_waste_submitted_kg', 'total_waste_recovered_kg',
             'streak_days', 'last_activity_date',
         ]
 
@@ -75,6 +75,7 @@ class CollectorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CollectorProfile
         fields = [
+            'phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode',
             'vehicle_number', 'vehicle_type', 'current_lat', 'current_lng',
             'is_active', 'rating', 'total_pickups', 'total_distance_km',
         ]

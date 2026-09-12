@@ -55,22 +55,43 @@ class ProfileView(APIView):
 
     def patch(self, request):
         user = request.user
+        data = request.data or {}
+
         for field in ['first_name', 'last_name', 'username']:
-            if field in request.data:
-                setattr(user, field, request.data[field])
+            if field in data and data[field] is not None:
+                setattr(user, field, str(data[field]))
         user.save()
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
-        for field in ['phone', 'address', 'city']:
-            if field in request.data:
-                setattr(profile, field, request.data[field])
+        for field in ['phone', 'address', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'vehicle_number', 'vehicle_type']:
+            if field in data and data[field] is not None:
+                setattr(profile, field, str(data[field]))
+
+        parts = [p for p in [profile.address_line1, profile.address_line2, profile.city, profile.state, profile.pincode] if p]
+        if parts:
+            profile.address = ", ".join(parts)
         profile.save()
 
         if user.role == 'COLLECTOR' or hasattr(user, 'collector_profile'):
             cp, _ = CollectorProfile.objects.get_or_create(user=user)
-            for field in ['vehicle_number', 'vehicle_type', 'is_active', 'current_lat', 'current_lng']:
-                if field in request.data:
-                    setattr(cp, field, request.data[field])
+            if 'vehicle_number' in data and data['vehicle_number'] is not None:
+                cp.vehicle_number = str(data['vehicle_number'])
+            if 'vehicle_type' in data and data['vehicle_type'] is not None:
+                cp.vehicle_type = str(data['vehicle_type'])
+            if 'is_active' in data and data['is_active'] is not None:
+                cp.is_active = bool(data['is_active'])
+
+            for loc_field in ['current_lat', 'current_lng']:
+                if loc_field in data:
+                    val = data[loc_field]
+                    if val is None or val == '':
+                        setattr(cp, loc_field, None)
+                    else:
+                        try:
+                            setattr(cp, loc_field, float(val))
+                        except (ValueError, TypeError):
+                            setattr(cp, loc_field, None)
+
             cp.save()
 
         return Response(UserSerializer(user).data)

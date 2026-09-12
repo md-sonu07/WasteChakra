@@ -56,13 +56,43 @@ class WasteReportCreateSerializer(serializers.ModelSerializer):
 
 class PickupSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(source='user.email', read_only=True)
+    user_name = serializers.SerializerMethodField()
     collector_email = serializers.CharField(source='collector.email', read_only=True, default=None)
+    collector_name = serializers.SerializerMethodField()
+    offered_collector_email = serializers.CharField(source='offered_collector.email', read_only=True, default=None)
+    waste_report_detail = WasteReportSerializer(source='waste_report', read_only=True)
+    distance_km = serializers.SerializerMethodField()
 
     class Meta:
         model = Pickup
         fields = '__all__'
         read_only_fields = ['id', 'pickup_id', 'user', 'created_at', 'updated_at',
                            'collected_at', 'completed_at']
+
+    def get_user_name(self, obj):
+        if obj.user:
+            return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.email
+        return ""
+
+    def get_collector_name(self, obj):
+        if obj.collector:
+            return f"{obj.collector.first_name} {obj.collector.last_name}".strip() or obj.collector.email
+        return None
+
+    def get_distance_km(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user:
+            return None
+        from .utils import calculate_haversine_distance
+        # If logged in user is a collector with lat/lng
+        if hasattr(request.user, 'collector_profile') and request.user.collector_profile.current_lat and request.user.collector_profile.current_lng:
+            c_lat = request.user.collector_profile.current_lat
+            c_lng = request.user.collector_profile.current_lng
+            p_lat = obj.latitude or (obj.waste_report.latitude if obj.waste_report else None)
+            p_lng = obj.longitude or (obj.waste_report.longitude if obj.waste_report else None)
+            if p_lat and p_lng:
+                return calculate_haversine_distance(c_lat, c_lng, p_lat, p_lng)
+        return None
 
 
 class PickupStatusUpdateSerializer(serializers.ModelSerializer):

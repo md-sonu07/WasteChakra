@@ -59,6 +59,7 @@ class WasteReport(models.Model):
 
 class PickupStatus(models.TextChoices):
     REQUESTED = "REQUESTED", "Requested"
+    OFFERED = "OFFERED", "Offered to Collector"
     CONFIRMED = "CONFIRMED", "Confirmed"
     ASSIGNED = "ASSIGNED", "Assigned"
     EN_ROUTE = "EN_ROUTE", "En Route"
@@ -75,6 +76,8 @@ class Pickup(models.Model):
     waste_report = models.ForeignKey(WasteReport, on_delete=models.SET_NULL, null=True, blank=True, related_name='pickups')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pickups')
     collector = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='collector_pickups')
+    offered_collector = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='offered_pickups')
+    rejected_collectors = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='rejected_pickups')
     pickup_type = models.CharField(max_length=20, choices=[
         ('HOME', 'Home'),
         ('BUSINESS', 'Business'),
