@@ -57,14 +57,65 @@ export default function AdminSettings() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-3 py-4">
-        <Avatar name="Admin" size="xl" className="w-20 h-20 text-2xl" />
-        <div className="text-center">
-          <h1 className="font-headline-md text-headline-md text-primary font-bold">System Settings</h1>
-          <p className="text-sm text-on-surface-variant">Manage homepage, rewards, map provider and notifications</p>
-          <span className="inline-flex mt-2 px-2.5 py-1 rounded-full text-xs font-bold bg-secondary-container text-primary uppercase">Super Admin</span>
+      {/* Profile / Admin Header Hero Card */}
+      <Card className="p-0 overflow-hidden relative border border-surface-container-high bg-surface-container-lowest rounded-xl technical-shadow">
+        {/* Decorative Top Accent Banner */}
+        <div className="h-28 md:h-36 w-full bg-linear-to-r from-forest via-[#0a3a2a] to-[#00180b] relative overflow-hidden flex items-start justify-between p-4 md:p-6">
+          <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#abf854_1px,transparent_1px)] bg-size-[16px_16px]" />
+          <div className="relative z-10 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-surface-bright text-xs font-semibold border border-white/15">
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary-container animate-pulse shadow-[0_0_6px_#abf854]" />
+              <span>Root Console</span>
+            </span>
+          </div>
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-extrabold bg-secondary-container text-primary uppercase tracking-wider shadow-sm">
+              <Icon name="admin_panel_settings" className="text-xs" />
+              <span>SUPER ADMIN</span>
+            </span>
+          </div>
         </div>
-      </div>
+
+        {/* Card Body with Overlapping Avatar */}
+        <div className="px-6 pb-6 pt-0 relative">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            {/* Left: Avatar + Details */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+              <div className="-mt-12 md:-mt-14 w-24 h-24 rounded-full bg-forest text-secondary-fixed ring-4 ring-surface-container-lowest flex items-center justify-center text-3xl font-extrabold shadow-xl shrink-0 z-10">
+                AD
+              </div>
+              <div className="flex flex-col gap-1 pt-1 sm:pt-3">
+                <h1 className="font-headline-md text-2xl md:text-3xl text-primary font-bold tracking-tight">
+                  System Settings
+                </h1>
+                <p className="text-sm text-on-surface-variant flex items-center justify-center sm:justify-start gap-1.5">
+                  <Icon name="tune" className="text-xs text-secondary" />
+                  <span>Global configuration, rewards, telemetry, and providers</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Right: Telemetry & API Ribbon (cleanly on light surface) */}
+            <div className="flex items-center justify-center gap-3 sm:gap-4 bg-surface-container-low px-4 sm:px-5 py-3 rounded-2xl border border-surface-container-high/60 shadow-2xs mt-2 md:mt-3">
+              <div className="text-center px-3 border-r border-surface-container-high/60">
+                <p className="font-headline-md text-sm sm:text-base font-extrabold text-primary flex items-center justify-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-full ${apiStatus.state === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                  <span>{apiStatus.state === 'ok' ? 'API Active' : 'Checking'}</span>
+                </p>
+                <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mt-0.5">
+                  {apiStatus.latency ? `${apiStatus.latency}ms latency` : 'Telemetry'}
+                </p>
+              </div>
+              <div className="text-center px-3">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-primary text-xs font-extrabold uppercase">
+                  <Icon name="map" className="text-xs text-secondary" />
+                  <span>{mapProvider}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {statMsg && (
         <div className="bg-secondary-container/40 rounded-xl p-3 text-primary text-sm font-bold flex items-center justify-center gap-2 border border-secondary-container">

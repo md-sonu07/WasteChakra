@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import { Icon } from '../components/AppIcons';
+
 export default function TheProblem() {
   return (
     <div className="grow w-full max-w-360 mx-auto px-margin-mobile md:px-margin-desktop py-space-3xl">
@@ -16,15 +18,40 @@ export default function TheProblem() {
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-space-lg mb-24">
-        {/* Main Visual Card */}
-        <div className="md:col-span-8 bg-surface-container-lowest border border-surface-container-high relative overflow-hidden rounded-[24px] technical-shadow h-64 md:h-125">
-          <div className="absolute top-4 right-4 font-label-sm text-label-sm text-on-surface-variant z-10 bg-surface-container-lowest/80 px-2 py-1 rounded-full border border-surface-container-high backdrop-blur-sm">VISUALIZATION-A1</div>
-          <div className="absolute inset-0 w-full h-full">
-            <img className="object-cover w-full h-full opacity-90" src="/images/problem.jpg" alt="Waste Visualization" />
+        {/* Main Visual Card: Live Simulation */}
+        <div className="md:col-span-8 bg-surface-container-lowest border border-surface-container-high relative overflow-hidden rounded-[24px] technical-shadow h-135 md:h-160 flex flex-col">
+          {/* Simulation Header HUD */}
+          <div className="flex items-center justify-between px-5 py-3 bg-surface-container-low border-b border-surface-container-high z-10 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-secondary-container animate-pulse shadow-[0_0_8px_#abf854]"></span>
+              <span className="font-label-sm text-xs font-bold text-primary uppercase tracking-wider">
+                LIVE FACILITY SIMULATION // MSW DIGITAL TWIN
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/simulation"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary-container text-primary hover:bg-[#bbfb64] text-xs font-bold transition-all shadow-2xs"
+              >
+                <span>Launch Fullscreen</span>
+                <Icon name="north_east" className="text-xs" />
+              </Link>
+            </div>
           </div>
-          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(theme('colors.primary') 1px, transparent 1px), linear-gradient(90deg, theme('colors.primary') 1px, transparent 1px)", backgroundSize: '100px 100px', opacity: 0.05 }}></div>
-          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary m-4"></div>
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary m-4"></div>
+
+          {/* Live Simulation Embed Viewport */}
+          <div className="relative flex-1 w-full h-full overflow-hidden bg-surface">
+            <iframe
+              src="/simulation?embed=1"
+              title="WasteChakra Live Simulation"
+              className="w-full h-full border-0"
+              loading="lazy"
+            />
+          </div>
+
+          {/* Tech Corner Accents */}
+          <div className="absolute top-14 left-0 w-3 h-3 border-t-2 border-l-2 border-primary/30 m-3 pointer-events-none"></div>
+          <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary/30 m-3 pointer-events-none"></div>
         </div>
 
         {/* Side Cards */}

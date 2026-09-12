@@ -56,7 +56,7 @@ export default function CitizenMap() {
       )}
 
       <Card className="p-0 overflow-hidden">
-        <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-green-100 via-emerald-50 to-green-200">
+        <div className="relative w-full aspect-[3/1] bg-gradient-to-br from-green-100 via-emerald-50 to-green-200">
           <div
             className="absolute inset-0 opacity-10"
             style={{

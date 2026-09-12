@@ -7,7 +7,7 @@ export default function Contact() {
   const contactInfo = [
     { icon: 'call', label: 'Phone', value: '+1 (800) CHAKRA-ECO', detail: '24/7 dispatch line' },
     { icon: 'mail', label: 'Email', value: 'support@wastechakra.org', detail: 'Response within 2 hours' },
-    { icon: 'location_on', label: 'Address', value: '104 Greenloop Way, Eco District, Metro 94016', detail: 'Walk-ins welcome' },
+    { icon: 'location_on', label: 'Address', value: 'Purnia Bihar - 854301', detail: 'Walk-ins welcome' },
     { icon: 'schedule', label: 'Hours', value: '24/7 On-Demand Dispatch', detail: 'Office: Mon–Fri 8am–6pm' },
   ];
 
