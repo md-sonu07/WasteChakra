@@ -40,6 +40,19 @@ class ProcessWasteImageView(APIView):
         if source == "INSPECTION_OVERLAY":
             if not vision_res:
                 return Response({"error": "Failed to analyze image with Vision Service"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            if request.user and request.user.is_authenticated:
+                try:
+                    from apps.accounts.rewards_service import award_points_and_streak
+                    reward_info = award_points_and_streak(
+                        user=request.user,
+                        points=15,
+                        activity_type='IMAGE_SCAN',
+                        description="Simulation Optical Scan",
+                        reference_id=str(waste_image.id),
+                    )
+                    vision_res["reward_info"] = reward_info
+                except Exception:
+                    pass
             return Response(vision_res, status=status.HTTP_200_OK)
 
         # 2. Extract classified material & confidence
@@ -83,6 +96,20 @@ class ProcessWasteImageView(APIView):
         data["estimated_quantity"] = vision_res.get("estimated_quantity", "5-15 kg")
         data["recommended_action"] = vision_res.get("recommended_action", "Route to dry waste recycling")
         data["objects"] = vision_res.get("objects", [])
+
+        if request.user and request.user.is_authenticated:
+            try:
+                from apps.accounts.rewards_service import award_points_and_streak
+                reward_info = award_points_and_streak(
+                    user=request.user,
+                    points=15,
+                    activity_type='IMAGE_SCAN',
+                    description=f"AI Optical Scan: detected {material}",
+                    reference_id=str(record.id),
+                )
+                data["reward_info"] = reward_info
+            except Exception:
+                pass
 
         return Response(data, status=status.HTTP_201_CREATED)
 

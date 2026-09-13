@@ -5,7 +5,7 @@ import { Icon } from './AppIcons';
 
 const SECTIONS = [
   // { label: 'Home', target: '/', active: true },
-  { label: 'About', target: '/about' },
+  // { label: 'About', target: '/about' },
   { label: 'Services', target: '/services' },
   { label: 'How It Works', target: '/how-it-works' },
   { label: 'Impact', target: '/impact' },
