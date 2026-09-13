@@ -142,3 +142,130 @@ class BusinessProfile(models.Model):
 
     def __str__(self):
         return f"Business: {self.company_name or self.user.email}"
+
+
+class ChakraPointTransaction(models.Model):
+    class TransactionType(models.TextChoices):
+        EARNED = 'EARNED', 'Points Earned'
+        REDEEMED = 'REDEEMED', 'Points Redeemed'
+
+    class ActivityType(models.TextChoices):
+        WASTE_REPORT = 'WASTE_REPORT', 'Waste Report with Photo'
+        IMAGE_SCAN = 'IMAGE_SCAN', 'AI Optical Waste Scan'
+        PICKUP_COMPLETED = 'PICKUP_COMPLETED', 'Completed Waste Pickup'
+        COMMUNITY_CLEANUP = 'COMMUNITY_CLEANUP', 'Community Cleanup Event'
+        STREAK_BONUS = 'STREAK_BONUS', 'Streak Milestone Bonus'
+        REWARD_REDEMPTION = 'REWARD_REDEMPTION', 'Reward Redemption'
+        MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT', 'Manual Adjustment'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chakra_transactions')
+    points = models.IntegerField(help_text="Signed integer: positive for earned, negative for redeemed")
+    balance_after = models.PositiveIntegerField(default=0)
+    transaction_type = models.CharField(max_length=20, choices=TransactionType.choices, default=TransactionType.EARNED)
+    activity_type = models.CharField(max_length=30, choices=ActivityType.choices, default=ActivityType.WASTE_REPORT)
+    description = models.CharField(max_length=255, blank=True, default='')
+    reference_id = models.CharField(max_length=100, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email}: {self.points:+d} pts ({self.activity_type})"
+
+
+class RewardCatalogItem(models.Model):
+    class Category(models.TextChoices):
+        VOUCHER = 'VOUCHER', 'Eco Voucher'
+        MERCHANDISE = 'MERCHANDISE', 'Sustainable Merchandise'
+        DONATION = 'DONATION', 'Green Cause & Tree Planting'
+        EXPERIENCE = 'EXPERIENCE', 'Workshop & Pass'
+
+    id = models.CharField(max_length=50, primary_key=True, help_text="Unique slug or identifier, e.g. eco-voucher-50")
+    title = models.CharField(max_length=150)
+    description = models.TextField(blank=True, default='')
+    cost = models.PositiveIntegerField(help_text="Chakra points required to redeem")
+    category = models.CharField(max_length=30, choices=Category.choices, default=Category.VOUCHER)
+    icon = models.CharField(max_length=50, default='card_giftcard', help_text="Lucide/Material icon name")
+    image_url = models.URLField(blank=True, default='')
+    stock = models.IntegerField(default=100, help_text="-1 for unlimited stock")
+    partner_name = models.CharField(max_length=100, blank=True, default='WasteChakra Green Partner')
+    terms = models.TextField(blank=True, default='Valid for 90 days from redemption. Non-transferable.')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['cost', 'title']
+
+    def __str__(self):
+        return f"{self.title} ({self.cost} pts)"
+
+
+class RewardRedemption(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = 'ACTIVE', 'Active / Usable'
+        USED = 'USED', 'Redeemed / Claimed'
+        EXPIRED = 'EXPIRED', 'Expired'
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reward_redemptions')
+    reward = models.ForeignKey(RewardCatalogItem, on_delete=models.PROTECT, related_name='redemptions')
+    points_spent = models.PositiveIntegerField()
+    voucher_code = models.CharField(max_length=50, unique=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    claimed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} - {self.reward.title} ({self.voucher_code})"
+
+
+class CommunityEvent(models.Model):
+    class Status(models.TextChoices):
+        UPCOMING = 'UPCOMING', 'Upcoming'
+        OPEN = 'OPEN', 'Open for Registration'
+        IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
+        COMPLETED = 'COMPLETED', 'Completed'
+
+    id = models.CharField(max_length=50, primary_key=True)
+    title = models.CharField(max_length=200)
+    category = models.CharField(max_length=50, default='Cleanup')
+    location = models.CharField(max_length=255)
+    date = models.CharField(max_length=100)
+    participants = models.PositiveIntegerField(default=0)
+    target_kg = models.PositiveIntegerField(default=0)
+    waste_recovered_kg = models.PositiveIntegerField(default=0)
+    description = models.TextField(blank=True, default='')
+    reward_points = models.PositiveIntegerField(default=50)
+    status = models.CharField(max_length=30, choices=Status.choices, default=Status.OPEN)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.title} ({self.category}) - {self.participants} joined"
+
+
+class CommunityEventRegistration(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event = models.ForeignKey(CommunityEvent, on_delete=models.CASCADE, related_name='registrations')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='event_registrations')
+    name = models.CharField(max_length=150, blank=True, default='')
+    phone = models.CharField(max_length=30, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('event', 'user')
+
+    def __str__(self):
+        actor = self.user.email if self.user else (self.name or self.phone)
+        return f"{actor} -> {self.event.title}"
