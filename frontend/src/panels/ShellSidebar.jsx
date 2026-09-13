@@ -18,14 +18,6 @@ export default function ShellSidebar({ items }) {
             src="/images/logo-aida.png"
           />
         </Link>
-        <Link
-          to="/"
-          className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl text-xs font-bold text-surface-bright bg-white/10 hover:bg-white/20 border border-white/10 hover:border-[#abf854]/40 transition-all group shadow-2xs cursor-pointer"
-          title="Return to public homepage"
-        >
-          <Icon name="arrow_back" className="text-sm text-[#abf854] group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Home</span>
-        </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
