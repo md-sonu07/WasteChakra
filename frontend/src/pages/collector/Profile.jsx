@@ -17,14 +17,14 @@ export default function Profile() {
   const [form, setForm] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
-    vehicle_number: user?.profile?.vehicle_number || user?.collector_profile?.vehicle_number || user?.vehicle_number || '',
-    vehicle_type: user?.profile?.vehicle_type || user?.collector_profile?.vehicle_type || user?.vehicle_type || 'VAN',
-    phone: user?.profile?.phone || user?.phone || '',
-    address_line1: user?.profile?.address_line1 || '',
-    address_line2: user?.profile?.address_line2 || '',
-    city: user?.profile?.city || user?.city || '',
-    state: user?.profile?.state || '',
-    pincode: user?.profile?.pincode || '',
+    vehicle_number: user?.collector_profile?.vehicle_number || user?.profile?.vehicle_number || user?.vehicle_number || '',
+    vehicle_type: user?.collector_profile?.vehicle_type || user?.profile?.vehicle_type || user?.vehicle_type || 'VAN',
+    phone: user?.collector_profile?.phone || user?.profile?.phone || user?.phone || '',
+    address_line1: user?.collector_profile?.address_line1 || user?.profile?.address_line1 || '',
+    address_line2: user?.collector_profile?.address_line2 || user?.profile?.address_line2 || '',
+    city: user?.collector_profile?.city || user?.profile?.city || user?.city || '',
+    state: user?.collector_profile?.state || user?.profile?.state || '',
+    pincode: user?.collector_profile?.pincode || user?.profile?.pincode || '',
     address: user?.profile?.address || user?.address || '',
     latitude: user?.collector_profile?.current_lat || null,
     longitude: user?.collector_profile?.current_lng || null,
@@ -40,14 +40,14 @@ export default function Profile() {
       setForm({
         first_name: user.first_name || '',
         last_name: user.last_name || '',
-        vehicle_number: user.profile?.vehicle_number || user.collector_profile?.vehicle_number || user.vehicle_number || '',
-        vehicle_type: user.profile?.vehicle_type || user.collector_profile?.vehicle_type || user.vehicle_type || 'VAN',
-        phone: user.profile?.phone || user.phone || '',
-        address_line1: user.profile?.address_line1 || '',
-        address_line2: user.profile?.address_line2 || '',
-        city: user.profile?.city || user.city || '',
-        state: user.profile?.state || '',
-        pincode: user.profile?.pincode || '',
+        vehicle_number: user.collector_profile?.vehicle_number || user.profile?.vehicle_number || user.vehicle_number || '',
+        vehicle_type: user.collector_profile?.vehicle_type || user.profile?.vehicle_type || user.vehicle_type || 'VAN',
+        phone: user.collector_profile?.phone || user.profile?.phone || user.phone || '',
+        address_line1: user.collector_profile?.address_line1 || user.profile?.address_line1 || '',
+        address_line2: user.collector_profile?.address_line2 || user.profile?.address_line2 || '',
+        city: user.collector_profile?.city || user.profile?.city || user.city || '',
+        state: user.collector_profile?.state || user.profile?.state || '',
+        pincode: user.collector_profile?.pincode || user.profile?.pincode || '',
         address: user.profile?.address || user.address || '',
         latitude: user.collector_profile?.current_lat || null,
         longitude: user.collector_profile?.current_lng || null,
@@ -71,6 +71,7 @@ export default function Profile() {
         vehicle_number: form.vehicle_number,
         vehicle_type: form.vehicle_type,
         phone: form.phone,
+        address: form.address,
         address_line1: form.address_line1,
         address_line2: form.address_line2,
         city: form.city,
@@ -101,12 +102,52 @@ export default function Profile() {
   };
 
   const handleMapLocationChange = (loc) => {
+    const addr = loc.address || '';
+    let line1 = form.address_line1;
+    let line2 = form.address_line2;
+    let city = form.city;
+    let state = form.state;
+    let pincode = form.pincode;
+
+    if (loc.details) {
+      const d = loc.details;
+      const l1Parts = [d.house_number, d.building, d.road || d.street].filter(Boolean);
+      line1 = l1Parts.length > 0 ? l1Parts.join(', ') : (addr.split(',')[0] || '');
+
+      const l2Parts = [d.suburb || d.neighbourhood, d.residential || d.quarter || d.city_district].filter(Boolean);
+      line2 = l2Parts.length > 0 ? l2Parts.join(', ') : (addr.split(',')[1] || '');
+
+      city = d.city || d.town || d.village || d.municipality || d.county || d.state_district || city;
+      state = d.state || d.province || d.region || state;
+      pincode = d.postcode || pincode;
+    } else if (addr) {
+      const parts = addr.split(',').map((p) => p.trim()).filter(Boolean);
+      if (parts.length >= 1) line1 = parts[0];
+      if (parts.length >= 2) line2 = parts[1];
+
+      const pinMatch = addr.match(/\b\d{6}\b/);
+      if (pinMatch) pincode = pinMatch[0];
+
+      if (parts.length >= 3) {
+        const potentialCity = parts[parts.length - 3].replace(/\b\d{6}\b/g, '').trim();
+        if (potentialCity) city = potentialCity;
+      }
+      if (parts.length >= 2) {
+        const potentialState = parts[parts.length - 2].replace(/\b\d{6}\b/g, '').trim();
+        if (potentialState) state = potentialState;
+      }
+    }
+
     setForm((prev) => ({
       ...prev,
-      latitude: loc.lat,
-      longitude: loc.lng,
-      address_line1: loc.address ? loc.address.split(',')[0] : prev.address_line1,
-      address: loc.address || prev.address,
+      latitude: loc.lat ?? prev.latitude,
+      longitude: loc.lng ?? prev.longitude,
+      address: addr,
+      address_line1: line1 || prev.address_line1,
+      address_line2: line2 || prev.address_line2,
+      city: city || prev.city,
+      state: state || prev.state,
+      pincode: pincode || prev.pincode,
     }));
   };
 
@@ -179,23 +220,33 @@ export default function Profile() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-space-md items-start">
-        <Card className="p-5 md:p-6">
-          <h2 className="font-headline-md text-xl md:text-2xl text-primary font-bold mb-6 flex items-center gap-2">
-            <Icon name="badge" className="text-secondary" /> Personal & Vehicle Information
-          </h2>
-          {saved && (
-            <div className="bg-secondary-container/40 rounded-xl p-3 mb-5 text-primary text-sm font-bold flex items-center gap-2 border border-secondary-container">
-              <Icon name="check_circle" className="text-lg text-forest" /> Profile saved successfully!
-            </div>
-          )}
-          {error && (
-            <div className="bg-red-500/10 text-red-700 rounded-xl p-3 mb-5 text-sm font-bold flex items-center gap-2 border border-red-200">
-              <Icon name="error" className="text-lg" /> {error}
-            </div>
-          )}
+      <Card className="p-6 md:p-8 w-full flex flex-col gap-8 border border-surface-container-high bg-surface-container-lowest rounded-xl technical-shadow">
+        {saved && (
+          <div className="bg-secondary-container/40 rounded-xl p-4 text-primary text-sm font-bold flex items-center gap-2.5 border border-secondary-container animate-fade-in">
+            <Icon name="check_circle" className="text-xl text-forest" /> Profile and Depot location saved successfully!
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-500/10 text-red-700 rounded-xl p-4 text-sm font-bold flex items-center gap-2.5 border border-red-200 animate-fade-in">
+            <Icon name="error" className="text-xl" /> {error}
+          </div>
+        )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        {/* SECTION 1: Personal & Vehicle Information */}
+        <div className="flex flex-col gap-5">
+          <div className="flex items-center gap-3 border-b border-surface-container-high pb-3">
+            <div className="p-2 rounded-xl bg-forest text-secondary-container shadow-xs">
+              <Icon name="badge" className="text-xl" />
+            </div>
+            <div>
+              <h2 className="font-headline-md text-xl md:text-2xl text-primary font-bold">
+                Personal & Vehicle Information
+              </h2>
+              <p className="text-xs text-on-surface-variant">Update your driver credentials & vehicle details</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">First Name</label>
               <input
@@ -216,7 +267,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 mb-4">
+          <div className="flex flex-col gap-1.5">
             <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Phone / Contact Number</label>
             <input
               value={form.phone}
@@ -226,7 +277,7 @@ export default function Profile() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Vehicle Number</label>
               <input
@@ -250,24 +301,24 @@ export default function Profile() {
               </select>
             </div>
           </div>
+        </div>
 
-          <Button variant="primary" size="lg" loading={saving} onClick={save} className="w-full">
-            {saving ? 'Saving Profile...' : 'Save Profile Changes'}
-          </Button>
-        </Card>
-
-        <Card className="p-5 md:p-6 w-full flex flex-col gap-6">
-          <div>
-            <h2 className="font-headline-md text-xl md:text-2xl text-primary font-bold mb-2 flex items-center gap-2">
-              <Icon name="location_on" className="text-secondary" /> Service Depot & Base Location
-            </h2>
-            <p className="text-xs text-on-surface-variant mb-4">
-              Pin your home depot or live operational base location on the map for optimal route auto-assignment.
-            </p>
+        {/* SECTION 2: Service Depot & Base Location */}
+        <div className="flex flex-col gap-5 pt-4 border-t border-surface-container-high/60">
+          <div className="flex items-center gap-3 border-b border-surface-container-high pb-3">
+            <div className="p-2 rounded-xl bg-forest text-secondary-container shadow-xs">
+              <Icon name="location_on" className="text-xl" />
+            </div>
+            <div>
+              <h2 className="font-headline-md text-xl md:text-2xl text-primary font-bold">
+                Service Depot & Base Location
+              </h2>
+              <p className="text-xs text-on-surface-variant">Pin your operational base depot on the map for route auto-assignment</p>
+            </div>
           </div>
 
-          {/* Pin the Location Interactive Map Header */}
-          <div className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 shadow-sm flex flex-col gap-4">
+          {/* Pin the Location Interactive Map Unit */}
+          <div className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 shadow-xs flex flex-col gap-4">
             <div className="text-center">
               <h3 className="text-xl text-primary font-extrabold mb-1">Pin the Location</h3>
               <p className="text-xs text-on-surface-variant">Drag the map or use your live location to mark your depot spot.</p>
@@ -277,15 +328,25 @@ export default function Profile() {
               <LocationPicker
                 value={{ address: form.address || form.address_line1, lat: form.latitude, lng: form.longitude }}
                 onChange={handleMapLocationChange}
-                height={256}
+                height={260}
                 showAddress={true}
                 addressLabel="Depot Base Address"
               />
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 pt-2 border-t border-surface-container-high">
-            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Additional Address Details</h3>
+          {/* Additional Address Details */}
+          <div className="flex flex-col gap-4 pt-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider">Additional Address Details</h3>
+              <button
+                type="button"
+                onClick={() => handleMapLocationChange({ lat: form.latitude, lng: form.longitude, address: form.address })}
+                className="text-xs font-bold text-forest hover:text-primary flex items-center gap-1 bg-secondary-container/40 px-2.5 py-1 rounded-lg border border-secondary-container cursor-pointer transition-colors"
+              >
+                <Icon name="autorenew" className="text-xs" /> Sync from Depot Address
+              </button>
+            </div>
             
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Address Line 1 (Flat/House No., Building, Street)</label>
@@ -339,36 +400,38 @@ export default function Profile() {
               </div>
             </div>
           </div>
+        </div>
 
-          <Button variant="primary" size="lg" loading={saving} onClick={save} className="w-full">
-            {saving ? 'Saving Depot & Profile...' : 'Save Depot & Address Changes'}
+        {/* Main Action Button */}
+        <div className="pt-2 border-t border-surface-container-high/60">
+          <Button variant="primary" size="lg" loading={saving} onClick={save} className="w-full text-base font-bold shadow-md">
+            <Icon name="save" className="text-lg" /> {saving ? 'Saving Profile & Depot Settings...' : 'Save Profile & Depot Settings'}
           </Button>
+        </div>
 
-          <div className="pt-2 border-t border-surface-container-high flex flex-col gap-4">
-            <h3 className="font-title-md text-base text-primary font-bold">Collector Availability Status</h3>
-            <label className="flex items-center justify-between gap-3 p-4 rounded-xl border border-surface-container-high/50 bg-surface-container-lowest hover:border-secondary/50 hover:bg-surface transition-colors cursor-pointer group">
-              <div>
-                <p className="font-body-md text-primary font-bold group-hover:text-[#0a3a2a] transition-colors">Accepting Pickups</p>
-                <p className="text-xs text-on-surface-variant mt-0.5">Toggle your active online status for route assignments.</p>
-              </div>
-              <div className="relative flex items-center">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => toggleActive(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#A8E05A]"></div>
-              </div>
-            </label>
-            <div className="pt-2 flex justify-center w-full">
-              <Button variant="danger" size="lg" onClick={() => { logout(); navigate('/'); }} className="w-full">
-                <Icon name="logout" className="text-lg" /> Sign Out
-              </Button>
+        {/* Collector Availability & Sign Out */}
+        <div className="pt-2 border-t border-surface-container-high/60 flex flex-col md:flex-row items-center justify-between gap-4">
+          <label className="flex-1 flex items-center justify-between gap-3 p-4 rounded-2xl border border-surface-container-high/60 bg-surface-container-lowest hover:border-secondary/50 hover:bg-surface transition-colors cursor-pointer group w-full">
+            <div>
+              <p className="font-body-md text-primary font-bold group-hover:text-[#0a3a2a] transition-colors">Accepting Pickups</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">Toggle online shift status for pickup assignments</p>
             </div>
-          </div>
-        </Card>
-      </div>
+            <div className="relative flex items-center">
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => toggleActive(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-surface-container-high peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#A8E05A]"></div>
+            </div>
+          </label>
+
+          <Button variant="danger" size="lg" onClick={() => { logout(); navigate('/'); }} className="w-full md:w-auto px-6">
+            <Icon name="logout" className="text-lg" /> Sign Out
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

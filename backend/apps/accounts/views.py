@@ -67,17 +67,19 @@ class ProfileView(APIView):
             if field in data and data[field] is not None:
                 setattr(profile, field, str(data[field]))
 
-        parts = [p for p in [profile.address_line1, profile.address_line2, profile.city, profile.state, profile.pincode] if p]
-        if parts:
-            profile.address = ", ".join(parts)
+        if 'address' in data and data['address']:
+            profile.address = str(data['address'])
+        else:
+            parts = [p for p in [profile.address_line1, profile.address_line2, profile.city, profile.state, profile.pincode] if p]
+            if parts:
+                profile.address = ", ".join(parts)
         profile.save()
 
         if user.role == 'COLLECTOR' or hasattr(user, 'collector_profile'):
             cp, _ = CollectorProfile.objects.get_or_create(user=user)
-            if 'vehicle_number' in data and data['vehicle_number'] is not None:
-                cp.vehicle_number = str(data['vehicle_number'])
-            if 'vehicle_type' in data and data['vehicle_type'] is not None:
-                cp.vehicle_type = str(data['vehicle_type'])
+            for field in ['phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'vehicle_number', 'vehicle_type']:
+                if field in data and data[field] is not None:
+                    setattr(cp, field, str(data[field]))
             if 'is_active' in data and data['is_active'] is not None:
                 cp.is_active = bool(data['is_active'])
 

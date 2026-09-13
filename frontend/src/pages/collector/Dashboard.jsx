@@ -238,7 +238,7 @@ export default function Dashboard() {
           <h2 className="font-title-md text-title-md text-primary font-bold mb-3 flex items-center gap-2">
             <Icon name="explore" className="text-secondary" /> Open Nearby Pickups Pool ({openPoolPickups.length})
           </h2>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {openPoolPickups.map((p) => (
               <div key={p.id} className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 flex flex-col gap-2 hover:border-secondary transition-all">
                 <div className="flex items-center justify-between gap-2">
