@@ -33,7 +33,9 @@ class WasteReportCreateView(generics.CreateAPIView):
     serializer_class = WasteReportCreateSerializer
     parser_classes = [parsers.MultiPartParser, parsers.FormParser, parsers.JSONParser]
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         report = serializer.save(
             user=self.request.user,
             report_id=generate_report_id(),
@@ -57,6 +59,26 @@ class WasteReportCreateView(generics.CreateAPIView):
         )
         report.status = 'PICKUP_SCHEDULED'
         report.save()
+
+        # Award points & maintain daily streak
+        reward_info = None
+        try:
+            from apps.accounts.rewards_service import award_points_and_streak
+            reward_info = award_points_and_streak(
+                user=self.request.user,
+                points=50,
+                activity_type='WASTE_REPORT',
+                description=f"Reported {report.waste_type} waste ({report.report_id})",
+                reference_id=str(report.id),
+            )
+        except Exception as e:
+            pass
+
+        data = WasteReportSerializer(report, context={'request': request}).data
+        data['reward_info'] = reward_info
+        data['pickup_id'] = pickup.pickup_id
+        headers = self.get_success_headers(data)
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class WasteReportListView(generics.ListAPIView):
@@ -284,6 +306,20 @@ class PickupDetailView(generics.RetrieveUpdateAPIView):
                     {'error': f"Invalid status transition: {pickup.status} → {new_status}. Allowed: {allowed or 'none'}"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            if new_status == 'COMPLETED' and pickup.user:
+                try:
+                    from apps.accounts.rewards_service import award_points_and_streak
+                    weight = float(request.data.get('actual_weight_kg') or pickup.actual_weight_kg or 5.0)
+                    calc_points = max(50, int(weight * 10))
+                    award_points_and_streak(
+                        user=pickup.user,
+                        points=calc_points,
+                        activity_type='PICKUP_COMPLETED',
+                        description=f"Completed pickup {pickup.pickup_id} ({weight:.1f}kg recycled)",
+                        reference_id=str(pickup.id),
+                    )
+                except Exception:
+                    pass
         return super().update(request, *args, **kwargs)
 
 

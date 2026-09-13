@@ -1,6 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import UserProfile, CollectorProfile
+from .models import (
+    UserProfile,
+    CollectorProfile,
+    RewardCatalogItem,
+    RewardRedemption,
+    ChakraPointTransaction,
+    CommunityEvent,
+    CommunityEventRegistration,
+)
 
 User = get_user_model()
 
@@ -84,3 +92,62 @@ class CollectorProfileSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
+
+
+class RewardCatalogItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RewardCatalogItem
+        fields = [
+            'id', 'title', 'description', 'cost', 'category',
+            'icon', 'image_url', 'stock', 'partner_name', 'terms', 'is_active',
+        ]
+
+
+class RewardRedemptionSerializer(serializers.ModelSerializer):
+    reward = RewardCatalogItemSerializer(read_only=True)
+    reward_id = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = RewardRedemption
+        fields = [
+            'id', 'reward', 'reward_id', 'points_spent', 'voucher_code',
+            'status', 'expires_at', 'claimed_at', 'created_at',
+        ]
+        read_only_fields = ['id', 'points_spent', 'voucher_code', 'status', 'expires_at', 'claimed_at', 'created_at']
+
+
+class ChakraPointTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ChakraPointTransaction
+        fields = [
+            'id', 'points', 'balance_after', 'transaction_type',
+            'activity_type', 'description', 'reference_id', 'created_at',
+        ]
+        read_only_fields = fields
+
+
+class CommunityEventSerializer(serializers.ModelSerializer):
+    is_joined = serializers.SerializerMethodField()
+    targetKg = serializers.IntegerField(source='target_kg', read_only=True)
+
+    class Meta:
+        model = CommunityEvent
+        fields = [
+            'id', 'title', 'category', 'location', 'date',
+            'participants', 'target_kg', 'targetKg', 'waste_recovered_kg',
+            'description', 'reward_points', 'status', 'is_joined',
+            'created_at', 'updated_at',
+        ]
+
+    def get_is_joined(self, obj):
+        request = self.context.get('request')
+        if request and request.user and request.user.is_authenticated:
+            return obj.registrations.filter(user=request.user).exists()
+        return False
+
+
+class CommunityEventRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommunityEventRegistration
+        fields = ['id', 'event', 'user', 'name', 'phone', 'created_at']
+        read_only_fields = ['id', 'created_at']

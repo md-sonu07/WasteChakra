@@ -51,6 +51,7 @@ export default function ReportWaste() {
   const [reportId, setReportId] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [aiScanning, setAiScanning] = useState(false);
+  const [rewardInfo, setRewardInfo] = useState(null);
 
   const [submitError, setSubmitError] = useState(null);
 
@@ -126,6 +127,9 @@ export default function ReportWaste() {
 
       const result = await api.createWasteReport(formData);
       setReportId(result.report_id || result.id || `WC-${String(Math.floor(1000 + Math.random() * 9000))}`);
+      if (result.reward_info) {
+        setRewardInfo(result.reward_info);
+      }
       setSubmitted(true);
 
       if (image && !aiAnalysis) {
@@ -141,30 +145,75 @@ export default function ReportWaste() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col gap-8 w-full max-w-4xl mx-auto py-8 px-4 animate-fade-in-up">
-        <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl rounded-[32px] p-10 flex flex-col items-center relative overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-64 h-64 bg-secondary-container/30 blur-3xl rounded-full pointer-events-none"></div>
-          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-[#0a3a2a]/10 blur-3xl rounded-full pointer-events-none"></div>
+      <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto py-8 px-4 animate-fade-in-up">
+        {/* Rewarded Points & Streak Celebration Hero */}
+        <div className="rounded-3xl bg-linear-to-br from-[#00180b] via-[#052b19] to-[#00180b] p-6 text-white border border-[#abf854]/30 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(#abf854_1px,transparent_1px)] bg-size-[16px_16px] opacity-15 pointer-events-none" />
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#abf854]/20 blur-2xl pointer-events-none" />
 
-          <div className="w-24 h-24 bg-surface rounded-full flex items-center justify-center mb-6 shadow-inner relative z-10">
-            <div className="absolute inset-0 bg-secondary rounded-full animate-ping opacity-20"></div>
-            <Icon name="check_circle" className="text-6xl text-[#0a3a2a]" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
+            <div className="flex items-center gap-4 text-center md:text-left">
+              <div className="w-14 h-14 rounded-2xl bg-[#abf854] text-[#00180b] flex items-center justify-center shrink-0 shadow-lg ring-4 ring-[#abf854]/20">
+                <Icon name="stars" className="text-3xl" />
+              </div>
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[#abf854] font-bold text-[10px] uppercase tracking-wider mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#abf854] animate-pulse" />
+                  Eco-Reward Credited
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">
+                  +{rewardInfo?.total_points_added || 50} Chakra Points
+                </h2>
+                <p className="text-xs text-white/75 mt-0.5">
+                  {rewardInfo?.bonus_points > 0
+                    ? `Includes +${rewardInfo.bonus_points} consecutive streak milestone bonus!`
+                    : 'Instantly credited to your Digital Wallet for sustainable redemptions.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-end">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md">
+                <Icon name="local_fire_department" className="text-amber-400 text-2xl" />
+                <div className="text-left">
+                  <span className="text-[10px] text-white/60 font-bold uppercase block">Current Streak</span>
+                  <span className="text-base font-extrabold font-mono text-white">
+                    {rewardInfo?.streak_days || 1}d Streak
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => navigate('/app/rewards')}
+                className="rounded-2xl px-4 py-2.5 font-extrabold text-xs shadow-md shrink-0"
+              >
+                <Icon name="card_giftcard" className="text-sm mr-1" /> Rewards Catalog
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl rounded-3xl p-8 flex flex-col items-center relative overflow-hidden">
+          <div className="w-20 h-20 bg-surface rounded-full flex items-center justify-center mb-4 shadow-inner relative z-10">
+            <Icon name="check_circle" className="text-5xl text-[#0a3a2a]" />
           </div>
           
-          <h1 className="font-headline-md text-3xl text-primary font-extrabold text-center mb-3 relative z-10">
+          <h1 className="font-headline-md text-2xl sm:text-3xl text-primary font-extrabold text-center mb-2 relative z-10">
             Report Submitted Successfully!
           </h1>
-          <p className="text-on-surface-variant text-center mb-8 max-w-md relative z-10">
+          <p className="text-on-surface-variant text-center mb-6 max-w-md relative z-10 text-sm">
             Your waste report has been recorded and will be assigned to a collector shortly. Thank you for keeping the community clean.
           </p>
           
-          <div className="bg-surface border border-surface-container-highest rounded-2xl px-6 py-4 flex items-center gap-4 w-full relative z-10 shadow-sm">
-            <div className="bg-surface-container-highest p-3 rounded-xl">
-              <Icon name="tag" className="text-primary text-xl" />
+          <div className="bg-surface border border-surface-container-highest rounded-2xl px-6 py-3.5 flex items-center gap-4 w-full relative z-10 shadow-sm">
+            <div className="bg-surface-container-highest p-2.5 rounded-xl">
+              <Icon name="tag" className="text-primary text-lg" />
             </div>
             <div>
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Report Tracking ID</p>
-              <p className="font-headline-sm text-xl text-primary font-extrabold font-mono tracking-tight">{reportId}</p>
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Report Tracking ID</p>
+              <p className="text-lg text-primary font-extrabold font-mono tracking-tight">{reportId}</p>
             </div>
           </div>
         </div>
@@ -279,7 +328,23 @@ export default function ReportWaste() {
             <div className="animate-fade-in-up">
               <div className="text-center mb-8">
                 <h2 className="text-2xl text-primary font-extrabold mb-2">Upload a Photo</h2>
-                <p className="text-on-surface-variant">A clear photo helps our AI identify materials and suggest the best action.</p>
+                <p className="text-on-surface-variant mb-4">A clear photo helps our AI identify materials and suggest the best action.</p>
+
+                {/* Eco-Reward Incentive Pill */}
+                <div className="flex items-center justify-between p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200/80 rounded-2xl max-w-lg mx-auto mb-5 shadow-2xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                      <Icon name="stars" className="text-base" />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-xs font-extrabold text-emerald-950 block">Earn +50 Chakra Points</span>
+                      <span className="text-[11px] text-emerald-800/80">Every verified waste report fuels your streak</span>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-200/70 border border-emerald-400/60 text-emerald-950 text-[11px] font-extrabold font-mono">
+                    +50 PTS
+                  </span>
+                </div>
               </div>
               
               {imagePreview ? (

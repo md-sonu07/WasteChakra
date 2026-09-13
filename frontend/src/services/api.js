@@ -119,3 +119,5 @@ export const processWasteImage = (...args) => api.processWasteImage(...args);
 export const getWasteRecords = (...args) => api.getWasteRecords(...args);
 export const getDecisionConfig = (...args) => api.getDecisionConfig(...args);
 export const updateDecisionConfig = (...args) => api.updateDecisionConfig(...args);
+export const getCommunityEvents = (...args) => api.getCommunityEvents(...args);
+export const joinCommunityEvent = (...args) => api.joinCommunityEvent(...args);

@@ -34,8 +34,8 @@ export default function CitizenDashboard() {
   }, []);
 
   const firstName = user?.first_name || user?.email?.split('@')[0] || 'there';
-  const points = user?.profile?.chakra_points || impact?.chakra_points || 1280;
-  const streakDays = impact?.streak_days || 7;
+  const points = impact?.chakra_points ?? user?.profile?.chakra_points ?? 0;
+  const streakDays = impact?.streak_days ?? user?.profile?.streak_days ?? 1;
   const recentPickup = pickups.length > 0 ? pickups[0] : null;
 
   if (loading) {
@@ -161,6 +161,51 @@ export default function CitizenDashboard() {
               </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* 2.5 Daily Streak & Continuity Tracker Widget */}
+      <div className="rounded-3xl bg-surface border border-surface-container-high p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xs">
+        <div className="flex items-center gap-3.5 w-full sm:w-auto">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 ring-4 ring-amber-500/10">
+            <Icon name="local_fire_department" className="text-2xl animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-extrabold text-primary">Daily Streak: {streakDays} Days</span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+                🔥 Active
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              Submit a waste photo or schedule a pickup today to keep your streak alive!
+            </p>
+          </div>
+        </div>
+
+        {/* 7-Day Visual Continuity Bubble Strip */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => {
+            const dayNum = idx + 1;
+            const isCompleted = dayNum <= Math.min(streakDays, 7);
+            const isToday = dayNum === Math.min(streakDays, 7);
+            return (
+              <div key={idx} className="flex flex-col items-center gap-1">
+                <div
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-extrabold transition-all ${
+                    isToday
+                      ? 'bg-amber-500 text-white ring-2 ring-amber-300 shadow-xs scale-105'
+                      : isCompleted
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-surface-container-high text-on-surface-variant'
+                  }`}
+                >
+                  {isCompleted ? <Icon name="check" className="text-xs" /> : day}
+                </div>
+                <span className="text-[9px] font-bold text-on-surface-variant uppercase">{day}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

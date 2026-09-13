@@ -29,11 +29,64 @@ export const dataProvider = {
   async getImpact() {
     return withFallback(() => api.getImpact(), demo.impact);
   },
-  async getEvents() {
-    return demo.events;
+  async getEvents(params = {}) {
+    return withFallback(async () => {
+      const res = await api.getCommunityEvents(params);
+      return res.results || res;
+    }, demo.events);
+  },
+  async joinEvent(eventId, data = {}) {
+    try {
+      const res = await api.joinCommunityEvent(eventId, data);
+      try {
+        const stored = JSON.parse(localStorage.getItem('wc_joined_events') || '{}');
+        stored[eventId] = true;
+        localStorage.setItem('wc_joined_events', JSON.stringify(stored));
+      } catch {}
+      return res;
+    } catch {
+      try {
+        const stored = JSON.parse(localStorage.getItem('wc_joined_events') || '{}');
+        stored[eventId] = true;
+        localStorage.setItem('wc_joined_events', JSON.stringify(stored));
+      } catch {}
+      return {
+        success: true,
+        message: 'Successfully registered for event!',
+        event_id: eventId,
+        already_joined: false,
+        reward_info: {
+          points_earned: 50,
+          current_points: (demo.impact.chakra_points || 1280) + 50,
+          streak_days: (demo.impact.streak_days || 7) + 1,
+        },
+      };
+    }
+  },
+  getJoinedEvents() {
+    try {
+      return JSON.parse(localStorage.getItem('wc_joined_events') || '{}');
+    } catch {
+      return {};
+    }
   },
   async getRewards() {
-    return demo.rewards;
+    return withFallback(async () => {
+      const data = await api.getRewards();
+      return data.catalog || data;
+    }, demo.rewards);
+  },
+  async getRewardSummary() {
+    return withFallback(() => api.getRewards(), {
+      catalog: demo.rewards,
+      user: { chakra_points: demo.impact.chakra_points, streak_days: demo.impact.streak_days },
+    });
+  },
+  async getRewardHistory() {
+    return withFallback(() => api.getRewardHistory(), { transactions: [], redemptions: [] });
+  },
+  async redeemReward(rewardId) {
+    return api.redeemReward(rewardId);
   },
   async getLeaderboard() {
     return demo.leaderboard;

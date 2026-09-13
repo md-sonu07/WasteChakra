@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/AppIcons';
+import { dataProvider } from '../services/dataProvider';
+import { useAuth } from '../context/AuthContext';
 
 export default function Community() {
+  const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState('All');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [joinedEvents, setJoinedEvents] = useState({});
   const [userName, setUserName] = useState('');
   const [userPhone, setUserPhone] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [rewardFeedback, setRewardFeedback] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const programs = [
     {
@@ -126,9 +132,43 @@ export default function Community() {
 
   const [events, setEvents] = useState(initialEvents);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetchDynamicEvents = async () => {
+      setLoading(true);
+      try {
+        const data = await dataProvider.getEvents();
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          setEvents(data);
+          // Sync any backend is_joined status
+          const backendJoined = {};
+          data.forEach((evt) => {
+            if (evt.is_joined) backendJoined[String(evt.id)] = true;
+          });
+          setJoinedEvents((prev) => ({ ...backendJoined, ...dataProvider.getJoinedEvents(), ...prev }));
+        }
+      } catch (err) {
+        console.warn('Could not load dynamic community events:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchDynamicEvents();
+
+    // Prefill name & phone if citizen is logged in
+    if (user) {
+      const name = user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : (user.username || '');
+      const phone = user.phone || user.profile?.phone || '';
+      if (name) setUserName(name);
+      if (phone) setUserPhone(phone);
+    }
+    return () => { mounted = false; };
+  }, [user]);
+
   const filteredEvents = activeFilter === 'All'
     ? events
-    : events.filter((e) => e.category === activeFilter);
+    : events.filter((e) => (e.category || '').toLowerCase() === activeFilter.toLowerCase());
 
   const leaderboard = [
     { rank: 1, name: 'Green Valley RWA', type: 'Residential Society', kg: '14,250 kg', credits: '18,500', badge: 'Diamond Champion' },
@@ -138,20 +178,46 @@ export default function Community() {
     { rank: 5, name: 'Purnia Tech Park Campus', type: 'Commercial Park', kg: '7,400 kg', credits: '9,800', badge: 'Green Workplace' },
   ];
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    if (!selectedEvent) return;
+    if (!selectedEvent || isSubmitting) return;
 
-    setJoinedEvents((prev) => ({ ...prev, [selectedEvent.id]: true }));
-    setEvents((prev) =>
-      prev.map((item) =>
-        item.id === selectedEvent.id ? { ...item, participants: item.participants + 1 } : item
-      )
-    );
+    setIsSubmitting(true);
+    try {
+      const res = await dataProvider.joinEvent(selectedEvent.id, {
+        name: userName,
+        phone: userPhone,
+      });
 
-    setSelectedEvent(null);
-    setShowSuccessToast(true);
-    setTimeout(() => setShowSuccessToast(false), 4000);
+      const eventKey = String(selectedEvent.id);
+      setJoinedEvents((prev) => ({ ...prev, [eventKey]: true }));
+      setEvents((prev) =>
+        prev.map((item) =>
+          String(item.id) === eventKey
+            ? {
+                ...item,
+                participants: res.participants || (item.participants + 1),
+                is_joined: true,
+              }
+            : item
+        )
+      );
+
+      const earned = res?.reward_info?.points_awarded || res?.reward_info?.total_points_added || res?.reward_info?.points_earned;
+      if (earned) {
+        setRewardFeedback(`+${earned} Chakra Points & Streak Updated! 🔥`);
+      } else {
+        setRewardFeedback('+50 Chakra Points & Volunteer Badge Reserved!');
+      }
+
+      setSelectedEvent(null);
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 5000);
+    } catch (err) {
+      console.error('Failed to join event:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -162,7 +228,9 @@ export default function Community() {
           <Icon name="check_circle" className="text-secondary text-[24px]" />
           <div>
             <div className="font-bold text-sm">Successfully Registered!</div>
-            <div className="text-xs text-primary-fixed-dim">You will receive an SMS reminder before the drive begins.</div>
+            <div className="text-xs text-primary-fixed-dim">
+              {rewardFeedback || 'You will receive an SMS reminder before the drive begins.'}
+            </div>
           </div>
         </div>
       )}
@@ -266,7 +334,7 @@ export default function Community() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
           {filteredEvents.map((evt) => {
-            const isJoined = joinedEvents[evt.id];
+            const isJoined = !!joinedEvents[String(evt.id)] || !!evt.is_joined;
             return (
               <div key={evt.id} className="bg-surface-container-lowest rounded-[28px] border border-surface-container-high/70 hover:border-secondary transition-all flex flex-col p-6 justify-between">
                 <div>
@@ -274,9 +342,14 @@ export default function Community() {
                     <span className="font-label-sm text-[11px] px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-bold">
                       {evt.category}
                     </span>
-                    <div className="flex items-center gap-1 text-xs text-on-surface-variant">
-                      <Icon name="people" className="text-secondary text-[16px]" />
-                      <span>{evt.participants} joined</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-label-sm text-[11px] px-2 py-0.5 rounded-md bg-secondary-container/60 text-primary font-bold">
+                        +{evt.reward_points || 50} pts
+                      </span>
+                      <div className="flex items-center gap-1 text-xs text-on-surface-variant font-medium">
+                        <Icon name="people" className="text-secondary text-[16px]" />
+                        <span className="font-bold text-primary">{evt.participants} joined</span>
+                      </div>
                     </div>
                   </div>
                   <h3 className="font-title-md text-base md:text-lg text-primary font-bold mb-2">{evt.title}</h3>
@@ -291,6 +364,12 @@ export default function Community() {
                       <Icon name="schedule" className="text-secondary text-[16px]" />
                       <span>{evt.date}</span>
                     </div>
+                    {(evt.target_kg || evt.targetKg) ? (
+                      <div className="flex items-center gap-2 text-[11px] text-primary/70">
+                        <Icon name="flag" className="text-forest text-[14px]" />
+                        <span>Target: {evt.target_kg || evt.targetKg} kg diversion</span>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -299,12 +378,12 @@ export default function Community() {
                   disabled={isJoined}
                   className={`w-full py-3 rounded-xl font-label-md text-xs md:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     isJoined
-                      ? 'bg-emerald-600 text-white cursor-default'
-                      : 'bg-secondary-container text-primary hover:bg-secondary-fixed-dim'
+                      ? 'bg-emerald-600 text-white cursor-default shadow-xs'
+                      : 'bg-secondary-container text-primary hover:bg-secondary-fixed-dim active:scale-[0.99]'
                   }`}
                 >
                   <Icon name={isJoined ? 'check_circle' : 'volunteer_activism'} className="text-[18px]" />
-                  <span>{isJoined ? 'You are Attending!' : 'Join This Event (Free)'}</span>
+                  <span>{isJoined ? 'Joined ✓' : 'Join This Event (Free)'}</span>
                 </button>
               </div>
             );
