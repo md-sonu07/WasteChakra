@@ -259,14 +259,34 @@ export default function Profile() {
         <Card className="p-5 md:p-6 w-full flex flex-col gap-6">
           <div>
             <h2 className="font-headline-md text-xl md:text-2xl text-primary font-bold mb-2 flex items-center gap-2">
-              <Icon name="location_on" className="text-secondary" /> Service Depot & Address Details
+              <Icon name="location_on" className="text-secondary" /> Service Depot & Base Location
             </h2>
-            <p className="text-xs text-on-surface-variant mb-6">
-              Enter your accurate structured address or pin your hub location on the map for route assignment.
+            <p className="text-xs text-on-surface-variant mb-4">
+              Pin your home depot or live operational base location on the map for optimal route auto-assignment.
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          {/* Pin the Location Interactive Map Header */}
+          <div className="bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 shadow-sm flex flex-col gap-4">
+            <div className="text-center">
+              <h3 className="text-xl text-primary font-extrabold mb-1">Pin the Location</h3>
+              <p className="text-xs text-on-surface-variant">Drag the map or use your live location to mark your depot spot.</p>
+            </div>
+
+            <div className="relative z-0">
+              <LocationPicker
+                value={{ address: form.address || form.address_line1, lat: form.latitude, lng: form.longitude }}
+                onChange={handleMapLocationChange}
+                height={256}
+                showAddress={true}
+                addressLabel="Depot Base Address"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 pt-2 border-t border-surface-container-high">
+            <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Additional Address Details</h3>
+            
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2">Address Line 1 (Flat/House No., Building, Street)</label>
               <input
@@ -317,18 +337,6 @@ export default function Profile() {
                   placeholder="560001"
                 />
               </div>
-            </div>
-
-            <div className="pt-2">
-              <label className="text-[11px] font-bold text-primary uppercase tracking-widest ml-2 mb-2 block">
-                Pin Depot Hub on Map
-              </label>
-              <LocationPicker
-                value={{ address: form.address || form.address_line1, lat: form.latitude, lng: form.longitude }}
-                onChange={handleMapLocationChange}
-                height={220}
-                showAddress={false}
-              />
             </div>
           </div>
 

@@ -6,6 +6,7 @@ export const citizenApi = {
   getWasteReport: (id) => request(`/waste-reports/${id}/`),
 
   createPickup: (data) => request('/pickups/create/', { method: 'POST', body: JSON.stringify(data) }),
+  submitQuoteRequest: (data) => request('/pickups/quote-request/', { method: 'POST', body: JSON.stringify(data) }),
   getPickups: (params = {}) => request(`/pickups/${qs(params)}`),
   getPickup: (id) => request(`/pickups/${id}/`),
 

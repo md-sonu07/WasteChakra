@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from django.contrib.auth import get_user_model
 from rest_framework import generics, permissions, status, parsers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -188,6 +189,53 @@ class PickupClaimView(APIView):
         pickup.status = 'ASSIGNED'
         pickup.save()
         return Response(PickupSerializer(pickup, context={'request': request}).data)
+
+
+class PickupQuoteRequestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = request.data or {}
+        name = data.get('name', '').strip()
+        phone = data.get('phone', '').strip()
+        service = data.get('service', 'Residential Pickup').strip()
+
+        if not name or not phone:
+            return Response({'error': 'Name and phone number are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        User = get_user_model()
+        user = request.user if (request.user and request.user.is_authenticated) else User.objects.filter(role='ADMIN').first()
+        if not user:
+            user = User.objects.first()
+
+        service_map = {
+            'Residential Pickup': ('HOME', 'MIXED'),
+            'Commercial Collection': ('BUSINESS', 'BULK'),
+            'Bulky Junk Cleanout': ('HOME', 'BULK'),
+            'E-Waste & Hazardous': ('HOME', 'E_WASTE'),
+            'Zero-Landfill Audit': ('BUSINESS', 'RECYCLABLES'),
+        }
+        pickup_type, waste_type = service_map.get(service, ('HOME', 'MIXED'))
+
+        nearest_collector, _ = find_nearest_collector(None, None)
+
+        pickup = Pickup.objects.create(
+            pickup_id=generate_pickup_id(),
+            user=user,
+            collector=None,
+            offered_collector=nearest_collector,
+            pickup_type=pickup_type,
+            waste_type=waste_type,
+            estimated_quantity='Quote Lead',
+            address=f"Quote Lead from {name} - Contact: {phone}",
+            instructions=f"Free Quote Lead. Service: {service}. Customer: {name}, Phone: {phone}",
+            status='OFFERED' if nearest_collector else 'REQUESTED',
+        )
+
+        return Response({
+            'message': 'Quote request submitted successfully',
+            'pickup': PickupSerializer(pickup, context={'request': request}).data
+        }, status=status.HTTP_201_CREATED)
 
 
 class PickupDetailView(generics.RetrieveUpdateAPIView):

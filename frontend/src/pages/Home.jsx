@@ -1,7 +1,36 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '../components/AppIcons';
+import { citizenApi } from '../services/citizenApi';
 
 export default function Home() {
+  const [quoteForm, setQuoteForm] = useState({
+    name: '',
+    phone: '',
+    service: 'Residential Pickup',
+  });
+  const [quoteSubmitting, setQuoteSubmitting] = useState(false);
+  const [quoteSubmitted, setQuoteSubmitted] = useState(false);
+  const [quoteError, setQuoteError] = useState('');
+
+  const handleQuoteSubmit = async (e) => {
+    e.preventDefault();
+    if (!quoteForm.name || !quoteForm.phone) {
+      setQuoteError('Please enter your full name and phone number.');
+      return;
+    }
+    setQuoteSubmitting(true);
+    setQuoteError('');
+    try {
+      await citizenApi.submitQuoteRequest(quoteForm);
+      setQuoteSubmitted(true);
+    } catch (err) {
+      setQuoteError(err.message || 'Failed to submit request. Please try again.');
+    } finally {
+      setQuoteSubmitting(false);
+    }
+  };
+
   return (
     <div className="w-full -mt-20">
       {/* 1. HERO WRAPPER */}
@@ -211,7 +240,7 @@ export default function Home() {
             <div className="bg-surface-container-lowest relative rounded-[32px] p-6 sm:p-8 md:p-10 border border-surface-container-high/60 shadow-xl overflow-hidden group" id="quote">
               <div className="absolute top-0 right-0 w-64 h-64 bg-secondary-container/30 blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none rounded-full"></div>
 
-              <form className="flex flex-col gap-4 md:gap-5 relative z-10" onSubmit={(e) => e.preventDefault()}>
+              <form className="flex flex-col gap-4 md:gap-5 relative z-10" onSubmit={handleQuoteSubmit}>
                 <div className="mb-2">
                   <h3 className="font-headline-sm text-2xl md:text-3xl text-primary font-extrabold tracking-tight mb-2">Get Your Free Quote</h3>
                   <p className="font-label-sm text-xs md:text-sm text-on-surface-variant leading-relaxed">
@@ -219,37 +248,81 @@ export default function Home() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Full Name</label>
-                  <input type="text" name="name" placeholder="e.g. Sarah Lindqvist" className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300" />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Phone Number</label>
-                  <input type="tel" name="phone" placeholder="+1 (555) 000-0000" className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300" />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Service Needed</label>
-                  <div className="relative">
-                    <select name="service" className="appearance-none w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300 cursor-pointer">
-                      <option>Residential Pickup</option>
-                      <option>Commercial Collection</option>
-                      <option>Bulky Junk Cleanout</option>
-                      <option>E-Waste &amp; Hazardous</option>
-                      <option>Zero-Landfill Audit</option>
-                    </select>
-                    <Icon name="expand_more" className="absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+                {quoteSubmitted ? (
+                  <div className="bg-secondary-container/40 border border-secondary-container rounded-2xl p-6 text-center flex flex-col items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-forest text-secondary-container flex items-center justify-center text-xl font-bold">
+                      ✓
+                    </div>
+                    <h4 className="font-bold text-primary text-lg">Callback Requested!</h4>
+                    <p className="text-sm text-on-surface-variant">
+                      Thank you <strong className="text-primary">{quoteForm.name}</strong>! Your inquiry for <strong className="text-primary">{quoteForm.service}</strong> has been sent directly to our nearest available collector. We will call you at <strong className="text-primary">{quoteForm.phone}</strong> shortly.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    {quoteError && (
+                      <div className="bg-red-500/10 text-red-700 text-xs font-bold p-3 rounded-xl border border-red-200">
+                        {quoteError}
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Full Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={quoteForm.name}
+                        onChange={(e) => setQuoteForm({ ...quoteForm, name: e.target.value })}
+                        placeholder="e.g. Sarah Lindqvist"
+                        className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300"
+                        required
+                      />
+                    </div>
 
-                <button type="submit" className="group mt-2 cursor-pointer inline-flex items-center justify-center gap-3 w-full px-6 md:px-8 py-3 md:py-4 rounded-xl bg-secondary-container text-primary font-bold hover:bg-[#bbfb64] hover:-translate-y-1 hover:shadow-[0_8px_24px_-6px_rgba(171,248,84,0.4)] transition-all duration-300 border border-secondary-container">
-                  <span className="text-sm md:text-base tracking-wide">Request Callback</span>
-                  <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-                    <Icon name="north_east" className="text-[16px] md:text-[18px] group-hover:rotate-45 transition-transform duration-300" />
-                  </span>
-                </button>
-                <p className="text-center font-label-sm text-[11px] md:text-[12px] text-on-surface-variant/80 mt-1 flex items-center justify-center gap-1.5"><Icon name="verified_user" className="text-[14px]" /> No obligation · Free on-site assessment</p>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={quoteForm.phone}
+                        onChange={(e) => setQuoteForm({ ...quoteForm, phone: e.target.value })}
+                        placeholder="+91 98765 43210"
+                        className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Service Needed</label>
+                      <div className="relative">
+                        <select
+                          name="service"
+                          value={quoteForm.service}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, service: e.target.value })}
+                          className="appearance-none w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300 cursor-pointer"
+                        >
+                          <option>Residential Pickup</option>
+                          <option>Commercial Collection</option>
+                          <option>Bulky Junk Cleanout</option>
+                          <option>E-Waste &amp; Hazardous</option>
+                          <option>Zero-Landfill Audit</option>
+                        </select>
+                        <Icon name="expand_more" className="absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={quoteSubmitting}
+                      className="group mt-2 cursor-pointer inline-flex items-center justify-center gap-3 w-full px-6 md:px-8 py-3 md:py-4 rounded-xl bg-secondary-container text-primary font-bold hover:bg-[#bbfb64] hover:-translate-y-1 hover:shadow-[0_8px_24px_-6px_rgba(171,248,84,0.4)] transition-all duration-300 border border-secondary-container"
+                    >
+                      <span className="text-sm md:text-base tracking-wide">{quoteSubmitting ? 'Submitting Request...' : 'Request Callback'}</span>
+                      <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                        <Icon name="north_east" className="text-[16px] md:text-[18px] group-hover:rotate-45 transition-transform duration-300" />
+                      </span>
+                    </button>
+                    <p className="text-center font-label-sm text-[11px] md:text-[12px] text-on-surface-variant/80 mt-1 flex items-center justify-center gap-1.5"><Icon name="verified_user" className="text-[14px]" /> No obligation · Free on-site assessment</p>
+                  </>
+                )}
               </form>
             </div>
           </div>

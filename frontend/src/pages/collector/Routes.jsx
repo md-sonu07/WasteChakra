@@ -78,12 +78,12 @@ export default function Routes() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      {/* <div>
         <h1 className="font-headline-md text-headline-md text-primary font-bold">Today's Route</h1>
         <p className="font-body-md text-body-md text-on-surface-variant mt-1">{active.length} stops · Plan your optimal path</p>
-      </div>
+      </div> */}
 
-      <Card className="p-0 overflow-hidden">
+      {/* <Card className="p-0 overflow-hidden">
         <div className="p-5 border-b border-surface-container-high flex items-center gap-2">
           <Icon name="map" className="text-secondary" />
           <h2 className="font-title-md text-title-md text-primary font-bold">Route Map Preview</h2>
@@ -117,7 +117,7 @@ export default function Routes() {
           <span className="inline-flex items-center gap-1"><Icon name="directions_car" className="text-[16px] text-secondary" /> Starting point</span>
           <span>{stopCoords.length} stops</span>
         </div>
-      </Card>
+      </Card> */}
 
       <section aria-label="Pickup order">
         <h2 className="font-title-md text-title-md text-primary font-bold mb-3">Pickup Order</h2>

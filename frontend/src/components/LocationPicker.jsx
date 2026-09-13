@@ -31,15 +31,15 @@ async function reverseGeocode(lat, lng) {
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       { headers: { 'Accept-Language': 'en' } }
     );
-    if (!res.ok) return '';
+    if (!res.ok) return { address: '', details: null };
     const data = await res.json();
-    return data.display_name || '';
+    return { address: data.display_name || '', details: data.address || null };
   } catch {
-    return '';
+    return { address: '', details: null };
   }
 }
 
-export default function LocationPicker({ value, onChange, height = 256, showAddress = true, disableGeolocation = false }) {
+export default function LocationPicker({ value, onChange, height = 256, showAddress = true, disableGeolocation = false, addressLabel = "Address" }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -55,11 +55,11 @@ export default function LocationPicker({ value, onChange, height = 256, showAddr
     }
     if (reverse) {
       setReverseGeocoding(true);
-      const address = await reverseGeocode(lat, lng);
+      const resData = await reverseGeocode(lat, lng);
       setReverseGeocoding(false);
-      onChange?.({ lat, lng, address: address || value?.address || '' });
+      onChange?.({ lat, lng, address: resData.address || value?.address || '', details: resData.details });
     } else {
-      onChange?.({ lat, lng, address: value?.address || '' });
+      onChange?.({ lat, lng, address: value?.address || '', details: null });
     }
   };
 
@@ -165,10 +165,10 @@ export default function LocationPicker({ value, onChange, height = 256, showAddr
             {value?.lat ? (
               <span className="inline-flex items-center gap-1">
                 <Icon name="place" className="text-sm" />
-                {reverseGeocoding ? 'Resolving address…' : 'Pickup Address'}
+                {reverseGeocoding ? 'Resolving address…' : addressLabel}
               </span>
             ) : (
-              'Pickup Address'
+              addressLabel
             )}
           </span>
           <textarea
