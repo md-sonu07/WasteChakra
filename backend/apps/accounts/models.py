@@ -94,3 +94,50 @@ class CollectorProfile(models.Model):
 
     def __str__(self):
         return f"Collector: {self.user.email} ({self.vehicle_number})"
+
+
+class BusinessProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='business_profile')
+    company_name = models.CharField(max_length=255, blank=True, default='')
+    gstin = models.CharField(max_length=50, blank=True, default='', verbose_name="GSTIN Number")
+    phone = models.CharField(max_length=20, blank=True, default='', verbose_name="Dispatch Phone")
+    address = models.TextField(blank=True, default='', verbose_name="Primary Facility Address")
+    address_line1 = models.CharField(max_length=255, blank=True, default='')
+    address_line2 = models.CharField(max_length=255, blank=True, default='')
+    city = models.CharField(max_length=100, blank=True, default='')
+    state = models.CharField(max_length=100, blank=True, default='')
+    pincode = models.CharField(max_length=20, blank=True, default='')
+    industry_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('CORPORATE', 'Corporate Office'),
+            ('IT_PARK', 'IT / Tech Park'),
+            ('MANUFACTURING', 'Manufacturing / Industrial'),
+            ('HOTEL_HOSPITALITY', 'Hotel & Hospitality'),
+            ('HOSPITAL', 'Hospital / Healthcare'),
+            ('RETAIL_MALL', 'Retail & Mall'),
+            ('EDUCATIONAL', 'Educational Institution'),
+            ('OTHER', 'Other Enterprise'),
+        ],
+        default='CORPORATE',
+    )
+    epr_registered = models.BooleanField(default=True, verbose_name="EPR Registered")
+    is_verified = models.BooleanField(default=True, verbose_name="Verified Enterprise")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.user_id:
+            profile, _ = UserProfile.objects.get_or_create(user=self.user)
+            updated = False
+            for field in ['phone', 'address', 'address_line1', 'city', 'state', 'pincode']:
+                val = getattr(self, field, '')
+                if val and getattr(profile, field, '') != val:
+                    setattr(profile, field, val)
+                    updated = True
+            if updated:
+                profile.save()
+
+    def __str__(self):
+        return f"Business: {self.company_name or self.user.email}"

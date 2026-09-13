@@ -114,16 +114,26 @@ class PickupStatusUpdateSerializer(serializers.ModelSerializer):
 
 class PickupCreateSerializer(serializers.ModelSerializer):
     pickup_type = serializers.ChoiceField(choices=['HOME', 'BUSINESS', 'SOCIETY'])
-    waste_type = serializers.ChoiceField(choices=['RECYCLABLES', 'ORGANIC', 'MIXED', 'BULK', 'E_WASTE', 'OTHER'])
+    waste_type = serializers.ChoiceField(
+        choices=[
+            'MIXED', 'PLASTIC', 'ORGANIC', 'PAPER', 'METAL', 'TEXTILE',
+            'E_WASTE', 'CONSTRUCTION', 'BULK', 'HAZARDOUS', 'RECYCLABLES', 'OTHER'
+        ],
+        default='MIXED',
+        required=False
+    )
     pickup_date = serializers.DateField()
     time_slot = serializers.CharField()
     address = serializers.CharField()
 
     class Meta:
         model = Pickup
-        fields = ['pickup_type', 'waste_type', 'estimated_quantity', 'pickup_date',
-                  'time_slot', 'latitude', 'longitude', 'address', 'instructions',
-                  'waste_report']
+        fields = [
+            'id', 'pickup_id', 'status', 'pickup_type', 'waste_type',
+            'estimated_quantity', 'pickup_date', 'time_slot',
+            'latitude', 'longitude', 'address', 'instructions', 'waste_report'
+        ]
+        read_only_fields = ['id', 'pickup_id', 'status']
 
 
 class WastePassportSerializer(serializers.ModelSerializer):

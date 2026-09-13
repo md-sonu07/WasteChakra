@@ -96,6 +96,23 @@ class ProfileView(APIView):
 
             cp.save()
 
+        if user.role == 'BUSINESS' or hasattr(user, 'business_profile'):
+            bp, _ = BusinessProfile.objects.get_or_create(user=user)
+            if 'company_name' in data and data['company_name'] is not None:
+                bp.company_name = str(data['company_name'])
+                cparts = bp.company_name.strip().split(' ', 1)
+                user.first_name = cparts[0]
+                user.last_name = cparts[1] if len(cparts) > 1 else ''
+                user.save(update_fields=['first_name', 'last_name'])
+            for field in ['gstin', 'phone', 'address', 'address_line1', 'address_line2', 'city', 'state', 'pincode', 'industry_type']:
+                if field in data and data[field] is not None:
+                    setattr(bp, field, str(data[field]))
+            if 'epr_registered' in data and data['epr_registered'] is not None:
+                bp.epr_registered = bool(data['epr_registered'])
+            if 'is_verified' in data and data['is_verified'] is not None:
+                bp.is_verified = bool(data['is_verified'])
+            bp.save()
+
         return Response(UserSerializer(user).data)
 
 
@@ -114,4 +131,4 @@ class RefreshTokenView(APIView):
 
 
 # Import here to avoid circular imports
-from .models import UserProfile, CollectorProfile
+from .models import UserProfile, CollectorProfile, BusinessProfile

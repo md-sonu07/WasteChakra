@@ -84,11 +84,17 @@ class Pickup(models.Model):
         ('SOCIETY', 'Society'),
     ], default='HOME')
     waste_type = models.CharField(max_length=30, choices=[
-        ('RECYCLABLES', 'Recyclables'),
-        ('ORGANIC', 'Organic'),
         ('MIXED', 'Mixed Waste'),
-        ('BULK', 'Bulk Waste'),
+        ('PLASTIC', 'Plastic'),
+        ('ORGANIC', 'Organic'),
+        ('PAPER', 'Paper'),
+        ('METAL', 'Metal'),
+        ('TEXTILE', 'Textile'),
         ('E_WASTE', 'E-Waste'),
+        ('CONSTRUCTION', 'Construction Waste'),
+        ('BULK', 'Bulk Waste'),
+        ('HAZARDOUS', 'Hazardous Waste'),
+        ('RECYCLABLES', 'Recyclables'),
         ('OTHER', 'Other'),
     ], default='MIXED')
     estimated_quantity = models.CharField(max_length=20, blank=True, default='')

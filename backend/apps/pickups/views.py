@@ -52,7 +52,7 @@ class WasteReportCreateView(generics.CreateAPIView):
             latitude=lat,
             longitude=lng,
             address=report.address or '',
-            waste_type='MIXED',
+            waste_type=report.waste_type or 'MIXED',
             status=status_val,
         )
         report.status = 'PICKUP_SCHEDULED'

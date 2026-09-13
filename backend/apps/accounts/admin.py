@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
-from .models import UserProfile, CollectorProfile
+from .models import UserProfile, CollectorProfile, BusinessProfile
 
 User = get_user_model()
 
@@ -33,4 +33,15 @@ class CollectorProfileAdmin(admin.ModelAdmin):
         ('Vehicle Details', {'fields': ('vehicle_number', 'vehicle_type')}),
         ('Contact & Address Information', {'fields': ('phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode')}),
         ('Location Hub Coordinates', {'fields': ('current_lat', 'current_lng')}),
+    )
+
+
+@admin.register(BusinessProfile)
+class BusinessProfileAdmin(admin.ModelAdmin):
+    list_display = ['company_name', 'user', 'gstin', 'phone', 'city', 'state', 'industry_type', 'epr_registered', 'created_at']
+    list_filter = ['industry_type', 'epr_registered', 'is_verified', 'city', 'state']
+    search_fields = ['company_name', 'gstin', 'user__email', 'phone', 'city', 'pincode', 'address']
+    fieldsets = (
+        ('Enterprise Account Details', {'fields': ('user', 'company_name', 'gstin', 'industry_type', 'epr_registered', 'is_verified')}),
+        ('Dispatch Contact & Facility Location', {'fields': ('phone', 'address', 'address_line1', 'address_line2', 'city', 'state', 'pincode')}),
     )

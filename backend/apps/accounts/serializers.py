@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import UserProfile, CollectorProfile
+from .models import UserProfile, CollectorProfile, BusinessProfile
 
 User = get_user_model()
 
@@ -8,10 +8,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
     collector_profile = serializers.SerializerMethodField()
+    business_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'profile', 'collector_profile', 'date_joined']
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'role', 'profile', 'collector_profile', 'business_profile', 'date_joined']
         read_only_fields = ['id', 'role', 'date_joined']
 
     def get_profile(self, obj):
@@ -26,6 +27,13 @@ class UserSerializer(serializers.ModelSerializer):
             cp = obj.collector_profile
             return CollectorProfileSerializer(cp).data
         except CollectorProfile.DoesNotExist:
+            return None
+
+    def get_business_profile(self, obj):
+        try:
+            bp = obj.business_profile
+            return BusinessProfileSerializer(bp).data
+        except BusinessProfile.DoesNotExist:
             return None
 
 
@@ -58,6 +66,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Auto-create CollectorProfile if role is COLLECTOR
         if user.role == 'COLLECTOR':
             CollectorProfile.objects.create(user=user)
+        # Auto-create BusinessProfile if role is BUSINESS
+        elif user.role == 'BUSINESS':
+            comp_name = f"{user.first_name} {user.last_name}".strip() if (user.first_name or user.last_name) else (user.username or 'Enterprise')
+            BusinessProfile.objects.create(user=user, company_name=comp_name)
         return user
 
 
@@ -78,6 +90,16 @@ class CollectorProfileSerializer(serializers.ModelSerializer):
             'phone', 'address_line1', 'address_line2', 'city', 'state', 'pincode',
             'vehicle_number', 'vehicle_type', 'current_lat', 'current_lng',
             'is_active', 'rating', 'total_pickups', 'total_distance_km',
+        ]
+
+
+class BusinessProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessProfile
+        fields = [
+            'company_name', 'gstin', 'phone', 'address', 'address_line1', 'address_line2',
+            'city', 'state', 'pincode', 'industry_type', 'epr_registered', 'is_verified',
+            'created_at', 'updated_at',
         ]
 
 
