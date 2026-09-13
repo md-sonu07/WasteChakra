@@ -96,7 +96,7 @@ export default function Login() {
                 <button onClick={() => quickFill('citizen@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Citizen</button>
                 <button onClick={() => quickFill('collector@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Collector</button>
                 <button onClick={() => quickFill('business@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Business</button>
-                <button onClick={() => quickFill('facility@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Facility</button>
+                {/* <button onClick={() => quickFill('facility@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Facility</button> */}
                 <button onClick={() => quickFill('admin@wastechakra.com')} className="px-3 py-1.5 rounded-full bg-surface-container-high text-xs font-bold text-primary hover:bg-surface-container cursor-pointer">Admin</button>
               </div>
             </div>
