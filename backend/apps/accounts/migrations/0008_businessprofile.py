@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0005_collectorprofile_address_line1_and_more'),
+        ('accounts', '0007_communityevent_and_more'),
     ]
 
     operations = [

@@ -50,6 +50,28 @@ Build WasteChakra, a full-stack waste-management platform (React 18 + Vite + Tai
     3. In `frontend/src/pages/citizen/ReportWaste.jsx`: file selection or drop triggers instant `runAIAnalysis` with visual optical scanner beam, live badge on preview, material breakdown card, auto-selection of category in Step 3 with animated "AI Suggested" badge, and real breakdown in review/success views.
     4. Enhanced client-side `analyzeImageViaCanvas` in `WasteInspectionOverlay.jsx` with physical optical signatures.
     5. Unit tests: 15/15 tests passing (`apps.detection` 12, `apps.waste_records` 3). Production Vite build cleanly compiles with 0 errors.
+- **Gamified Rewards & Daily Streak Engine (`/app`, `/app/report`, `/app/rewards`)**:
+  - **Database Models & Migration**: Introduced `ChakraPointTransaction` (double-entry ledger with balance after and activity type), `RewardCatalogItem` (catalog with cost, category, stock, partner name, terms), and `RewardRedemption` (unique voucher code, status, expiration date). Created and ran migration `0006_rewardcatalogitem_chakrapointtransaction_and_more`.
+  - **Streak Continuity & Rewards Service (`apps/accounts/rewards_service.py`)**: Date-based continuity engine (same-day action keeps streak `EXTENDED`, consecutive day increments streak `+1`, missed day resets to `1`). Automatically credits milestone bonuses (+25 at 3d, +50 at 7d, +100 at 14d, +250 at 30d). Atomic `redeem_reward` deducts points with `select_for_update()`, decrements stock, issues a `WC-ECO-` voucher code, and logs transactions. Pre-seeded 6 realistic green rewards.
+  - **Action Triggers Connected**:
+    - `WasteReportCreateView`: Creating a waste report photo awards **+50 Chakra Points**, advances daily streak, and returns `reward_info` in response.
+    - `PickupDetailView`: Transitioning pickup to `COMPLETED` awards **+100 PTS** (scaled by weight) to citizen owner.
+    - `ProcessWasteImageView`: AI optical scan awards **+15 PTS** and advances streak for authenticated citizens.
+  - **Backend API Endpoints**: Registered `/api/v1/rewards/` (catalog + user points/streak), `/api/v1/rewards/redeem/` (atomic redemption), `/api/v1/rewards/history/` (points ledger & active vouchers).
+  - **Frontend Experience**:
+    - `/app` (Citizen Dashboard): Live points & streak days from backend; added a 7-day visual streak activity continuity tracker widget (Mon–Sun indicators with animated flame badges).
+    - `/app/report` (Report Waste): Step 1 photo capture displays "+50 Chakra Points" incentive pill; submission success screen displays celebratory Eco-Reward Hero Card with points added, current streak, and streak bonus alerts.
+    - `/app/rewards` (Rewards Center): Revamped with 4 tabs (Marketplace, My Vouchers, Points Ledger, Leaderboards), confirmation modal, live points countdown, and unique voucher code modal with 1-click clipboard copy.
+  - **Verification**: 8/8 tests passing in `apps.accounts.tests` (total 23/23 unit tests passing); `npx vite build` cleanly compiles in 1.07s with 0 errors.
+- **Dynamic Community Events & Volunteer Drives (`/community` & `/app/community`)**:
+  - **Models & Migrations**: Introduced `CommunityEvent` (id, title, category, location, date, participants, target_kg, waste_recovered_kg, description, reward_points, status) and `CommunityEventRegistration` (event, user, name, phone, created_at). Created and ran migration `0007_communityevent_and_more.py`.
+  - **Auto-Seeding & Reward Action**: Added `seed_default_events` in `rewards_service.py` with 6 authentic drives led by `Purnia Riverbank Shoreline Cleanup` (64 joined, Saura River Ghat, target 450 kg). Atomic `register_for_event` creates registration, increments participants count, and awards **+50 Chakra Points** plus daily streak continuity to authenticated citizens.
+  - **API Endpoints**: Registered `/api/v1/community/events/` (public event list with user-specific `is_joined` status) and `/api/v1/community/events/<id>/join/` (atomic event registration + streak & rewards hook).
+  - **Frontend Unification**:
+    - `dataProvider.js`, `citizenApi.js`, `api.js`: Added `getEvents`, `joinEvent`, and `getJoinedEvents()` with local caching fallback.
+    - Public `/community`: Displays dynamic events, live participant counter (e.g. 64 -> 65), pre-filled registration modal for logged-in citizens, "+50 Chakra Points & Streak Updated" toast feedback, and toggles button to `Joined ✓`.
+    - Citizen Panel `/app/community`: Fully dynamic drive cards matching public page (category badge, reward points badge, exact participant counters, target kg, location, schedule, and description). Includes category filters (All, Cleanup, Collection, Workshops, My Events), 1-tap join button, celebration toast with points awarded, and an Event Details modal.
+  - **Verification**: 10/10 tests passing in `apps.accounts.tests`; `npx vite build` builds cleanly in 1.03s with 0 errors.
 
 ## Conventions / Gotchas
 - **Icons**: always use `<Icon name="..." />` from `src/components/AppIcons.jsx`. To add an icon: import the lucide component by name in the big import block, add `name: LucideName` to `ICON_MAP`, and (if PascalCase lookup matters — currently unused) keep lists in sync. Named imports only — do NOT switch to `import * as Lucide` (kills tree-shaking, ballooned bundle to 1.28MB).

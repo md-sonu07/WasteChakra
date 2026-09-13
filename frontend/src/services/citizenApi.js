@@ -13,6 +13,13 @@ export const citizenApi = {
   getImpact: () => request('/user/impact/'),
   getPassport: (id) => request(`/passports/${id}/`),
 
+  getRewards: () => request('/rewards/'),
+  redeemReward: (rewardId) => request('/rewards/redeem/', { method: 'POST', body: JSON.stringify({ reward_id: rewardId }) }),
+  getRewardHistory: () => request('/rewards/history/'),
+
+  getCommunityEvents: (params = {}) => request(`/community/events/${qs(params)}`),
+  joinCommunityEvent: (id, data = {}) => request(`/community/events/${id}/join/`, { method: 'POST', body: JSON.stringify(data) }),
+
   processWasteImage: (file, source = 'UPLOAD') => {
     const formData = new FormData();
     formData.append('image', file);

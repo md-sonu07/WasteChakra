@@ -11,10 +11,21 @@ function mapsUrl(p) {
   return `https://maps.google.com/?q=${encodeURIComponent(p.address || 'India')}`;
 }
 
+function extractPhoneNumber(pickup) {
+  if (!pickup) return '';
+  const str = `${pickup.address || ''} ${pickup.instructions || ''}`;
+  const match = str.match(/(?:Contact|Phone)?:\s*(\+?\d[\d\s-]{7,14})/i) || str.match(/(\+?91)?\s*([6-9]\d{9})/);
+  if (match) {
+    return (match[1] || match[2] || match[0]).replace(/[^\d+]/g, '');
+  }
+  return '';
+}
+
 export default function Routes() {
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filterSource, setFilterSource] = useState('ALL');
 
   useEffect(() => {
     let mounted = true;
@@ -73,61 +84,73 @@ export default function Routes() {
     return <ErrorState title="Couldn't load route" message={error} onRetry={() => window.location.reload()} />;
   }
 
-  const active = pickups.filter((p) => !['COMPLETED', 'CANCELLED'].includes(p.status));
-  const stopCoords = active.slice(0, 6);
+  const isHomepageLead = (p) =>
+    p.estimated_quantity === 'Quote Lead' ||
+    p.instructions?.includes('Quote Lead') ||
+    p.address?.includes('Quote Lead');
+
+  const active = pickups.filter((p) => !['ASSIGNED', 'COMPLETED', 'CANCELLED'].includes(p.status));
+  const citizenCount = active.filter((p) => !isHomepageLead(p)).length;
+  const homepageCount = active.filter((p) => isHomepageLead(p)).length;
+
+  const filteredActive = active.filter((p) => {
+    if (filterSource === 'CITIZEN') return !isHomepageLead(p);
+    if (filterSource === 'HOMEPAGE') return isHomepageLead(p);
+    return true;
+  });
 
   return (
     <div className="flex flex-col gap-6">
-      {/* <div>
-        <h1 className="font-headline-md text-headline-md text-primary font-bold">Today's Route</h1>
-        <p className="font-body-md text-body-md text-on-surface-variant mt-1">{active.length} stops · Plan your optimal path</p>
-      </div> */}
-
-      {/* <Card className="p-0 overflow-hidden">
-        <div className="p-5 border-b border-surface-container-high flex items-center gap-2">
-          <Icon name="map" className="text-secondary" />
-          <h2 className="font-title-md text-title-md text-primary font-bold">Route Map Preview</h2>
-        </div>
-        <div className="relative bg-gradient-to-b from-secondary-container/15 to-secondary-container/25 h-48 overflow-hidden">
-          <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(13,42,26,0.05) 24px), repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(13,42,26,0.05) 24px)' }} />
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 180" preserveAspectRatio="none" aria-hidden="true">
-            {stopCoords.length > 1 && (
-              <polyline
-                points={stopCoords.map((_, i) => `${40 + i * 40},${150 - (i % 2 === 0 ? 60 : 100)}`).join(' ')}
-                fill="none"
-                stroke="rgba(13,42,26,0.35)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray="6 6"
-              />
-            )}
-          </svg>
-          {stopCoords.map((p, i) => (
-            <span
-              key={p.id}
-              className="absolute w-7 h-7 rounded-full bg-secondary-container border-2 border-forest text-primary text-xs font-bold flex items-center justify-center shadow-md"
-              style={{ left: `${10 + i * 16}%`, top: `${i % 2 === 0 ? 22 : 46}%` }}
-              aria-label={`Stop ${i + 1}`}
-            >
-              {i + 1}
-            </span>
-          ))}
-        </div>
-        <div className="p-4 flex items-center justify-between text-xs font-semibold text-on-surface-variant">
-          <span className="inline-flex items-center gap-1"><Icon name="directions_car" className="text-[16px] text-secondary" /> Starting point</span>
-          <span>{stopCoords.length} stops</span>
-        </div>
-      </Card> */}
-
       <section aria-label="Pickup order">
-        <h2 className="font-title-md text-title-md text-primary font-bold mb-3">Pickup Order</h2>
-        {active.length === 0 ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 className="font-title-md text-title-md text-primary font-bold">Pickup Order</h2>
+
+          {/* Filter Source Buttons Bar */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setFilterSource('ALL')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                filterSource === 'ALL'
+                  ? 'bg-primary text-secondary-container shadow-xs'
+                  : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
+              }`}
+            >
+              All Orders ({active.length})
+            </button>
+            <button
+              onClick={() => setFilterSource('CITIZEN')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                filterSource === 'CITIZEN'
+                  ? 'bg-primary text-secondary-container shadow-xs'
+                  : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
+              }`}
+            >
+              <Icon name="delete" className="text-xs" /> Citizen Reports ({citizenCount})
+            </button>
+            <button
+              onClick={() => setFilterSource('HOMEPAGE')}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                filterSource === 'HOMEPAGE'
+                  ? 'bg-primary text-secondary-container shadow-xs'
+                  : 'bg-surface-container-high text-on-surface hover:bg-surface-container-highest'
+              }`}
+            >
+              <Icon name="call" className="text-xs" /> Homepage Queries ({homepageCount})
+            </button>
+          </div>
+        </div>
+
+        {filteredActive.length === 0 ? (
           <Card>
-            <EmptyState title="Route is clear" message="No active pickups scheduled for today." icon="route" />
+            <EmptyState
+              title={filterSource === 'ALL' ? 'Route is clear' : `No ${filterSource === 'CITIZEN' ? 'Citizen Waste Reports' : 'Homepage Callback Queries'} found`}
+              message="No active pickups match the selected filter."
+              icon="route"
+            />
           </Card>
         ) : (
           <ol className="flex flex-col gap-3">
-            {active.map((p, i) => (
+            {filteredActive.map((p, i) => (
               <li key={p.id}>
                 <Card className="flex items-start gap-3 p-4">
                   <div className="w-9 h-9 rounded-full bg-secondary-container text-primary font-bold flex items-center justify-center shrink-0">{i + 1}</div>
@@ -135,20 +158,40 @@ export default function Routes() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="font-label-md text-label-md text-primary font-bold">Pickup {i + 1}</span>
                       <StatusBadge status={p.status} />
+
+                      {/* Source Origin Badge */}
+                      {isHomepageLead(p) ? (
+                        <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200 text-[10px] font-extrabold flex items-center gap-1 shadow-2xs">
+                          <Icon name="call" className="text-[11px]" /> Homepage Query
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200 text-[10px] font-extrabold flex items-center gap-1 shadow-2xs">
+                          <Icon name="delete" className="text-[11px]" /> Citizen Report
+                        </span>
+                      )}
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">{p.address}</p>
                     <p className="text-xs font-semibold text-on-surface-variant mt-1 inline-flex items-center gap-1">
                       <Icon name="near_me" className="text-[14px]" />{p.latitude && p.longitude ? `${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)}` : 'On route list'}
                     </p>
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
-                      <a
-                        href={mapsUrl(p)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-primary text-xs font-bold hover:bg-[#bbfb64] transition-colors"
-                      >
-                        <Icon name="map" className="text-[16px]" /> Navigate
-                      </a>
+                      {isHomepageLead(p) ? (
+                        <a
+                          href={`tel:${extractPhoneNumber(p) || '0000000000'}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-100 text-blue-950 border border-blue-300 text-xs font-extrabold hover:bg-blue-200 transition-colors shadow-2xs"
+                        >
+                          <Icon name="call" className="text-xs text-blue-800" /> Call {extractPhoneNumber(p) ? `(${extractPhoneNumber(p)})` : ''}
+                        </a>
+                      ) : (
+                        <a
+                          href={mapsUrl(p)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-primary text-xs font-bold hover:bg-[#bbfb64] transition-colors"
+                        >
+                          <Icon name="map" className="text-[16px]" /> Location
+                        </a>
+                      )}
                       <Link
                         to={`/collector/pickups/${p.id}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-surface-container-highest text-primary text-xs font-bold hover:bg-surface-container-low transition-colors"

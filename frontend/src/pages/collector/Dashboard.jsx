@@ -49,6 +49,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastOfferedCount, setLastOfferedCount] = useState(0);
+  const [filterSource, setFilterSource] = useState('ALL');
+
+  const isHomepageLead = (p) =>
+    p.estimated_quantity === 'Quote Lead' ||
+    p.instructions?.includes('Quote Lead') ||
+    p.address?.includes('Quote Lead');
 
   useEffect(() => {
     let mounted = true;
@@ -224,19 +230,19 @@ export default function Dashboard() {
       </section>
 
       <button
-        onClick={() => navigate('/collector/routes')}
+        onClick={() => navigate('/collector/assigned')}
         className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-secondary-container text-primary font-bold py-4 text-base hover:bg-[#bbfb64] transition-colors shadow-lg shadow-secondary-container/40"
       >
-        <Icon name="directions" className="" />
-        START ROUTE
-        <Icon name="chevron_right" className="" />
+        <Icon name="assignment" className="text-xl" />
+        View Assigned Pickups ({todayPickups.length})
+        <Icon name="chevron_right" className="text-xl" />
       </button>
 
       {/* OPEN NEARBY PICKUPS POOL */}
       {openPoolPickups.length > 0 && (
         <section aria-label="Open pool pickups">
           <h2 className="font-title-md text-title-md text-primary font-bold mb-3 flex items-center gap-2">
-            <Icon name="explore" className="text-secondary" /> Open Nearby Pickups Pool ({openPoolPickups.length})
+            <Icon name="explore" className="text-secondary" /> HomePage Queries ({openPoolPickups.length})
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {openPoolPickups.map((p) => (
@@ -260,51 +266,6 @@ export default function Dashboard() {
           </div>
         </section>
       )}
-
-      <section aria-label="Today's pickups">
-        <h2 className="font-title-md text-title-md text-primary font-bold mb-3">Assigned Pickups ({todayPickups.length})</h2>
-        {todayPickups.length === 0 ? (
-          <Card>
-            <EmptyState title="No active pickups" message="You're all caught up. New assignments will appear here." icon="task_alt" />
-          </Card>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {todayPickups.map((p) => (
-              <li key={p.id}>
-                <Link
-                  to={`/collector/pickups/${p.id}`}
-                  className="block bg-surface-container-lowest border border-surface-container-high rounded-2xl p-4 hover:border-secondary transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="font-label-md text-label-md text-primary font-bold">{p.pickup_id || `#${p.id}`}</span>
-                        <StatusBadge status={p.status} />
-                      </div>
-                      <p className="font-body-md text-body-md text-on-surface-variant truncate">{p.address}</p>
-                      <div className="flex items-center gap-3 mt-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
-                          <Icon name="delete" className="text-[16px]" />
-                          {p.waste_type || 'MIXED'}
-                        </span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container/30 text-primary text-xs font-bold">
-                          <Icon name="near_me" className="text-[14px]" />
-                          {p.latitude && p.longitude ? `${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)}` : 'Location Pinned'}
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
-                          <Icon name="scale" className="text-[16px]" />
-                          {formatWeight(Number(String(p.estimated_quantity).match(/\d+/)?.[0] || 0))}
-                        </span>
-                      </div>
-                    </div>
-                    <Icon name="chevron_right" className="text-on-surface-variant shrink-0" />
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { collectorApi } from '../../services/collectorApi';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Card, StatusBadge, Skeleton, ErrorState, formatWeight } from '../../components/ui';
@@ -19,6 +19,7 @@ function customerName(email) {
 
 export default function PickupDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [pickup, setPickup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,7 @@ export default function PickupDetail() {
     }
     setPickup((prev) => ({ ...prev, status: 'EN_ROUTE' }));
     setProofOpen(true);
+    navigate('/collector/routes');
   };
 
   if (loading) {
