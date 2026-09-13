@@ -1,143 +1,304 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '../components/AppIcons';
 
 export default function Contact() {
-  const [openFaq, setOpenFaq] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ticketId, setTicketId] = useState('');
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: 'General Inquiry',
+    message: '',
+  });
 
   const contactInfo = [
-    { icon: 'call', label: 'Phone', value: '+1 (800) CHAKRA-ECO', detail: '24/7 dispatch line' },
-    { icon: 'mail', label: 'Email', value: 'support@wastechakra.org', detail: 'Response within 2 hours' },
-    { icon: 'location_on', label: 'Address', value: 'Purnia Bihar - 854301', detail: 'Walk-ins welcome' },
-    { icon: 'schedule', label: 'Hours', value: '24/7 On-Demand Dispatch', detail: 'Office: Mon–Fri 8am–6pm' },
+    {
+      icon: 'call',
+      label: 'Toll-Free Helpline',
+      value: '1800-889-WCHAKRA',
+      detail: 'Toll-free 24/7 waste dispatch line',
+    },
+    {
+      icon: 'chat',
+      label: 'WhatsApp Quick Help',
+      value: '+91 6454 295 800',
+      detail: 'Send photos of waste for instant dispatch',
+    },
+    {
+      icon: 'mail',
+      label: 'Support & Partnerships',
+      value: 'support@wastechakra.org',
+      detail: 'Guaranteed response within 2 hours',
+    },
+    {
+      icon: 'location_on',
+      label: 'Regional Innovation Hub',
+      value: 'Purnia, Bihar - 854301',
+      detail: 'Central Material Recovery Facility #01',
+    },
   ];
 
   const faqs = [
     {
-      question: 'What services does WasteChakra offer?',
-      answer: 'We provide residential composting, commercial bulk collection, e-waste and hazardous disposal, zero-landfill audits, resource recovery, RDF conditioning, community cleanup events, and AI-powered waste analytics. Each service is backed by digital tracking and ESG reporting.',
+      question: 'How do I schedule a doorstep scrap pickup from my home?',
+      bullets: [
+        'Open the WasteChakra app or website and click "Schedule Pickup".',
+        'Choose your scrap categories (paper, plastic bottles, metals, e-waste).',
+        'Select a convenient 2-hour morning or evening slot and pin your live location.',
+        'Our uniformed eco-collector arrives with a certified digital scale and pays you on the spot via cash, UPI, or 1.5x in Eco-Credits.',
+      ],
     },
     {
-      question: 'How is pricing structured?',
-      answer: 'Pricing is based on waste volume, service frequency, and material type. Residential plans start at $29/month. Commercial and industrial clients receive custom quotes based on waste-stream audits. All pricing is transparent with no hidden fees.',
+      question: 'Can our apartment society / gated community install WasteChakra?',
+      bullets: [
+        'Yes. We service residential complexes ranging from 10 to over 1,000 apartments.',
+        'We provide daily morning segregated collection (Wet, Dry, Domestic Hazardous).',
+        'We can install an odor-free on-site organic compost tumbler for wet kitchen waste.',
+        'Your RWA receives an official "Zero-Waste Society Certificate" to claim municipal property tax discounts.',
+      ],
     },
     {
-      question: 'How do you handle hazardous and e-waste?',
-      answer: 'All hazardous and electronic waste is processed through R2v3 certified downstream partners. We provide chain-of-custody documentation and certificates of destruction for every batch. Data-bearing devices undergo DoD-standard sanitization before material recovery.',
+      question: 'What is a "Digital Waste Passport"?',
+      bullets: [
+        'Every collection batch receives a unique encrypted QR code tracking manifest.',
+        'It logs the exact weight, material composition, collection timestamp, and processing facility ID.',
+        'You can scan the QR code to verify your waste was recycled into new products or compost, never dumped in open landfills.',
+      ],
     },
     {
-      question: 'How do I report illegal dumping or bulk waste?',
-      answer: 'Use the Report Waste feature in the app or call our 24/7 dispatch line. Include the location, estimated volume, and material type if possible. Our eco-crew typically responds within 4–6 hours for priority reports.',
+      question: 'How do I report illegal street dumping or roadside blackspots?',
+      bullets: [
+        'Use the "Report Waste" button in the app to take a live photo of the dirty spot.',
+        'Your phone GPS automatically tags the exact ward coordinates.',
+        'Our community collection van dispatches to clean the site within 24 hours.',
+        'You receive a "Cleaned" verification photo notification + 25 Eco-Credits.',
+      ],
     },
     {
-      question: 'Can I get a certificate for my waste diversion?',
-      answer: 'Yes. Every pickup and processing batch generates a digital waste passport with full material tracking. Businesses receive ESG-compliant diversion certificates suitable for sustainability reports, TRUE certification, and regulatory filings.',
+      question: 'What happens to non-recyclable plastic and food scraps?',
+      bullets: [
+        'Food scraps and wet waste are routed to aerobic composting pits, turning into chemical-free bio-fertilizer for local farmers within 21 days.',
+        'Non-recyclable high-calorific plastics are shredded into Refuse-Derived Fuel (RDF) and sent to cement kilns to replace coal.',
+        'Only inert mineral fines (<8%) are used for road base, achieving 92%+ total landfill diversion.',
+      ],
     },
   ];
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const generatedId = `WC-${Math.floor(10000 + Math.random() * 90000)}`;
+      setTicketId(generatedId);
+      setIsSubmitting(false);
+      setFormSubmitted(true);
+    }, 650);
+  };
+
   return (
     <div className="grow w-full max-w-container-max mx-auto px-gutter py-16 md:py-space-3xl">
-      <header className="mb-20 md:mb-space-4xl">
-        <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-surface-container-high/60 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-space-xs">
+      {/* Header */}
+      <header className="mb-16 md:mb-space-3xl">
+        <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-secondary-container/40 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-space-xs">
           <span>✳</span>
-          <span>Get In Touch</span>
+          <span>Contact & Support</span>
         </div>
         <h1 className="font-headline-lg text-headline-lg-mobile md:text-display-hero text-primary font-bold tracking-tight max-w-4xl leading-tight">
-          Let us build your circular waste <span className="text-transparent bg-clip-text bg-gradient-to-r from-forest to-secondary">solution</span>
+          We are here to make zero-waste <span className="text-transparent bg-clip-text bg-gradient-to-r from-forest to-secondary">simple and accessible</span>
         </h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant mt-space-md max-w-2xl">
-          Whether you are a homeowner, business operator, or city planner — our team is ready to design a waste program that fits your exact needs.
+        <p className="font-body-lg text-body-lg text-on-surface-variant mt-space-md max-w-3xl leading-relaxed">
+          Need a doorstep scrap pickup, want to enroll your residential apartment complex, or looking for an industrial RDF fuel supply? Reach out below — our coordinators respond within 2 business hours.
         </p>
       </header>
 
+      {/* 4 Contact Cards */}
       <section className="mb-20 md:mb-space-4xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-lg">
           {contactInfo.map((info) => (
-            <div key={info.label} className="bg-surface-container-lowest p-space-lg rounded-[28px] border border-surface-container-high/70 hover:border-secondary hover:shadow-lg transition-all flex flex-col group">
-              <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-space-md transition-colors">
-                <Icon name={info.icon} className="text-[26px]" />
+            <div key={info.label} className="bg-surface-container-lowest p-6 rounded-[28px] border border-surface-container-high/70 hover:border-secondary hover:shadow-lg transition-all flex flex-col group">
+              <div className="w-12 h-12 rounded-2xl bg-secondary-container/40 group-hover:bg-secondary-container flex items-center justify-center text-primary mb-4 transition-colors">
+                <Icon name={info.icon} className="text-[24px]" />
               </div>
-              <span className="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold tracking-wider mb-space-xxs">{info.label}</span>
-              <span className="font-title-md text-title-md text-primary font-bold mb-space-xxs break-words">{info.value}</span>
-              <span className="font-label-sm text-label-sm text-on-surface-variant">{info.detail}</span>
+              <span className="font-label-sm text-[11px] text-on-surface-variant uppercase font-bold tracking-wider mb-1">{info.label}</span>
+              <span className="font-title-md text-base md:text-lg text-primary font-bold mb-1 break-words">{info.value}</span>
+              <span className="font-label-sm text-xs text-forest font-medium">{info.detail}</span>
             </div>
           ))}
         </div>
       </section>
 
+      {/* Main Form & FAQs */}
       <section className="mb-20 md:mb-space-4xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-space-2xl">
-          <div>
-            <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-surface-container-high/60 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-space-xs">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* Left Form (7 cols) */}
+          <div className="lg:col-span-7 bg-surface-container-lowest rounded-[28px] border border-surface-container-high/70 p-6 md:p-10">
+            <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-secondary-container/40 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-2">
               <span>✳</span>
-              <span>Send a Message</span>
+              <span>Send An Inquiry</span>
             </div>
-            <h2 className="font-headline-lg text-headline-lg text-primary font-bold mb-space-md">
-              We would love to hear from you.
+            <h2 className="font-headline-lg text-2xl md:text-3xl text-primary font-bold mb-2">
+              How Can Our Team Help You?
             </h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-space-xl max-w-lg">
-              Fill out the form and a member of our team will reach out within one business day. For urgent matters, call our 24/7 dispatch line.
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant mb-6 leading-relaxed">
+              Fill out the details below. For urgent blackspot clearance or doorstep scrap inquiries, you can also call our toll-free line anytime.
             </p>
-            <div className="bg-surface-container-lowest rounded-[28px] border border-surface-container-high/70 p-space-xl">
-              <form className="flex flex-col gap-space-md" action="contact" onSubmit={(e) => e.preventDefault()}>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Full Name</label>
-                  <input type="text" name="name" placeholder="e.g. Sarah Lindqvist" className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300" />
+
+            {formSubmitted ? (
+              <div className="p-6 md:p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center flex flex-col items-center animate-fadeIn">
+                <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-4 shadow-md">
+                  <Icon name="check_circle" className="text-[32px]" />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Email Address</label>
-                  <input type="email" name="email" placeholder="e.g. sarah@example.com" className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Subject</label>
-                  <div className="relative">
-                    <select name="subject" className="appearance-none w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300 cursor-pointer">
-                      <option>General Inquiry</option>
-                      <option>Residential Service</option>
-                      <option>Commercial Partnership</option>
-                      <option>E-Waste &amp; Hazardous</option>
-                      <option>Community Event</option>
-                      <option>Waste Report Support</option>
-                    </select>
-                    <Icon name="expand_more" className="absolute right-4 md:right-5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
+                <span className="px-3 py-1 rounded-full bg-emerald-600/20 text-emerald-900 font-bold text-xs uppercase tracking-wider mb-2">
+                  Ticket Generated #{ticketId}
+                </span>
+                <h3 className="font-headline-sm text-xl text-primary font-bold mb-2">
+                  Thank You, {formData.name || 'Friend'}!
+                </h3>
+                <p className="text-sm text-on-surface-variant max-w-md mb-6 leading-relaxed">
+                  Your message regarding <span className="font-bold text-primary">"{formData.subject}"</span> has been assigned to our regional dispatch coordinator. We will reply via email or WhatsApp within 2 hours.
+                </p>
+                <button
+                  onClick={() => {
+                    setFormSubmitted(false);
+                    setFormData({ name: '', email: '', phone: '', subject: 'General Inquiry', message: '' });
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-secondary-container text-primary font-bold text-xs hover:bg-secondary-fixed-dim transition-colors cursor-pointer"
+                >
+                  Submit Another Query
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-primary uppercase tracking-wider">Your Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Ramesh Chandra"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-sm outline-none focus:border-secondary transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-primary uppercase tracking-wider">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="e.g. ramesh@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-sm outline-none focus:border-secondary transition-all"
+                    />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-[10px] md:text-[11px] text-primary font-bold uppercase tracking-widest ml-4">Message</label>
-                  <textarea name="message" rows={5} placeholder="Tell us about your waste management needs..." className="w-full rounded-xl border-2 border-surface-container-high bg-surface-container-lowest px-4 md:px-6 py-3 md:py-3.5 font-body-md text-sm md:text-base text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-secondary focus:bg-surface focus:shadow-[0_0_0_4px_rgba(var(--color-secondary),0.1)] transition-all duration-300 resize-none"></textarea>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-primary uppercase tracking-wider">Mobile Number</label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="e.g. +91 98765 43210"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-sm outline-none focus:border-secondary transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-primary uppercase tracking-wider">Inquiry Subject</label>
+                    <select
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-sm outline-none focus:border-secondary transition-all cursor-pointer"
+                    >
+                      <option>Household Doorstep Scrap Pickup</option>
+                      <option>Apartment Society / RWA Onboarding</option>
+                      <option>Commercial Office & Retail Waste</option>
+                      <option>Certified E-Waste Destruction</option>
+                      <option>Community Cleanup Event / Volunteer</option>
+                      <option>Refuse-Derived Fuel (RDF) Supply</option>
+                      <option>General Inquiry</option>
+                    </select>
+                  </div>
                 </div>
-                <button type="submit" className="group mt-2 cursor-pointer inline-flex items-center justify-center gap-3 w-full px-6 md:px-8 py-3 md:py-4 rounded-xl bg-secondary-container text-primary font-bold hover:bg-[#bbfb64] hover:-translate-y-1 hover:shadow-[0_8px_24px_-6px_rgba(171,248,84,0.4)] transition-all duration-300 border border-secondary-container">
-                  <span className="text-sm md:text-base tracking-wide">Send Message</span>
-                  <span className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
-                    <Icon name="north_east" className="text-[16px] md:text-[18px] group-hover:rotate-45 transition-transform duration-300" />
-                  </span>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-primary uppercase tracking-wider">Your Message / Requirements</label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Tell us about your estimated waste volume, society address, or specific questions..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-surface-container-high bg-surface text-sm outline-none focus:border-secondary transition-all resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="mt-2 w-full py-3.5 rounded-xl bg-secondary-container text-primary font-bold text-sm hover:bg-secondary-fixed-dim transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <span>Sending Your Request...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit Inquiry</span>
+                      <Icon name="arrow_forward" className="text-[18px]" />
+                    </>
+                  )}
                 </button>
               </form>
-            </div>
+            )}
           </div>
 
-          <div>
-            <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-surface-container-high/60 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-space-xs">
-              <span>✳</span>
-              <span>Frequently Asked</span>
+          {/* Right FAQs (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-3">
+            <div className="mb-2">
+              <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-secondary-container/40 text-primary font-eyebrow-tag text-eyebrow-tag font-bold uppercase mb-2">
+                <span>✳</span>
+                <span>Clear Answers</span>
+              </div>
+              <h2 className="font-headline-lg text-xl md:text-2xl text-primary font-bold">
+                Frequently Asked Questions
+              </h2>
+              <p className="font-body-md text-xs text-on-surface-variant mt-1">
+                Point-wise answers to everything you need to know.
+              </p>
             </div>
-            <h2 className="font-headline-lg text-headline-lg text-primary font-bold mb-space-xl">
-              Common Questions
-            </h2>
-            <div className="flex flex-col gap-space-sm">
+
+            <div className="flex flex-col gap-3">
               {faqs.map((faq, i) => (
-                <div key={i} className="bg-surface-container-lowest rounded-2xl border border-surface-container-high/70 overflow-hidden transition-all duration-300 hover:border-secondary/50">
+                <div key={i} className="bg-surface-container-lowest rounded-2xl border border-surface-container-high/70 overflow-hidden transition-all">
                   <button
-                    className="w-full flex items-center justify-between gap-space-sm p-space-md text-left cursor-pointer"
+                    className="w-full flex items-center justify-between gap-3 p-4 text-left cursor-pointer hover:bg-surface-container-low/40"
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
-                    <span className="font-title-md text-title-md text-primary font-bold">{faq.question}</span>
-                    <Icon name="expand_more" className={`text-[20px] text-on-surface-variant shrink-0 transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`} />
+                    <span className="font-title-sm text-xs md:text-sm text-primary font-bold leading-snug">{faq.question}</span>
+                    <Icon name="expand_more" className={`text-[18px] text-on-surface-variant shrink-0 transition-transform ${openFaq === i ? 'rotate-180 text-secondary' : ''}`} />
                   </button>
-                  <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="px-space-md pb-space-md font-body-md text-body-md text-on-surface-variant border-t border-surface-container-high/50 pt-space-sm">
-                      {faq.answer}
-                    </p>
-                  </div>
+                  {openFaq === i && (
+                    <div className="px-4 pb-4 pt-1 border-t border-surface-container-high/40">
+                      <ul className="flex flex-col gap-2 text-xs text-on-surface-variant">
+                        {faq.bullets.map((b, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <Icon name="check_circle" className="text-secondary text-[14px] shrink-0 mt-0.5" />
+                            <span className="leading-relaxed">{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -145,23 +306,28 @@ export default function Contact() {
         </div>
       </section>
 
+      {/* Emergency Hotline Banner */}
       <section className="mb-16 md:mb-space-3xl">
-        <div className="bg-forest rounded-[28px] p-space-xl md:p-space-2xl text-on-primary text-center relative overflow-hidden">
-          <div className="max-w-3xl mx-auto flex flex-col items-center gap-space-md relative z-10">
-            <div className="inline-flex items-center gap-space-xs px-space-sm py-space-xxs rounded-full bg-surface-container-high/15 backdrop-blur-sm text-secondary-fixed font-eyebrow-tag text-eyebrow-tag font-bold uppercase">
-              <span>✳</span>
-              <span>Ready to Start?</span>
+        <div className="bg-forest rounded-[28px] p-8 md:p-space-2xl text-on-primary text-center relative overflow-hidden">
+          <div className="max-w-2xl mx-auto flex flex-col items-center gap-4 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high/15 backdrop-blur-sm text-secondary-fixed font-eyebrow-tag text-xs font-bold uppercase">
+              <Icon name="phone_in_talk" className="text-[16px]" />
+              <span>Instant Ground Dispatch</span>
             </div>
-            <h2 className="font-headline-lg text-headline-lg md:text-[48px] md:leading-[54px] text-surface-bright font-bold tracking-tight">
-              Join 120+ cities already running circular waste systems.
+            <h2 className="font-headline-lg text-2xl md:text-3xl text-surface-bright font-bold tracking-tight">
+              Need immediate assistance or spot an emergency hazard?
             </h2>
-            <p className="font-body-lg text-body-lg text-primary-fixed-dim max-w-xl">
-              From first pickup to full ESG compliance — WasteChakra handles the entire journey so you can focus on what matters.
+            <p className="font-body-md text-sm text-primary-fixed-dim">
+              Our 24/7 municipal dispatch team coordinates with local ward collection vehicles round the clock.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-space-sm pt-space-xs">
-              <a href="tel:1800242572" className="inline-flex items-center gap-space-xs px-space-lg py-space-sm rounded-full bg-secondary-container text-primary font-label-md text-label-md font-bold hover:bg-secondary-fixed-dim transition-all shadow-lg">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <a href="tel:1800889924" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-secondary-container text-primary font-bold text-sm hover:bg-secondary-fixed-dim transition-all shadow-md">
                 <Icon name="call" className="text-[18px]" />
-                <span>Call Now</span>
+                <span>Call Toll-Free 1800-889-WCHAKRA</span>
+              </a>
+              <a href="https://wa.me/916454295800" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-surface-container-high/20 hover:bg-surface-container-high/30 text-surface-bright font-bold text-sm transition-colors">
+                <Icon name="chat" className="text-[18px]" />
+                <span>Message on WhatsApp</span>
               </a>
             </div>
           </div>
