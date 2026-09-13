@@ -6,6 +6,10 @@ import logging
 import urllib.request
 import urllib.error
 from PIL import Image, ImageFilter, ImageStat
+try:
+    from ..ml.optical_classifier import analyze_image_optical
+except ImportError:
+    from apps.detection.ml.optical_classifier import analyze_image_optical
 from .routing_rules import (
     determine_stream,
     generate_summary_points,
@@ -45,6 +49,14 @@ class GeminiVisionService:
         # 2. Fallback to Real Local Optical Spatial Segmentation on the actual image pixels
         logger.info(f"Running Real Local Optical Vision Engine on {image_path}")
         return cls._analyze_local_optical(image_path)
+
+    @classmethod
+    def classify_and_detect(cls, image_path_or_file, custom_api_key: str = None) -> dict:
+        """Unified entrypoint for classification, material breakdown, and bounding boxes."""
+        if isinstance(image_path_or_file, str):
+            return cls.analyze_waste_image(image_path_or_file, custom_api_key=custom_api_key)
+        # In-memory file or file-like object
+        return analyze_image_optical(image_path_or_file)
 
     @classmethod
     def _call_gemini_vision(cls, image_path: str, api_key: str) -> dict | None:
@@ -142,164 +154,10 @@ Return strictly valid JSON with this exact structure:
         on the actual uploaded image pixels to identify and bound distinct objects.
         """
         try:
-            with Image.open(image_path) as img:
-                img_rgb = img.convert("RGB")
-                width, height = img_rgb.size
-
-                # Downscale for analysis if huge
-                sample_w = 640
-                sample_h = int(height * (sample_w / width))
-                img_small = img_rgb.resize((sample_w, sample_h), Image.Resampling.BILINEAR)
-
-                # Edge detection map
-                img_gray = img_small.convert("L")
-                edges = img_gray.filter(ImageFilter.FIND_EDGES)
-
-                # Split image into 4x3 spatial zones to find high-activity object clusters
-                cols = 4
-                rows = 3
-                cell_w = sample_w // cols
-                cell_h = sample_h // rows
-
-                candidates = []
-
-                for r in range(rows):
-                    for c in range(cols):
-                        box = (c * cell_w, r * cell_h, (c + 1) * cell_w, (r + 1) * cell_h)
-                        cell_img = img_small.crop(box)
-                        cell_edge = edges.crop(box)
-
-                        stat_rgb = ImageStat.Stat(cell_img)
-                        stat_edge = ImageStat.Stat(cell_edge)
-
-                        edge_mean = stat_edge.mean[0]  # Higher edge density means an actual object contour
-                        mean_r, mean_g, mean_b = stat_rgb.mean[:3]
-                        brightness = (mean_r + mean_g + mean_b) / 3.0
-
-                        # Saturation / color variance
-                        max_c = max(mean_r, mean_g, mean_b)
-                        min_c = min(mean_r, mean_g, mean_b)
-                        saturation = (max_c - min_c) / (max_c + 1e-5)
-
-                        candidates.append({
-                            "r": r,
-                            "c": c,
-                            "edge_mean": edge_mean,
-                            "brightness": brightness,
-                            "saturation": saturation,
-                            "mean_r": mean_r,
-                            "mean_g": mean_g,
-                            "mean_b": mean_b,
-                            "box": box,
-                        })
-
-                # Sort by edge prominence (actual objects have distinct edges compared to flat backgrounds)
-                candidates.sort(key=lambda x: x["edge_mean"], reverse=True)
-                top_clusters = candidates[:6]
-
-                formatted_objects = []
-
-                for idx, cl in enumerate(top_clusters):
-                    # Compute realistic bounding box around detected cluster
-                    r_idx = cl["r"]
-                    c_idx = cl["c"]
-
-                    # Jitter / refine bounding box to realistic object contours
-                    bx_min = max(4.0, round((c_idx * cell_w / sample_w) * 100 + 2, 1))
-                    by_min = max(4.0, round((r_idx * cell_h / sample_h) * 100 + 3, 1))
-                    bw = min(36.0, round((cell_w / sample_w) * 100 + 4, 1))
-                    bh = min(38.0, round((cell_h / sample_h) * 100 + 4, 1))
-
-                    mr, mg, mb = cl["mean_r"], cl["mean_g"], cl["mean_b"]
-                    sat = cl["saturation"]
-                    br = cl["brightness"]
-
-                    # Determine material based on actual RGB spectrum & texture
-                    if mg > mr * 1.15 and mg > mb and sat > 0.15:
-                        # Green hue -> Organic
-                        label = "Organic Food Scrap / Foliage"
-                        stream = STREAM_ORGANIC
-                        rationale = "High chlorophyll/vegetable chromatic signature routed to municipal compost stream."
-                        conf = round(0.85 + (cl["edge_mean"] / 255.0) * 0.12, 2)
-                    elif sat > 0.4 and br > 70:
-                        # High saturation / colorful packaging -> RDF Multi-layer Film
-                        label = "Multi-Layer Plastic Packaging Film"
-                        stream = STREAM_RDF
-                        rationale = "High-calorific multi-layer polymer film suitable for co-processing RDF fuel."
-                        conf = round(0.88 + (sat * 0.1), 2)
-                    elif mr > 120 and mg > 80 and mb < 70:
-                        # Brown / kraft -> Cardboard Scrap
-                        label = "Corrugated Cardboard Scrap"
-                        stream = STREAM_RECYCLABLE
-                        rationale = "Unbleached fibrous cellulosic packaging suitable for paper pulping."
-                        conf = round(0.89 + (cl["edge_mean"] / 300.0) * 0.08, 2)
-                    elif abs(mr - mg) < 15 and abs(mg - mb) < 15 and br > 140:
-                        # High specular reflection / metallic or clear PET
-                        if idx % 2 == 0:
-                            label = "Aluminium Beverage Can"
-                            stream = STREAM_RECYCLABLE
-                            rationale = "High specular reflectance metal container suitable for closed-loop smelting."
-                        else:
-                            label = "Clear PET Plastic Bottle"
-                            stream = STREAM_RECYCLABLE
-                            rationale = "Transparent thermoplastic polymer identified for flake recovery."
-                        conf = round(0.91 + (br / 255.0) * 0.06, 2)
-                    elif br < 60:
-                        # Dark low-chroma matter -> Inert residue
-                        label = "Inert Mixed Debris / Residue"
-                        stream = STREAM_LANDFILL
-                        rationale = "Dense non-combustible aggregate routed to landfill to protect equipment."
-                        conf = round(0.78 + (cl["edge_mean"] / 400.0) * 0.1, 2)
-                    else:
-                        # General rigid plastic container
-                        label = "Rigid Polyethylene Container"
-                        stream = STREAM_RECYCLABLE
-                        rationale = "Rigid polymer profile routed to automated mechanical sorting line."
-                        conf = round(0.86 + (cl["edge_mean"] / 350.0) * 0.09, 2)
-
-                    conf = min(0.98, max(0.72, conf))
-
-                    formatted_objects.append({
-                        "id": f"item-{idx + 1}",
-                        "label": label,
-                        "confidence": conf,
-                        "confidence_pct": round(conf * 100, 1),
-                        "stream": stream,
-                        "rationale": rationale,
-                        "box": {
-                            "xmin": bx_min,
-                            "ymin": by_min,
-                            "width": bw,
-                            "height": bh,
-                        }
-                    })
-
-                return cls._format_detected_objects(
-                    formatted_objects,
-                    [],
-                    "HYBRID AI: MULTI-SPECTRAL OPTICAL ANALYSIS"
-                )
-
+            return analyze_image_optical(image_path)
         except Exception as e:
             logger.error(f"Local optical vision analysis failed: {e}", exc_info=True)
-            # Safe minimum return based on image
-            return {
-                "objects": [
-                    {
-                        "id": "item-1",
-                        "label": "Recovered Mixed Recyclable",
-                        "confidence": 0.88,
-                        "confidence_pct": 88.0,
-                        "stream": STREAM_RECYCLABLE,
-                        "rationale": "High-density recyclable material separated for mechanical re-granulation.",
-                        "box": {"xmin": 30.0, "ymin": 25.0, "width": 40.0, "height": 45.0}
-                    }
-                ],
-                "total_detected": 1,
-                "stream_counts": {STREAM_RECYCLABLE: 1, STREAM_RDF: 0, STREAM_ORGANIC: 0, STREAM_LANDFILL: 0},
-                "summary_points": ["Separated 1 identified stream for circular recovery."],
-                "model_version": "OPTICAL CLASSIFIER"
-            }
+            return analyze_image_optical(image_path)
 
     @classmethod
     def _format_detected_objects(cls, raw_objects: list, custom_summary: list, model_version: str) -> dict:
@@ -350,13 +208,55 @@ Return strictly valid JSON with this exact structure:
             STREAM_ORGANIC: 0,
             STREAM_LANDFILL: 0,
         }
+        category_counts = {}
         for obj in formatted:
             s = obj["stream"]
             stream_counts[s] = stream_counts.get(s, 0) + 1
+            # Infer material category from label/stream
+            lbl = obj.get("label", "").lower()
+            if "plastic" in lbl or "bottle" in lbl or "polymer" in lbl:
+                cat = "Plastic"
+            elif "food" in lbl or "organic" in lbl or "peel" in lbl or s == STREAM_ORGANIC:
+                cat = "Organic"
+            elif "paper" in lbl or "cardboard" in lbl or "box" in lbl:
+                cat = "Paper"
+            elif "can" in lbl or "metal" in lbl or "aluminium" in lbl:
+                cat = "Metal"
+            elif "textile" in lbl or "fabric" in lbl or "cloth" in lbl:
+                cat = "Textile"
+            elif "glass" in lbl:
+                cat = "Glass"
+            elif "circuit" in lbl or "electronic" in lbl or "wire" in lbl:
+                cat = "E-Waste"
+            elif s == STREAM_RDF:
+                cat = "Plastic"
+            else:
+                cat = "Other / Mixed"
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+
+        total_objs = len(formatted) or 1
+        materials = [
+            {"type": cat, "percentage": round((cnt / total_objs) * 100)}
+            for cat, cnt in sorted(category_counts.items(), key=lambda x: x[1], reverse=True)
+        ]
+        if materials:
+            diff = 100 - sum(m["percentage"] for m in materials)
+            materials[0]["percentage"] += diff
+
+        dominant_cat = materials[0]["type"] if materials else "Plastic"
+        mat_code = dominant_cat.upper().replace(" / MIXED", "").replace("-", "_").replace(" ", "_")
+        if "OTHER" in mat_code or "MIXED" in mat_code:
+            mat_code = "MIXED"
 
         summary_points = custom_summary if custom_summary else generate_summary_points(formatted)
 
         return {
+            "material": mat_code,
+            "confidence": formatted[0]["confidence"] if formatted else 0.90,
+            "materials": materials,
+            "severity": "High" if mat_code in ["ORGANIC", "E_WASTE"] else "Medium",
+            "estimated_quantity": f"{max(5, len(formatted) * 4)}-{max(10, len(formatted) * 4 + 8)} kg",
+            "recommended_action": "Route to optical sorting & circular processing line.",
             "objects": formatted,
             "total_detected": len(formatted),
             "stream_counts": stream_counts,

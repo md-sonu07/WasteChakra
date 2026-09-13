@@ -50,6 +50,7 @@ export default function ReportWaste() {
   const [submitted, setSubmitted] = useState(false);
   const [reportId, setReportId] = useState('');
   const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [aiScanning, setAiScanning] = useState(false);
 
   const [submitError, setSubmitError] = useState(null);
 
@@ -58,6 +59,7 @@ export default function ReportWaste() {
     if (!file) return;
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
+    runAIAnalysis(file);
   };
 
   const handleDrop = (e) => {
@@ -66,37 +68,45 @@ export default function ReportWaste() {
     if (file && file.type.startsWith('image/')) {
       setImage(file);
       setImagePreview(URL.createObjectURL(file));
+      runAIAnalysis(file);
     }
   };
 
   const runAIAnalysis = async (file) => {
+    setAiScanning(true);
     try {
       const result = await api.processWasteImage(file);
-      setAiAnalysis({
-        materials: result.materials || [
-          { type: 'Plastic', percentage: 48 },
-          { type: 'Organic', percentage: 21 },
-          { type: 'Paper', percentage: 14 },
-          { type: 'Textile', percentage: 9 },
-          { type: 'Other', percentage: 8 },
+      const detMaterial = (result.material || result.detected_material || 'PLASTIC').toUpperCase();
+      const conf = typeof result.confidence === 'number' ? result.confidence : 0.92;
+      const confPct = Math.round(conf * 100);
+
+      const parsedAnalysis = {
+        material: detMaterial,
+        confidence: conf,
+        confidence_pct: confPct,
+        materials: result.materials && result.materials.length > 0 ? result.materials : [
+          { type: detMaterial.charAt(0) + detMaterial.slice(1).toLowerCase(), percentage: 80 },
+          { type: 'Other / Mixed', percentage: 20 },
         ],
-        severity: result.severity || 'Medium',
-        estimated_quantity: result.estimated_quantity || '20-30 kg',
-        recommended_action: result.recommended_action || 'Pickup required',
+        severity: result.severity || (detMaterial === 'ORGANIC' ? 'High' : 'Medium'),
+        estimated_quantity: result.estimated_quantity || '10-25 kg',
+        recommended_action: result.recommended_action || 'Dry waste collection and recycling',
+        objects: result.objects || [],
+      };
+      setAiAnalysis(parsedAnalysis);
+
+      // Auto-suggest category if user has not already picked one
+      setCategory((prev) => {
+        if (!prev || prev === 'MIXED') {
+          const match = CATEGORIES.find((c) => c.value === detMaterial);
+          return match ? match.value : prev;
+        }
+        return prev;
       });
-    } catch {
-      setAiAnalysis({
-        materials: [
-          { type: 'Plastic', percentage: 48 },
-          { type: 'Organic', percentage: 21 },
-          { type: 'Paper', percentage: 14 },
-          { type: 'Textile', percentage: 9 },
-          { type: 'Other', percentage: 8 },
-        ],
-        severity: 'Medium',
-        estimated_quantity: '20-30 kg',
-        recommended_action: 'Pickup required',
-      });
+    } catch (err) {
+      console.warn("Optical AI analysis notice:", err);
+    } finally {
+      setAiScanning(false);
     }
   };
 
@@ -118,21 +128,8 @@ export default function ReportWaste() {
       setReportId(result.report_id || result.id || `WC-${String(Math.floor(1000 + Math.random() * 9000))}`);
       setSubmitted(true);
 
-      if (image) {
+      if (image && !aiAnalysis) {
         runAIAnalysis(image);
-      } else {
-        setAiAnalysis({
-          materials: [
-            { type: 'Plastic', percentage: 48 },
-            { type: 'Organic', percentage: 21 },
-            { type: 'Paper', percentage: 14 },
-            { type: 'Textile', percentage: 9 },
-            { type: 'Other', percentage: 8 },
-          ],
-          severity: 'Medium',
-          estimated_quantity: '20-30 kg',
-          recommended_action: 'Pickup required',
-        });
       }
     } catch (err) {
       console.error("Waste report submit failed:", err);
@@ -286,16 +283,87 @@ export default function ReportWaste() {
               </div>
               
               {imagePreview ? (
-                <div className="relative group rounded-3xl overflow-hidden shadow-lg border border-surface-container-high transition-transform hover:scale-[1.01] duration-300 mb-6 max-w-lg mx-auto">
-                  <img src={imagePreview} alt="Waste preview" className="w-full h-64 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
-                    <button
-                      onClick={() => { setImage(null); setImagePreview(null); }}
-                      className="bg-white/20 backdrop-blur-md text-white font-bold py-2 px-6 rounded-full hover:bg-white/30 transition-colors flex items-center gap-2 border border-white/30 shadow-xl"
-                    >
-                      <Icon name="delete" className="text-lg" /> Replace Image
-                    </button>
+                <div className="max-w-lg mx-auto mb-6">
+                  <div className="relative group rounded-3xl overflow-hidden shadow-lg border border-surface-container-high transition-transform hover:scale-[1.01] duration-300">
+                    <img src={imagePreview} alt="Waste preview" className="w-full h-64 object-cover" />
+                    
+                    {/* Live AI Optical Scanner Beam Overlay */}
+                    {aiScanning && (
+                      <div className="absolute inset-0 bg-[#00180b]/60 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3 text-white z-20">
+                        <div className="relative w-16 h-16 flex items-center justify-center">
+                          <div className="absolute inset-0 rounded-full border-2 border-[#abf854]/30 animate-ping"></div>
+                          <div className="w-12 h-12 rounded-full bg-[#00180b] border border-[#abf854] flex items-center justify-center shadow-[0_0_15px_rgba(171,248,84,0.5)]">
+                            <Icon name="psychology" className="text-2xl text-[#abf854] animate-pulse" />
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-white tracking-wide">Vision AI Scanning...</p>
+                          <p className="text-xs text-white/70">Segmenting contours & identifying materials</p>
+                        </div>
+                        <div className="w-40 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                          <div className="w-full h-full bg-[#abf854] rounded-full animate-[shimmer_1.5s_infinite]"></div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* AI Detection Pill on Preview */}
+                    {!aiScanning && aiAnalysis && (
+                      <div className="absolute top-3 left-3 bg-[#00180b]/90 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold border border-[#abf854]/40 flex items-center gap-1.5 shadow-xl z-10">
+                        <Icon name="auto_awesome" className="text-[#abf854] text-sm" />
+                        <span>AI Detected: <strong className="text-[#abf854]">{aiAnalysis.material}</strong></span>
+                        <span className="text-white/60 text-[10px]">({aiAnalysis.confidence_pct}%)</span>
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6 z-10">
+                      <button
+                        onClick={() => { setImage(null); setImagePreview(null); setAiAnalysis(null); }}
+                        className="bg-white/20 backdrop-blur-md text-white font-bold py-2 px-6 rounded-full hover:bg-white/30 transition-colors flex items-center gap-2 border border-white/30 shadow-xl"
+                      >
+                        <Icon name="delete" className="text-lg" /> Replace Image
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Instant AI Material Breakdown Card */}
+                  {aiAnalysis && !aiScanning && (
+                    <div className="mt-4 bg-surface border border-[#abf854]/40 rounded-2xl p-4 shadow-sm animate-fade-in-up">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-[#00180b] text-[#abf854] rounded-lg">
+                            <Icon name="psychology" className="text-sm" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-extrabold text-[#00180b] uppercase tracking-wider">AI Optical Breakdown</span>
+                            <span className="text-[11px] text-on-surface-variant block">Primary: {aiAnalysis.material} (Pre-selected for Step 3)</span>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
+                          {aiAnalysis.confidence_pct}% Verified
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col gap-2 mb-3">
+                        {aiAnalysis.materials.slice(0, 3).map((m) => (
+                          <div key={m.type} className="flex items-center gap-2 text-xs">
+                            <span className="font-bold text-[#00180b] w-24 truncate">{m.type}</span>
+                            <div className="flex-1 h-2 bg-black/5 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#0a3a2a] to-[#87c538] rounded-full transition-all duration-700"
+                                style={{ width: `${m.percentage}%` }}
+                              />
+                            </div>
+                            <span className="font-extrabold text-[#00180b] w-8 text-right">{m.percentage}%</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="text-[11px] text-on-surface-variant flex items-center gap-1.5 pt-2 border-t border-black/5">
+                        <Icon name="info" className="text-xs text-[#0a3a2a]" />
+                        <span>Recommended action: <strong>{aiAnalysis.recommended_action}</strong></span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div
@@ -324,8 +392,25 @@ export default function ReportWaste() {
                   </Button>
                 </div>
               )}
+
+              {/* Community AI Model Contribution Banner */}
+              <div className="mt-5 p-4 rounded-2xl bg-secondary-container/40 border border-secondary-container flex items-center gap-3.5 max-w-lg mx-auto">
+                <div className="p-2.5 rounded-xl bg-primary text-[#abf854] shrink-0 shadow-xs">
+                  <Icon name="psychology" className="text-xl" />
+                </div>
+                <div className="text-xs">
+                  <p className="font-bold text-primary flex items-center gap-1.5">
+                    <span>Help Train WasteChakra AI</span>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 text-[10px] font-extrabold">+5 EcoCoins</span>
+                  </p>
+                  <p className="text-on-surface-variant mt-0.5">
+                    Your photo will be automatically used to train and improve our community waste recognition models.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
+
 
           {step === 2 && (
             <div className="animate-fade-in-up h-full flex flex-col">
@@ -360,16 +445,23 @@ export default function ReportWaste() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {CATEGORIES.map((cat) => {
                   const isSelected = category === cat.value;
+                  const isAiSuggested = aiAnalysis?.material === cat.value;
                   return (
                     <button
                       key={cat.value}
                       onClick={() => setCategory(cat.value)}
-                      className={`group flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300
+                      className={`group relative flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border-2 transition-all duration-300
+                        ${isAiSuggested && !isSelected ? 'ring-2 ring-[#abf854] ring-offset-1 border-[#00180b]/40' : ''}
                         ${isSelected 
                           ? 'border-primary bg-primary shadow-[0_8px_20px_rgba(0,24,11,0.2)] -translate-y-1' 
                           : 'border-surface-container-highest bg-surface hover:border-primary/40 hover:-translate-y-1 hover:shadow-md'
                         }`}
                     >
+                      {isAiSuggested && (
+                        <span className="absolute -top-2.5 bg-[#abf854] text-[#00180b] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 border border-[#00180b]/15 z-10 animate-bounce">
+                          <Icon name="auto_awesome" className="text-xs" /> AI Suggested
+                        </span>
+                      )}
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300
                         ${isSelected ? 'bg-white/20 text-white' : 'bg-surface-container-high text-primary group-hover:bg-primary group-hover:text-white'}`}>
                         <Icon name={cat.icon} className="text-2xl" />

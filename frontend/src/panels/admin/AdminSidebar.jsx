@@ -11,6 +11,7 @@ export const ADMIN_NAV = [
   { to: '/admin/societies', label: 'Societies', icon: 'apartment' },
   { to: '/admin/facilities', label: 'Facilities', icon: 'factory' },
   { to: '/admin/processing', label: 'Processing', icon: 'precision_manufacturing' },
+  { to: '/admin/ai-training', label: 'AI Model Training', icon: 'psychology' },
   { to: '/admin/simulation', label: 'Simulation', icon: 'view_in_ar' },
   { to: '/admin/rewards', label: 'Rewards', icon: 'redeem' },
   { to: '/admin/community', label: 'Community', icon: 'groups' },

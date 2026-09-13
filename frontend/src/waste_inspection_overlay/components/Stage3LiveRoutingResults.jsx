@@ -6,6 +6,7 @@ export default function Stage3LiveRoutingResults({
   imagePreviewUrl,
   onBackToSimulation,
   onReupload,
+  onReturnToStart,
   onClose,
 }) {
   const [hoveredObjectId, setHoveredObjectId] = useState(null);
@@ -289,7 +290,7 @@ export default function Stage3LiveRoutingResults({
       </div>
 
       {/* 3. Footer */}
-      <div className="flex flex-wrap justify-between items-center border-t border-surface-container-high pt-2.5 mt-1 text-xs shrink-0">
+      <div className="flex flex-wrap justify-between items-center border-t border-surface-container-high pt-2.5 mt-1 text-xs shrink-0 gap-2">
         <button
           onClick={onBackToSimulation}
           className="inline-flex items-center gap-1.5 text-forest font-bold hover:underline cursor-pointer"
@@ -298,13 +299,26 @@ export default function Stage3LiveRoutingResults({
           <span>Replay Conveyor Plant</span>
         </button>
 
-        <button
-          onClick={onClose}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary hover:bg-forest text-white font-bold text-xs tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer"
-        >
-          <span>Return To Simulation Hub</span>
-          <Icon name="task_alt" className="w-4 h-4 text-secondary-container" />
-        </button>
+        <div className="flex items-center gap-2">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high font-semibold text-xs transition-colors cursor-pointer"
+              title="Exit simulation"
+            >
+              <Icon name="logout" className="w-3.5 h-3.5" />
+              <span>Exit</span>
+            </button>
+          )}
+
+          <button
+            onClick={onReturnToStart || onClose}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary hover:bg-forest text-white font-bold text-xs tracking-wide shadow-md hover:shadow-lg transition-all cursor-pointer"
+          >
+            <span>Return To Ingestion (Stage 1)</span>
+            <Icon name="restart_alt" className="w-4 h-4 text-secondary-container" />
+          </button>
+        </div>
       </div>
 
     </div>

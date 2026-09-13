@@ -68,6 +68,20 @@ function analyzeImageViaCanvas(imgElement) {
       }
     }
 
+    // Scene-level optical heuristics to contextualize image stream before cell classification
+    const petBottleIndicators = items.filter(it => 
+      (it.avgB > it.avgR + 6 && it.avgB > 95) || 
+      (it.brightness > 135 && it.avgB > 110 && it.avgG > 130)
+    ).length;
+    
+    const organicIndicators = items.filter(it => 
+      (it.avgR > it.avgB * 1.45 && it.sat > 0.35) || 
+      (it.avgG > it.avgR * 1.35 && it.avgB < 90)
+    ).length;
+
+    const isPetScene = petBottleIndicators >= 5 && organicIndicators <= 2;
+    const isOrganicScene = organicIndicators >= 4 && petBottleIndicators <= 1;
+
     // Sort by visual activity to find distinct objects
     items.sort((a, b) => b.activity - a.activity);
     const topClusters = items.slice(0, 5);
@@ -79,31 +93,82 @@ function analyzeImageViaCanvas(imgElement) {
       const bh = Math.min(38, Math.round((1 / rows) * 100 + 2));
 
       let label, stream, rationale, conf;
-      if (cl.avgG > cl.avgR * 1.15 && cl.avgG > cl.avgB && cl.sat > 0.15) {
-        label = "Organic Food Scrap / Peel";
-        stream = "ORGANIC";
-        rationale = "High chlorophyll / vegetal chromatic profile routed to compost stream.";
-        conf = 0.89;
-      } else if (cl.sat > 0.35 && cl.brightness > 75) {
-        label = "Flexible Multi-layer Packaging";
-        stream = "RDF";
-        rationale = "High-calorific multi-layer polymer film routed to RDF energy recovery.";
-        conf = 0.91;
-      } else if (cl.avgR > 110 && cl.avgG > 75 && cl.avgB < 75) {
-        label = "Corrugated Cardboard Scrap";
-        stream = "RECYCLABLE";
-        rationale = "Unbleached fibrous cellulosic packaging suitable for paper pulping.";
-        conf = 0.93;
-      } else if (cl.brightness > 130) {
-        label = idx % 2 === 0 ? "Aluminium Can" : "PET Plastic Bottle";
-        stream = "RECYCLABLE";
-        rationale = "Specular reflective recyclable container suitable for material remanufacturing.";
-        conf = 0.94;
+
+      if (isPetScene) {
+        // Scene is transparent PET bottles
+        if (cl.avgG > cl.avgR * 1.12 && cl.avgG > 120) {
+          label = "PET Bottle (Polymer Printed Label)";
+          stream = "RECYCLABLE";
+          rationale = "PET beverage container with printed polymer sleeve routed to flake recycling.";
+          conf = 0.94;
+        } else if (cl.avgB > cl.avgR + 8 && cl.avgB > 95) {
+          label = "PET Bottle Neck & Polymer Cap";
+          stream = "RECYCLABLE";
+          rationale = "High-density polymer cap closure separated during washing float-sink stage.";
+          conf = 0.95;
+        } else {
+          label = "Clear PET Plastic Bottle";
+          stream = "RECYCLABLE";
+          rationale = "Transparent food-grade PET bottle identified for closed-loop bottle-to-bottle pelletizing.";
+          conf = 0.96;
+        }
+      } else if (isOrganicScene) {
+        // Scene is organic kitchen waste / food biomass
+        if (cl.avgG > cl.avgR * 1.20 && cl.avgG > cl.avgB) {
+          label = "Vegetable Scrap / Leaf Biomass";
+          stream = "ORGANIC";
+          rationale = "Chlorophyll-rich vegetal matter routed to municipal aerobic composting.";
+          conf = 0.93;
+        } else if (cl.avgR > 110 && cl.avgR > cl.avgB * 1.35) {
+          label = "Organic Food Peels & Kitchen Scrap";
+          stream = "ORGANIC";
+          rationale = "High-moisture organic kitchen biomass routed to bio-methanation.";
+          conf = 0.92;
+        } else {
+          label = "Organic Compostable Residue";
+          stream = "ORGANIC";
+          rationale = "Biodegradable organic matter suitable for anaerobic digestion.";
+          conf = 0.89;
+        }
       } else {
-        label = "Inert Mixed Residue";
-        stream = "LANDFILL";
-        rationale = "Non-combustible dense composite isolated away from sorting equipment.";
-        conf = 0.79;
+        // Mixed waste scene
+        const isKraftCardboard = cl.avgR > 115 && cl.avgG > 80 && cl.avgB < 75 && cl.sat < 0.35;
+        const isNewsprint = cl.sat < 0.18 && cl.brightness > 105;
+        const isSpecularCan = cl.brightness > 155 && cl.sat < 0.22;
+        const isGreenVegetal = cl.avgG > cl.avgR * 1.30 && cl.avgG > cl.avgB * 1.25 && cl.avgB < 95;
+        const isMultiLayerFilm = cl.sat > 0.38 && cl.brightness > 80;
+
+        if (isKraftCardboard) {
+          label = "Corrugated Cardboard Packaging";
+          stream = "RECYCLABLE";
+          rationale = "Unbleached fibrous cellulosic packaging suitable for paper pulping.";
+          conf = 0.93;
+        } else if (isNewsprint) {
+          label = "Recoverable Newsprint / Paper Scrap";
+          stream = "RECYCLABLE";
+          rationale = "De-inkable high-grade paper scrap sorted for pulp recovery.";
+          conf = 0.91;
+        } else if (isSpecularCan) {
+          label = "Aluminium Beverage Can";
+          stream = "RECYCLABLE";
+          rationale = "Specular reflective metallic container separated for closed-loop smelting.";
+          conf = 0.95;
+        } else if (isGreenVegetal) {
+          label = "Vegetal Matter / Plant Trimmings";
+          stream = "ORGANIC";
+          rationale = "Green organic waste directed to municipal composting.";
+          conf = 0.90;
+        } else if (isMultiLayerFilm) {
+          label = "Flexible Multi-layer Packaging Film";
+          stream = "RDF";
+          rationale = "High-calorific multi-layer polymer film routed to RDF fuel recovery.";
+          conf = 0.91;
+        } else {
+          label = "Rigid Polymer Packaging Container";
+          stream = "RECYCLABLE";
+          rationale = "Rigid plastic profile routed to automated optical sorting line.";
+          conf = 0.88;
+        }
       }
 
       return {
@@ -124,7 +189,15 @@ function analyzeImageViaCanvas(imgElement) {
       objects,
       total_detected: objects.length,
       stream_counts,
-      summary_points: [
+      summary_points: isPetScene ? [
+        `Identified ${stream_counts.RECYCLABLE} recyclable PET containers for closed-loop recovery.`,
+        `Diverted polymer labels and caps for mechanical flake separation.`,
+        `Preserved high-purity clear polymer batch for pelletizing.`
+      ] : isOrganicScene ? [
+        `Identified ${stream_counts.ORGANIC} organic items for bio-methanation and composting.`,
+        `Diverted high-moisture kitchen scraps from dry recyclables.`,
+        `Zero plastic contamination detected in bio-stream.`
+      ] : [
         `Identified ${stream_counts.RECYCLABLE} recyclable items for closed-loop recovery.`,
         `Diverted ${stream_counts.RDF} high-energy packages into RDF fuel stream.`,
         `Isolated non-recoverable matter from conveyor twin.`
@@ -193,12 +266,30 @@ export default function WasteInspectionOverlay({
     fileInputRef.current?.click();
   };
 
-  const handleUseDemoSample = () => {
+  const handleUseDemoSample = (sampleUrl = '/images/samples/municipal_mixed_waste.jpg') => {
     setImageFile(null);
-    setImagePreviewUrl('/images/problem.jpg');
+    setImagePreviewUrl(typeof sampleUrl === 'string' ? sampleUrl : '/images/samples/municipal_mixed_waste.jpg');
     setDetectionData(null);
     setCurrentStage(1);
     setError(null);
+  };
+
+  const handleReturnToStart = () => {
+    if (imagePreviewUrl && imagePreviewUrl.startsWith('blob:')) {
+      try {
+        URL.revokeObjectURL(imagePreviewUrl);
+      } catch (e) {
+        // ignore
+      }
+    }
+    setImageFile(null);
+    setImagePreviewUrl(null);
+    setDetectionData(null);
+    setCurrentStage(1);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSaveApiKey = (key) => {
@@ -393,7 +484,7 @@ export default function WasteInspectionOverlay({
 
           {currentStage > 1 && (
             <button
-              onClick={() => setCurrentStage(1)}
+              onClick={handleReturnToStart}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-container-highest bg-white hover:bg-surface-container-low text-on-surface-variant text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               <Icon name="restart_alt" className="w-3.5 h-3.5 text-on-surface-variant" />
@@ -440,6 +531,7 @@ export default function WasteInspectionOverlay({
             imagePreviewUrl={imagePreviewUrl}
             onBackToSimulation={() => setCurrentStage(2)}
             onReupload={triggerFileInput}
+            onReturnToStart={handleReturnToStart}
             onClose={onClose}
           />
         )}

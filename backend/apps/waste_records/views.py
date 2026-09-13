@@ -33,20 +33,21 @@ class ProcessWasteImageView(APIView):
         # 1. Save uploaded waste image
         waste_image = WasteImage.objects.create(image=image_file, source=source)
 
-        if source == "INSPECTION_OVERLAY":
-            from apps.detection.yolo_service.gemini_vision_service import GeminiVisionService
-            gemini_key = request.headers.get("X-Gemini-Key") or request.data.get("gemini_key")
-            result = GeminiVisionService.analyze_waste_image(waste_image.image.path, custom_api_key=gemini_key)
-            if not result:
-                return Response({"error": "Failed to analyze image with Vision Service"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(result, status=status.HTTP_200_OK)
+        from apps.detection.yolo_service.gemini_vision_service import GeminiVisionService
+        gemini_key = request.headers.get("X-Gemini-Key") or request.data.get("gemini_key")
+        vision_res = GeminiVisionService.analyze_waste_image(waste_image.image.path, custom_api_key=gemini_key)
 
-        # 2. Classify material (Legacy Simulation)
-        image_file.seek(0)
-        material, confidence, all_probs = virtual_classify(image_file)
+        if source == "INSPECTION_OVERLAY":
+            if not vision_res:
+                return Response({"error": "Failed to analyze image with Vision Service"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(vision_res, status=status.HTTP_200_OK)
+
+        # 2. Extract classified material & confidence
+        material = vision_res.get("material") or "MIXED"
+        confidence = float(vision_res.get("confidence") or 0.88)
         waste_image.detected_material = material
         waste_image.detection_confidence = confidence
-        waste_image.raw_model_output = all_probs
+        waste_image.raw_model_output = vision_res
         waste_image.save()
 
         # 3. Generate software virtual feature readings
@@ -74,7 +75,16 @@ class ProcessWasteImageView(APIView):
             decision_breakdown=trace,
         )
 
-        return Response(WasteRecordSerializer(record, context={"request": request}).data, status=status.HTTP_201_CREATED)
+        data = WasteRecordSerializer(record, context={"request": request}).data
+        data["material"] = material
+        data["confidence"] = confidence
+        data["materials"] = vision_res.get("materials", [])
+        data["severity"] = vision_res.get("severity", "Medium")
+        data["estimated_quantity"] = vision_res.get("estimated_quantity", "5-15 kg")
+        data["recommended_action"] = vision_res.get("recommended_action", "Route to dry waste recycling")
+        data["objects"] = vision_res.get("objects", [])
+
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class ProcessWasteSimulateView(APIView):

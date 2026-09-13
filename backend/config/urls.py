@@ -11,6 +11,7 @@ urlpatterns = [
     path('api/v1/', include('apps.waste_records.urls')),
     path('api/v1/', include('apps.accounts.urls')),
     path('api/v1/', include('apps.pickups.urls')),
+    path('api/v1/detection/', include('apps.detection.urls')),
 ]
 
 if settings.DEBUG:

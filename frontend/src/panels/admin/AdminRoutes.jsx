@@ -12,6 +12,7 @@ const AdminBusinesses = lazy(() => import('../../pages/admin/Businesses'));
 const AdminFacilities = lazy(() => import('../../pages/admin/Facilities'));
 const AdminSocieties = lazy(() => import('../../pages/admin/Societies'));
 const AdminProcessing = lazy(() => import('../../pages/admin/Processing'));
+const AdminAITraining = lazy(() => import('../../pages/admin/AITraining'));
 const AdminSimulation = lazy(() => import('../../pages/admin/Simulation'));
 const AdminRewards = lazy(() => import('../../pages/admin/Rewards'));
 const AdminCommunity = lazy(() => import('../../pages/admin/Community'));
@@ -30,6 +31,7 @@ export const AdminRoutes = (
     <Route path="facilities" element={<Lazy><AdminFacilities /></Lazy>} />
     <Route path="societies" element={<Lazy><AdminSocieties /></Lazy>} />
     <Route path="processing" element={<Lazy><AdminProcessing /></Lazy>} />
+    <Route path="ai-training" element={<Lazy><AdminAITraining /></Lazy>} />
     <Route path="simulation" element={<Lazy><AdminSimulation /></Lazy>} />
     <Route path="rewards" element={<Lazy><AdminRewards /></Lazy>} />
     <Route path="community" element={<Lazy><AdminCommunity /></Lazy>} />
