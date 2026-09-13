@@ -75,7 +75,7 @@ export default function CitizenDashboard() {
   }
 
   return (
-    <div className="flex flex-col gap-5 sm:gap-6 max-w-3xl mx-auto w-full">
+    <div className="flex flex-col gap-5 sm:gap-6 max-w-6xl mx-auto w-full">
       {/* 1. Mobile App Greeting Header */}
       <div className="flex items-center justify-between pt-1">
         <div className="flex items-center gap-3 min-w-0">
