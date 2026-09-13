@@ -7,9 +7,9 @@ import Stage2PlantSimulation from './components/Stage2PlantSimulation';
 import Stage3LiveRoutingResults from './components/Stage3LiveRoutingResults';
 
 const STAGES = [
-  { num: 1, label: 'Ingestion' },
-  { num: 2, label: '3D Plant Simulation' },
-  { num: 3, label: 'Routing Matrix' },
+  { num: 1, label: 'Ingestion', shortLabel: 'Ingest' },
+  { num: 2, label: '3D Plant Simulation', shortLabel: 'Plant Twin' },
+  { num: 3, label: 'Routing Matrix', shortLabel: 'Routing' },
 ];
 
 /**
@@ -383,7 +383,7 @@ export default function WasteInspectionOverlay({
   return (
     <div
       ref={containerRef}
-      className={`w-full flex-1 min-h-160 flex flex-col justify-between overflow-hidden bg-surface-container-lowest rounded-3xl shadow-xl border border-surface-container-high transition-all ${
+      className={`w-full flex-1 min-h-[500px] sm:min-h-160 flex flex-col justify-between overflow-hidden bg-surface-container-lowest rounded-2xl sm:rounded-3xl shadow-xl border border-surface-container-high transition-all ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen' : 'relative h-full'
       }`}
     >
@@ -407,27 +407,50 @@ export default function WasteInspectionOverlay({
         />
       )}
 
-      {/* TOP HEADER CONTROLS & STEPPER BREADCRUMB - CENTERED STEPPER IN MIDDLE OF PAGE */}
-      <div className="w-full px-4 md:px-6 py-3.5 border-b border-surface-container-high bg-surface-container-lowest/90 backdrop-blur-md shrink-0 flex items-center justify-between gap-4">
+      {/* TOP HEADER CONTROLS & STEPPER BREADCRUMB */}
+      <div className="w-full px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-surface-container-high bg-surface-container-lowest/95 backdrop-blur-md shrink-0 flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-4">
         
-        {/* Left Side: Brand / Facility Badge */}
-        <div className="flex items-center gap-3 min-w-50">
-          <div className="w-9 h-9 rounded-xl bg-primary text-secondary-container flex items-center justify-center shadow-xs">
-            <Icon name="view_in_ar" className="w-5 h-5" />
+        {/* Left Side & Mobile Controls Row */}
+        <div className="w-full md:w-auto flex items-center justify-between gap-3 md:min-w-50">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary text-secondary-container flex items-center justify-center shadow-xs">
+              <Icon name="view_in_ar" className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-bold text-primary leading-tight flex items-center gap-1.5">
+                <span>MRF AI Simulator</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-on-surface-variant font-medium">
+                Optical Sorter Digital Twin
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-xs md:text-sm font-bold text-primary leading-tight flex items-center gap-1.5">
-              <span>MRF AI Simulator</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-            <div className="text-[11px] text-on-surface-variant font-medium">
-              Real Multi-stream Optical Sorter Twin
-            </div>
+
+          {/* Mobile Right Controls */}
+          <div className="flex md:hidden items-center gap-1.5">
+            {currentStage > 1 && (
+              <button
+                onClick={handleReturnToStart}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-xl border border-surface-container-highest bg-white text-on-surface text-[11px] font-semibold cursor-pointer shadow-2xs"
+                title="Start Over"
+              >
+                <Icon name="restart_alt" className="w-3 h-3 text-on-surface-variant" />
+                <span>Reset</span>
+              </button>
+            )}
+            <button
+              onClick={toggleFullscreen}
+              className="p-1.5 rounded-xl border border-surface-container-highest bg-white text-on-surface-variant cursor-pointer shadow-2xs"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen View"}
+            >
+              <Icon name={isFullscreen ? "fullscreen_exit" : "fullscreen"} className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
-        {/* MIDDLE OF PAGE: 3-Stage Stepper Navigation */}
-        <div className="flex items-center justify-center flex-1 max-w-xl mx-auto">
+        {/* MIDDLE: 3-Stage Stepper Navigation */}
+        <div className="flex items-center justify-center w-full md:w-auto md:flex-1 max-w-xl mx-auto overflow-x-auto py-0.5">
           <div className="inline-flex items-center gap-1 p-1 bg-surface-container-low border border-surface-container-highest rounded-full shadow-2xs">
             {STAGES.map((st) => {
               const isActive = currentStage === st.num;
@@ -441,7 +464,7 @@ export default function WasteInspectionOverlay({
                       setCurrentStage(st.num);
                     }
                   }}
-                  className={`flex items-center gap-2 px-3.5 md:px-5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer select-none ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 md:px-5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
                     isActive
                       ? 'bg-primary text-white shadow-sm'
                       : isCompleted
@@ -450,10 +473,10 @@ export default function WasteInspectionOverlay({
                   }`}
                 >
                   {isCompleted ? (
-                    <Icon name="check_circle" className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <Icon name="check_circle" className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-600 shrink-0" />
                   ) : (
                     <span
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full flex items-center justify-center text-[9px] sm:text-[10px] font-extrabold shrink-0 ${
                         isActive
                           ? 'bg-secondary-container text-primary'
                           : 'bg-surface-container-high text-on-surface-variant'
@@ -462,30 +485,20 @@ export default function WasteInspectionOverlay({
                       {st.num}
                     </span>
                   )}
-                  <span>{st.label}</span>
+                  <span className="sm:hidden">{st.shortLabel}</span>
+                  <span className="hidden sm:inline">{st.label}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Right Side: Tools & Window Controls */}
-        <div className="flex items-center justify-end gap-2 min-w-50">
-          {/* <button
-            onClick={() => setShowKeyModal(true)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer shadow-2xs ${
-              geminiApiKey ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-surface-container-highest bg-white hover:bg-surface-container-low text-on-surface-variant'
-            }`}
-            title="Configure Gemini API Key"
-          >
-            <Icon name="key" className="w-3.5 h-3.5 text-forest" />
-            <span className="hidden sm:inline">{geminiApiKey ? 'Gemini AI: Active' : 'AI Key'}</span>
-          </button> */}
-
+        {/* Desktop Right Controls */}
+        <div className="hidden md:flex items-center justify-end gap-2 min-w-50">
           {currentStage > 1 && (
             <button
               onClick={handleReturnToStart}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-container-highest bg-white hover:bg-surface-container-low text-on-surface-variant text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-surface-container-highest bg-white hover:bg-surface-container-low text-on-surface-variant text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
             >
               <Icon name="restart_alt" className="w-3.5 h-3.5 text-on-surface-variant" />
               <span>Start Over</span>
@@ -503,7 +516,7 @@ export default function WasteInspectionOverlay({
       </div>
 
       {/* DYNAMIC STAGE VIEWPORT */}
-      <div className="flex-1 w-full overflow-hidden relative flex flex-col">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden relative flex flex-col custom-scrollbar">
         {currentStage === 1 && (
           <Stage1UploadPreview
             imageFile={imageFile}
