@@ -174,7 +174,7 @@ export default function Dashboard() {
             <Icon name="notifications_active" className="text-secondary-container text-xl animate-bounce" />
             New Pickup Offered Nearby ({offeredPickups.length})
           </h2>
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {offeredPickups.map((p) => (
               <div key={p.id} className="bg-secondary-container/20 border-2 border-secondary-container rounded-2xl p-4 flex flex-col gap-3 shadow-md">
                 <div className="flex items-center justify-between gap-2 flex-wrap">

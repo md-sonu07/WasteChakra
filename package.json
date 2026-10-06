@@ -1,0 +1,10 @@
+{
+  "name": "wastechakra",
+  "version": "1.0.0",
+  "description": "Root workspace to run frontend and backend together",
+  "scripts": {
+    "dev": "./dev.sh",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend & & DATABASE_URL=\"sqlite:///$PWD/dev.sqlite3\" python manage.py runserver 8000"
+  }
+}
